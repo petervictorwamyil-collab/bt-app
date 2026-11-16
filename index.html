@@ -130,6 +130,8 @@ nav button.plus{flex:none;width:56px;height:56px;border-radius:50%;background:li
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
 const SUPABASE_URL='https://ndempmyasibwvanccqjd.supabase.co';
 const SUPABASE_KEY='sb_publishable_wD7-VXsD2nO4ToxJ5NFvjw_cWDJicVO'; // publishable key: safe in the browser
@@ -199,6 +201,7 @@ let pendingReq=[], gateOn=false, geo=null, mapWatch=null, watchT=null, asking=fa
 let me=null, profile=null, businesses=[], myBiz=null, cur={name:'home',params:{}}, stack=[], mapObj=null, query='';
 const MAIN=['home','discover','chat','account'];
 function show(name,params={},push=true){
+  window.__btShow=show;
   if(MAIN.includes(name)) stack=[{name,params}]; else if(push) stack.push({name,params});
   cur={name,params}; draw();
 }
@@ -514,6 +517,49 @@ function navHtml(){
   return `<nav><div class="in">${t('home','🏠','Home')}${t('discover','🔍','Discover')}<button class="plus" data-t="plus" aria-label="Add">+</button>${t('chat','👥','Community')}${t('account','👤','Account')}</div></nav>`;
 }
 const soon=(title,icon,text)=>({html:`${topbar(title)}<div class="empty"><i>${icon}</i><b style="color:var(--text)">${esc(title)}</b><p>${esc(text)}</p></div>`});
+
+/** Parse a scanned QR and try check-in / open profile */
+async function handleScannedQR(raw){
+  const box=$('scanResult');
+  const show=(html)=>{ if(box){ box.style.display='block'; box.innerHTML=html; } };
+  let data=null;
+  try{ data=JSON.parse(raw); }catch{}
+  // BT business QR
+  if(data && data.t==='bt_biz' && data.id){
+    show(`<b>Business found</b><div class="nm" style="margin-top:6px">${esc(data.name||'Business')}</div>
+      <p class="muted sm">Checking you in…</p>`);
+    try{
+      const {error}=await sb.rpc('check_in',{p_business_id:data.id});
+      if(error) throw error;
+      toast('+100 EXP · Check-in recorded');
+      show(`<b class="ok">Checked in ✓</b><div class="nm" style="margin-top:6px">${esc(data.name||'')}</div>
+        <p class="muted sm">You earned EXP for this visit.</p>
+        <button class="btn sm2" style="margin-top:10px" id="qrHome">Back home</button>`);
+      const h=$('qrHome'); if(h) h.onclick=()=>show('home');
+    }catch(e){
+      // Fallback if RPC does not exist yet in Supabase
+      show(`<b>Business QR</b><div class="nm" style="margin-top:6px">${esc(data.name||data.id)}</div>
+        <p class="muted sm">QR read successfully. Add a <b>check_in</b> function in Supabase later to award EXP automatically.</p>
+        <button class="btn sm2" style="margin-top:10px" id="qrHome2">OK</button>`);
+      const h=$('qrHome2'); if(h) h.onclick=()=>show('home');
+      toast('QR scanned · check-in backend not set up yet');
+    }
+    return;
+  }
+  // BT user QR
+  if(data && data.t==='bt_user' && (data.u||data.id)){
+    show(`<b>User</b><div class="nm" style="margin-top:6px">@${esc(data.u||data.id)}</div>
+      <p class="muted sm">Profile links open in a future update.</p>
+      <button class="btn sm2" style="margin-top:10px" id="qrHomeU">OK</button>`);
+    const hu=$('qrHomeU'); if(hu) hu.onclick=()=>window.__btShow&&window.__btShow('home');
+    return;
+  }
+  // Plain text / unknown
+  show(`<b>Scanned</b><p class="muted sm" style="word-break:break-all;margin-top:8px">${esc(String(raw).slice(0,200))}</p>
+    <p class="muted sm">Not a BT business QR. Business codes look like {"t":"bt_biz",...}</p>
+    <button class="btn sm2" style="margin-top:10px" id="qrAgain">Scan again</button>`);
+  const ag=$('qrAgain'); if(ag) ag.onclick=()=>window.__btShow&&window.__btShow('scanner');
+}
 const bizCard=b=>`<button class="bc" data-b="${esc(b.id)}"><div class="img">${bizAva(b)}</div><div class="t"><div class="nm">${esc(b.name)}</div><div class="muted sm">${esc(b.category)}${b.distance_m!=null?' • '+km(b.distance_m):''}</div><div class="sm vl" style="margin-top:4px">${Number(b.follower_count)||0} followers</div></div></button>`;
 
 const VIEWS={
@@ -731,7 +777,82 @@ const VIEWS={
     return {html:`${topbar('Notifications')}${pendingReq.length?pendingReq.map(r=>`<button class="card row" data-r="${esc(r.id)}" style="width:100%;text-align:left"><div style="font-size:26px">🔐</div><div class="grow"><div class="nm">New login request</div><div class="muted sm">${esc(r.label||'New device')} • tap to review</div></div></button>`).join(''):`<div class="empty"><i>🔔</i>You are all caught up. Alerts, messages and community activity will show here.</div>`}`,
       bind(){document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const r=pendingReq.find(x=>x.id===b.dataset.r);if(r)askApprove(r)})}};
   },
-  scanner:()=>soon('QR check-in','▦','Scan a business QR code to earn 100 EXP per verified visit. Camera scanning arrives in the next update.'),
+  /* ----- QR SCANNER (camera) ----- */
+  scanner(){
+    let html5Qr=null;
+    return {html:`
+    ${topbar('QR Scanner')}
+    <p class="muted sm" style="margin-top:-6px;margin-bottom:12px">Point your camera at a business QR code to check in and earn EXP.</p>
+    <div id="qrReader" style="width:100%;max-width:400px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#000;min-height:280px"></div>
+    <div class="err" id="er" style="text-align:center;margin-top:12px"></div>
+    <div id="scanResult" style="display:none" class="card"></div>
+    <button class="btn ghost" id="stopScan" style="margin-top:12px">Close camera</button>
+    <p class="muted sm" style="text-align:center;margin-top:10px">Allow camera access when your browser asks.</p>`,
+    async bind(){
+      const onSuccess=async(decoded)=>{
+        try{ if(html5Qr) await html5Qr.stop(); }catch{}
+        html5Qr=null;
+        $('qrReader').style.display='none';
+        $('stopScan').style.display='none';
+        await handleScannedQR(decoded);
+      };
+      const start=async()=>{
+        if(typeof Html5Qrcode==='undefined'){
+          $('er').textContent='Scanner library failed to load. Check your connection and refresh.';
+          return;
+        }
+        try{
+          html5Qr=new Html5Qrcode('qrReader');
+          await html5Qr.start(
+            {facingMode:'environment'},
+            {fps:10, qrbox:{width:240,height:240}},
+            onSuccess,
+            ()=>{}
+          );
+        }catch(e){
+          $('er').textContent='Could not open camera. Allow camera permission and try again on HTTPS/mobile.';
+        }
+      };
+      $('stopScan').onclick=async()=>{
+        try{ if(html5Qr) await html5Qr.stop(); }catch{}
+        html5Qr=null; back();
+      };
+      start();
+      // cleanup when leaving view is handled by stop button / success
+    }};
+  },
+
+  /* ----- MY QR CODE (generate) ----- */
+  qrCode(){
+    const payload = profile.role==='business' && myBiz
+      ? JSON.stringify({t:'bt_biz', id: myBiz.id, name: myBiz.name})
+      : JSON.stringify({t:'bt_user', id: me.id, u: profile.username});
+    const label = profile.role==='business' && myBiz
+      ? `Business check-in · ${myBiz.name}`
+      : `@${profile.username}`;
+    return {html:`
+    ${topbar('My QR code')}
+    <div class="card" style="text-align:center">
+      <p class="muted sm">Others can scan this code to find you${profile.role==='business'?' or check in at your business':''}.</p>
+      <div id="qrBox" style="display:inline-block;padding:16px;background:#fff;border-radius:16px;margin:12px 0"></div>
+      <div class="nm" style="margin-top:4px">${esc(label)}</div>
+      <div class="muted sm" style="margin-top:6px;word-break:break-all;font-size:11px">${esc(payload)}</div>
+    </div>
+    <button class="btn ghost" id="shareQr">Copy code text</button>`,
+    bind(){
+      const box=$('qrBox');
+      box.innerHTML='';
+      if(typeof QRCode!=='undefined'){
+        new QRCode(box,{text:payload,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});
+      } else {
+        box.innerHTML='<p class="muted">QR library failed to load. Refresh the page.</p>';
+      }
+      $('shareQr').onclick=async()=>{
+        try{ await navigator.clipboard.writeText(payload); toast('Copied'); }
+        catch{ toast(payload); }
+      };
+    }};
+  },
 
   /* ----- UNIFIED SEARCH (people + businesses) ----- */
   search(p={}){
@@ -947,7 +1068,7 @@ const VIEWS={
     bind(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const k=b.dataset.go;
       if(k==='logout')doLogout();
       else if(k.startsWith('legal:'))show('legal',{k:k.slice(6)});
-      else if(k==='privacy'||k==='notificationsPref'||k==='language'||k==='qrCode') toast('This section opens in the next pass');
+      else if(k==='privacy'||k==='notificationsPref'||k==='language') toast('This section opens in the next pass');
       else show(k)})}};
   },
   editProfile(){
