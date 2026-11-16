@@ -171,7 +171,54 @@ const safeImg=u=>(typeof u==='string'&&u.startsWith('https://res.cloudinary.com/
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
 
-/** Upload a File to Cloudinary (unsigned preset). resourceType: 'image' | 'video' | 'auto' */
+/* Media limits — free-plan friendly (both customers & businesses) */
+const MAX_VIDEO_MB = 100;
+const MAX_VIDEO_SEC = 180; // 3 minutes
+const MAX_IMAGE_MB = 10;
+
+/** Read video duration (seconds) via a temporary <video> element */
+function getVideoDuration(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    const v=document.createElement('video');
+    v.preload='metadata';
+    v.onloadedmetadata=()=>{URL.revokeObjectURL(url); resolve(v.duration||0);};
+    v.onerror=()=>{URL.revokeObjectURL(url); reject(new Error('Could not read video'));};
+    v.src=url;
+  });
+}
+
+/**
+ * Validate image/video before upload.
+ * Videos: max 100 MB and max 3 minutes.
+ * Images: max 10 MB.
+ */
+async function validateMediaFile(file, {allowVideo=true, allowImage=true}={}){
+  if(!file) return 'Choose a file first';
+  const isVid=file.type.startsWith('video/');
+  const isImg=file.type.startsWith('image/');
+  if(isVid && !allowVideo) return 'Video is not allowed here';
+  if(isImg && !allowImage) return 'Image is not allowed here';
+  if(!isVid && !isImg) return 'Only photos or videos are allowed';
+  const mb=file.size/(1024*1024);
+  if(isImg && mb>MAX_IMAGE_MB) return `Photo must be under ${MAX_IMAGE_MB} MB (yours is ${mb.toFixed(1)} MB)`;
+  if(isVid && mb>MAX_VIDEO_MB) return `Video must be under ${MAX_VIDEO_MB} MB (yours is ${mb.toFixed(1)} MB). Try a shorter clip or lower quality.`;
+  if(isVid){
+    try{
+      const sec=await getVideoDuration(file);
+      if(sec>MAX_VIDEO_SEC+0.5) return `Video must be 3 minutes or less (yours is ${Math.ceil(sec/60)} min ${Math.round(sec%60)}s)`;
+    }catch{
+      return 'Could not read that video. Try another file (mp4 recommended).';
+    }
+  }
+  return null; // ok
+}
+
+/**
+ * Upload to Cloudinary (unsigned preset).
+ * For videos we request a 720p-friendly delivery URL when possible.
+ * resourceType: 'image' | 'video' | 'auto'
+ */
 async function uploadToCloudinary(file, resourceType='image'){
   if(!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET){
     toast('Cloudinary not configured yet');
@@ -180,10 +227,24 @@ async function uploadToCloudinary(file, resourceType='image'){
   const fd=new FormData();
   fd.append('file', file);
   fd.append('upload_preset', CLOUDINARY_PRESET);
+  // Hint for presets that allow incoming transformations (configure preset in Cloudinary too)
+  if(resourceType==='video'){
+    // Limit processing impact on free plan; 720p is a good balance
+    fd.append('eager', 'c_limit,w_1280,h_720,q_auto:good');
+    fd.append('eager_async', 'true');
+  }
+  if(resourceType==='image'){
+    fd.append('eager', 'c_limit,w_1080,q_auto:good');
+  }
   const endpoint=`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${resourceType}/upload`;
   const res=await fetch(endpoint,{method:'POST',body:fd});
-  if(!res.ok) throw new Error('Cloudinary upload failed');
-  const data=await res.json();
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok){
+    const msg=data.error&&data.error.message?data.error.message:'Cloudinary upload failed';
+    throw new Error(msg);
+  }
+  // Prefer 720p eager URL when Cloudinary returns it
+  if(data.eager && data.eager[0] && data.eager[0].secure_url) return data.eager[0].secure_url;
   return data.secure_url || data.url || null;
 }
 
@@ -518,45 +579,68 @@ function navHtml(){
 }
 const soon=(title,icon,text)=>({html:`${topbar(title)}<div class="empty"><i>${icon}</i><b style="color:var(--text)">${esc(title)}</b><p>${esc(text)}</p></div>`});
 
+/** Get current GPS once (for check-in) */
+function getLatLng(){
+  return new Promise(res=>{
+    if(!navigator.geolocation) return res({lat:null,lng:null});
+    navigator.geolocation.getCurrentPosition(
+      p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),
+      ()=>res({lat:null,lng:null}),
+      {enableHighAccuracy:true,timeout:12000,maximumAge:30000}
+    );
+  });
+}
+
 /** Parse a scanned QR and try check-in / open profile */
 async function handleScannedQR(raw){
   const box=$('scanResult');
-  const show=(html)=>{ if(box){ box.style.display='block'; box.innerHTML=html; } };
+  const render=(html)=>{ if(box){ box.style.display='block'; box.innerHTML=html; } };
   let data=null;
   try{ data=JSON.parse(raw); }catch{}
-  // BT business QR
+  // BT business QR — needs business id + token + GPS (matches Supabase check_in)
   if(data && data.t==='bt_biz' && data.id){
-    show(`<b>Business found</b><div class="nm" style="margin-top:6px">${esc(data.name||'Business')}</div>
-      <p class="muted sm">Checking you in…</p>`);
+    render(`<b>Business found</b><div class="nm" style="margin-top:6px">${esc(data.name||'Business')}</div>
+      <p class="muted sm">Getting location & checking in…</p>`);
+    const {lat,lng}=await getLatLng();
+    const token = data.token || '';
     try{
-      const {error}=await sb.rpc('check_in',{p_business_id:data.id});
+      const {data:result, error}=await sb.rpc('check_in',{
+        p_business: data.id,
+        p_token: token,
+        p_lat: lat,
+        p_lng: lng
+      });
       if(error) throw error;
-      toast('+100 EXP · Check-in recorded');
-      show(`<b class="ok">Checked in ✓</b><div class="nm" style="margin-top:6px">${esc(data.name||'')}</div>
-        <p class="muted sm">You earned EXP for this visit.</p>
+      const row = Array.isArray(result) ? result[0] : result;
+      const awarded = row?.awarded ?? row?.awarded_exp ?? 100;
+      const msg = row?.result_message || row?.message || 'Check-in recorded';
+      toast(`+${awarded} EXP`);
+      render(`<b class="ok">Checked in ✓</b><div class="nm" style="margin-top:6px">${esc(data.name||'')}</div>
+        <p class="muted sm">${esc(msg)} · +${awarded} EXP</p>
         <button class="btn sm2" style="margin-top:10px" id="qrHome">Back home</button>`);
-      const h=$('qrHome'); if(h) h.onclick=()=>show('home');
+      const h=$('qrHome'); if(h) h.onclick=()=>window.__btShow&&window.__btShow('home');
     }catch(e){
-      // Fallback if RPC does not exist yet in Supabase
-      show(`<b>Business QR</b><div class="nm" style="margin-top:6px">${esc(data.name||data.id)}</div>
-        <p class="muted sm">QR read successfully. Add a <b>check_in</b> function in Supabase later to award EXP automatically.</p>
+      const errMsg = (e && e.message) ? e.message : 'Check-in failed';
+      render(`<b>Business QR</b><div class="nm" style="margin-top:6px">${esc(data.name||data.id)}</div>
+        <p class="muted sm">${esc(errMsg)}</p>
+        <p class="muted sm">Need: valid business token, GPS, and device approved. See Supabase SQL notes.</p>
         <button class="btn sm2" style="margin-top:10px" id="qrHome2">OK</button>`);
-      const h=$('qrHome2'); if(h) h.onclick=()=>show('home');
-      toast('QR scanned · check-in backend not set up yet');
+      const h=$('qrHome2'); if(h) h.onclick=()=>window.__btShow&&window.__btShow('home');
+      toast('Check-in failed');
     }
     return;
   }
   // BT user QR
   if(data && data.t==='bt_user' && (data.u||data.id)){
-    show(`<b>User</b><div class="nm" style="margin-top:6px">@${esc(data.u||data.id)}</div>
+    render(`<b>User</b><div class="nm" style="margin-top:6px">@${esc(data.u||data.id)}</div>
       <p class="muted sm">Profile links open in a future update.</p>
       <button class="btn sm2" style="margin-top:10px" id="qrHomeU">OK</button>`);
     const hu=$('qrHomeU'); if(hu) hu.onclick=()=>window.__btShow&&window.__btShow('home');
     return;
   }
   // Plain text / unknown
-  show(`<b>Scanned</b><p class="muted sm" style="word-break:break-all;margin-top:8px">${esc(String(raw).slice(0,200))}</p>
-    <p class="muted sm">Not a BT business QR. Business codes look like {"t":"bt_biz",...}</p>
+  render(`<b>Scanned</b><p class="muted sm" style="word-break:break-all;margin-top:8px">${esc(String(raw).slice(0,200))}</p>
+    <p class="muted sm">Not a BT business QR.</p>
     <button class="btn sm2" style="margin-top:10px" id="qrAgain">Scan again</button>`);
   const ag=$('qrAgain'); if(ag) ag.onclick=()=>window.__btShow&&window.__btShow('scanner');
 }
@@ -824,32 +908,58 @@ const VIEWS={
 
   /* ----- MY QR CODE (generate) ----- */
   qrCode(){
-    const payload = profile.role==='business' && myBiz
-      ? JSON.stringify({t:'bt_biz', id: myBiz.id, name: myBiz.name})
-      : JSON.stringify({t:'bt_user', id: me.id, u: profile.username});
-    const label = profile.role==='business' && myBiz
-      ? `Business check-in · ${myBiz.name}`
-      : `@${profile.username}`;
+    const isBiz = profile.role==='business' && myBiz;
+    const label = isBiz ? `Business check-in · ${myBiz.name}` : `@${profile.username}`;
     return {html:`
     ${topbar('My QR code')}
     <div class="card" style="text-align:center">
-      <p class="muted sm">Others can scan this code to find you${profile.role==='business'?' or check in at your business':''}.</p>
-      <div id="qrBox" style="display:inline-block;padding:16px;background:#fff;border-radius:16px;margin:12px 0"></div>
+      <p class="muted sm">${isBiz
+        ? 'Customers scan this at your location to check in and earn EXP.'
+        : 'Your personal QR — share so others can find you.'}</p>
+      <div id="qrBox" style="display:inline-block;padding:16px;background:#fff;border-radius:16px;margin:12px 0;min-height:200px;min-width:200px"></div>
       <div class="nm" style="margin-top:4px">${esc(label)}</div>
-      <div class="muted sm" style="margin-top:6px;word-break:break-all;font-size:11px">${esc(payload)}</div>
+      <div class="muted sm" id="qrMeta" style="margin-top:6px;word-break:break-all;font-size:11px">Loading token…</div>
+      ${isBiz?`<button class="btn sm2" style="margin-top:12px" id="rotateQr">Rotate QR (new code)</button>`:''}
     </div>
     <button class="btn ghost" id="shareQr">Copy code text</button>`,
-    bind(){
+    async bind(){
       const box=$('qrBox');
+      let payload='';
+      try{
+        if(isBiz){
+          const {data, error}=await sb.rpc('my_qr_token');
+          if(error) throw error;
+          const token = typeof data==='string' ? data : (data && (data.token||String(data)));
+          payload = JSON.stringify({t:'bt_biz', id: myBiz.id, token: token, name: myBiz.name});
+          $('qrMeta').textContent = 'Token ready · customers need GPS on to check in';
+        } else {
+          payload = JSON.stringify({t:'bt_user', id: me.id, u: profile.username});
+          $('qrMeta').textContent = payload;
+        }
+      }catch(e){
+        payload = isBiz
+          ? JSON.stringify({t:'bt_biz', id: myBiz.id, token: '', name: myBiz.name})
+          : JSON.stringify({t:'bt_user', id: me.id, u: profile.username});
+        $('qrMeta').textContent = 'Could not load my_qr_token — run Supabase SQL / check business account';
+      }
       box.innerHTML='';
       if(typeof QRCode!=='undefined'){
         new QRCode(box,{text:payload,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});
       } else {
-        box.innerHTML='<p class="muted">QR library failed to load. Refresh the page.</p>';
+        box.innerHTML='<p class="muted">QR library failed to load. Refresh.</p>';
       }
       $('shareQr').onclick=async()=>{
         try{ await navigator.clipboard.writeText(payload); toast('Copied'); }
         catch{ toast(payload); }
+      };
+      const rot=$('rotateQr');
+      if(rot) rot.onclick=async()=>{
+        try{
+          const {error}=await sb.rpc('rotate_qr_token');
+          if(error) throw error;
+          toast('QR rotated');
+          show('qrCode');
+        }catch(e){ toast('Could not rotate token'); }
       };
     }};
   },
@@ -897,22 +1007,29 @@ const VIEWS={
     <textarea id="sc" maxlength="150" placeholder="What's happening?"></textarea>
     <div class="err" id="er"></div>
     <button class="btn" id="sp">Post to Status</button>
-    <p class="muted sm">${CLOUDINARY_CLOUD?'Ready to upload via Cloudinary.':'Fill CLOUDINARY_CLOUD + CLOUDINARY_PRESET at the top of this file to enable uploads.'}</p></div>`,
+    <p class="muted sm">Max video: <b>100 MB</b> · <b>3 minutes</b>. Photos: 10 MB. Videos are kept around 720p for quality vs free-plan limits.</p></div>`,
     bind(){
       $('sp').onclick=async()=>{
         const f=$('sf').files[0];
         if(!f){$('er').textContent='Choose a video or photo first';return;}
         if(!CLOUDINARY_CLOUD){toast('Connect Cloudinary first (see top of index.html)');return;}
-        $('sp').disabled=true;$('er').textContent='';
+        $('sp').disabled=true;$('er').textContent='Checking file…';
         try{
+          const bad=await validateMediaFile(f,{allowVideo:true,allowImage:true});
+          if(bad){$('er').textContent=bad;$('sp').disabled=false;return;}
+          $('er').textContent='Uploading…';
           const isVid=f.type.startsWith('video');
           const url=await uploadToCloudinary(f, isVid?'video':'image');
           if(!url){ $('sp').disabled=false; return; }
-          // Optional: save to a `statuses` table when you create one in Supabase
-          // await sb.from('statuses').insert({ user_id: me.id, media_url: url, caption: $('sc').value.trim(), expires_at: new Date(Date.now()+24*3600e3).toISOString() });
-          toast('Status uploaded ✓ (save-to-DB step is optional next)');
+          const {error}=await sb.rpc('post_story',{
+            p_media_url: url,
+            p_media_type: isVid?'video':'image',
+            p_caption: ($('sc').value||'').trim()||null
+          });
+          if(error) throw error;
+          toast('Status posted ✓ (24h)');
           back();
-        }catch(e){$('er').textContent='Upload failed. Check Cloudinary settings.';}
+        }catch(e){$('er').textContent=(e&&e.message)||'Upload failed. Run Step 5 SQL + check Cloudinary.';}
         $('sp').disabled=false;
       };
     }};
@@ -932,21 +1049,27 @@ const VIEWS={
     <textarea id="vd" maxlength="300" placeholder="Describe the product or offer. Add #hashtags so people can find it."></textarea>
     <div class="err" id="er"></div>
     <button class="btn" id="vp">Post to Discover</button>
-    <p class="muted sm">${CLOUDINARY_CLOUD?'Ready to upload via Cloudinary.':'Fill CLOUDINARY_CLOUD + CLOUDINARY_PRESET at the top of this file to enable uploads.'}</p></div>`,
+    <p class="muted sm">Max: <b>100 MB</b> · <b>3 minutes</b>. We target ~720p so free-plan bandwidth stays healthy.</p></div>`,
     bind(){
       $('vp').onclick=async()=>{
         const f=$('vf').files[0];
         if(!f){$('er').textContent='Choose a video first';return;}
         if(!CLOUDINARY_CLOUD){toast('Connect Cloudinary first (see top of index.html)');return;}
-        $('vp').disabled=true;$('er').textContent='';
+        $('vp').disabled=true;$('er').textContent='Checking video…';
         try{
+          const bad=await validateMediaFile(f,{allowVideo:true,allowImage:false});
+          if(bad){$('er').textContent=bad;$('vp').disabled=false;return;}
+          $('er').textContent='Uploading (may take a minute)…';
           const url=await uploadToCloudinary(f,'video');
           if(!url){ $('vp').disabled=false; return; }
-          // Optional: save to a `discover_posts` table when you create one
-          // await sb.from('discover_posts').insert({ business_id: myBiz?.id, user_id: me.id, video_url: url, caption: $('vd').value.trim() });
-          toast('Video uploaded ✓ (save-to-DB step is optional next)');
+          const {error}=await sb.rpc('post_discover',{
+            p_video_url: url,
+            p_caption: ($('vd').value||'').trim()||null
+          });
+          if(error) throw error;
+          toast('Posted to Discover ✓');
           back();
-        }catch(e){$('er').textContent='Upload failed. Check Cloudinary settings.';}
+        }catch(e){$('er').textContent=(e&&e.message)||'Upload failed. Need verified business + Step 5 SQL.';}
         $('vp').disabled=false;
       };
     }};
@@ -1089,6 +1212,8 @@ const VIEWS={
       };
       $('photoFile').onchange=async(e)=>{
         const file=e.target.files&&e.target.files[0]; if(!file) return;
+        const bad=await validateMediaFile(file,{allowVideo:false,allowImage:true});
+        if(bad){toast(bad);return;}
         toast('Uploading…');
         try{
           const url=await uploadToCloudinary(file,'image');
@@ -1097,7 +1222,7 @@ const VIEWS={
             if(!error){profile.avatar_url=url;$('editAva').innerHTML=`<img src="${esc(url)}" alt="">`;toast('Photo updated');}
             else toast('Saved to Cloudinary but profile update failed');
           }
-        }catch(err){toast('Upload failed');}
+        }catch(err){toast((err&&err.message)||'Upload failed');}
       };
       $('sv').onclick=async()=>{
         const nm=$('nm').value.trim();if(nm.length<2){$('er').textContent='Enter your name';return}
