@@ -1,0 +1,1957 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0B1A">
+<title>BT - Business Tracker</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--bg:#0B0B1A;--s1:#14142A;--s2:#1B1B38;--line:rgba(167,139,250,.18);--violet:#7C3AED;--vl:#A78BFA;--text:#F3F0FF;--muted:#9A98B8;--red:#ff6b6b;--green:#4ade80}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;background:radial-gradient(900px 500px at 80% -10%,rgba(124,58,237,.28),transparent 60%),radial-gradient(700px 400px at -10% 30%,rgba(76,29,149,.25),transparent 60%),var(--bg);background-attachment:fixed}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+.screen{max-width:480px;margin:0 auto;padding:16px 16px 110px;min-height:100vh}
+.screen.plain{padding-bottom:30px}
+.muted{color:var(--muted)} .vl{color:var(--vl)} .sm{font-size:13px}
+.top{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.top b{font-size:18px;flex:1}
+.ib{width:40px;height:40px;border-radius:12px;background:var(--s1);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;flex:none}
+.badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--violet);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+input,select,textarea{width:100%;background:var(--s1);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:15px 14px;font:inherit;font-size:16px;margin:0 0 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--violet)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+textarea{min-height:110px;resize:vertical}
+label.f{display:block;font-size:13px;color:var(--muted);margin:0 0 6px 4px}
+label.chk{display:flex;gap:10px;align-items:flex-start;margin:4px 0 14px;font-size:15px}
+label.chk input{width:20px;height:20px;margin:0;flex:none}
+.btn{width:100%;background:linear-gradient(135deg,#7C3AED,#9F67FF);color:#fff;border-radius:14px;padding:15px;font-size:16px;font-weight:700;text-align:center}
+.btn:disabled{opacity:.55}
+.btn.ghost{background:var(--s1);border:1px solid var(--line)}
+.btn.sm2{width:auto;padding:10px 16px;font-size:14px;border-radius:12px}
+.btn.visit{width:100%;padding:10px;font-size:14px;border-radius:12px;margin-top:8px}
+.link{color:var(--vl);padding:12px;font-size:15px}
+.err{color:var(--red);font-size:14px;margin:2px 0 12px;min-height:1px}
+.ok{color:var(--green);font-size:14px;margin:2px 0 12px}
+.card{background:linear-gradient(160deg,rgba(124,58,237,.14),rgba(20,20,42,.9));border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.hero{padding:0;overflow:hidden;position:relative;min-height:160px;display:flex;flex-direction:column;justify-content:flex-end}
+.hero .hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(76,29,149,.85),rgba(124,58,237,.6)),url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect fill="%231a1035" width="400" height="200"/></svg>');background-size:cover;background-position:center}
+.hero .hero-body{position:relative;padding:18px 16px 16px;z-index:1}
+.pill{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(167,139,250,.2);color:var(--vl);margin-bottom:8px;font-weight:600}
+.hero h2{margin:0 0 6px;font-size:22px;line-height:1.25;font-weight:800}
+.hero h2 span{color:var(--vl)}
+.hero p{margin:0 0 12px;color:rgba(243,240,255,.85);font-size:13px;line-height:1.4}
+.q4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.q4 button{background:var(--s1);border:1px solid var(--line);border-radius:18px;padding:14px 6px 12px;font-size:11px;text-align:center;line-height:1.25;font-weight:600}
+.q4 button i{display:block;font-style:normal;font-size:24px;margin-bottom:8px;width:42px;height:42px;line-height:42px;border-radius:14px;margin-left:auto;margin-right:auto}
+.q4 button i.p{background:rgba(124,58,237,.25)}
+.q4 button i.g{background:rgba(74,222,128,.2)}
+.q4 button i.b{background:rgba(96,165,250,.2)}
+.q4 button i.y{background:rgba(250,204,21,.2)}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0 10px}
+.sec b{font-size:17px} .sec button{color:var(--vl);font-size:13px;font-weight:600}
+.hs{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;margin:0 -16px 14px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.hs::-webkit-scrollbar{display:none}
+.bc{flex:none;width:160px;background:var(--s1);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-align:left}
+.bc .img{height:100px;background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(20,20,42,1));display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden;position:relative}
+.bc .img img{width:100%;height:100%;object-fit:cover}
+.bc .badge-st{position:absolute;bottom:6px;left:6px;font-size:10px;padding:2px 7px;border-radius:8px;background:rgba(11,11,26,.85);color:var(--vl);font-weight:700;border:1px solid var(--line)}
+.bc .t{padding:10px 10px 12px}
+.nm{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row{display:flex;gap:12px;align-items:center}
+.ava{width:48px;height:48px;border-radius:14px;background:rgba(124,58,237,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;font-size:20px}
+.ava img{width:100%;height:100%;object-fit:cover}
+.ava.round{border-radius:50%;background:linear-gradient(135deg,#7C3AED,#C4B5FD);font-weight:800;color:#fff}
+.grow{flex:1;min-width:0}
+.bar{height:8px;border-radius:8px;background:var(--bg);overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#7C3AED,#A78BFA);border-radius:8px}
+.srch{display:flex;gap:10px;margin-bottom:14px}
+.srch input{margin:0;border-radius:16px;padding:13px 14px}
+.mapb{flex:none;width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,#7C3AED,#A78BFA);font-size:20px;display:flex;align-items:center;justify-content:center}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(15,15,32,.97);border-top:1px solid var(--line);backdrop-filter:blur(12px)}
+nav .in{max-width:480px;margin:0 auto;display:flex;align-items:center;padding:6px 4px calc(8px + env(safe-area-inset-bottom))}
+nav button{flex:1;color:var(--muted);font-size:10px;padding:6px 0;font-weight:600}
+nav button span{display:block;font-size:20px;margin-bottom:2px}
+nav button.on{color:var(--vl)}
+nav button.plus{flex:none;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#A78BFA);color:#fff;font-size:28px;margin:-24px 6px 0;box-shadow:0 8px 24px rgba(124,58,237,.55)}
+.evcard{display:flex;gap:12px;align-items:center}
+.evdate{flex:none;width:48px;text-align:center;background:rgba(124,58,237,.2);border-radius:12px;padding:8px 4px}
+.evdate b{display:block;font-size:18px;line-height:1.1}
+.evdate span{font-size:11px;color:var(--vl);font-weight:700}
+.header-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.header-row .brand{flex:1}
+.header-row .brand b{font-size:20px;display:block}
+.header-row .brand .tag{font-size:11px;color:var(--muted);letter-spacing:.3px}
+.menu{background:var(--s1);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:16px}
+.menu button{width:100%;display:flex;align-items:center;gap:14px;padding:15px 16px;text-align:left;font-size:16px;border-bottom:1px solid var(--line)}
+.menu button:last-child{border-bottom:0}
+.menu button i{font-style:normal;width:24px;text-align:center;font-size:18px}
+.menu button em{margin-left:auto;font-style:normal;color:var(--muted)}
+.menu button.danger{color:var(--red)}
+.mh{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:18px 4px 8px}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100vh;padding:20px}
+.logo{border-radius:20px;width:130px;height:130px}
+.logo.s{width:40px;height:40px;border-radius:10px}
+.seg{display:flex;gap:0;margin:0 -16px 14px;border-bottom:1px solid var(--line);padding:0 16px}
+.seg button{flex:1;padding:14px 8px;font-size:15px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.seg button.on{color:var(--text);border-bottom-color:var(--violet)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;padding:8px 14px;border-radius:20px;background:var(--s1);border:1px solid var(--line);font-size:13px;font-weight:600}
+.chips button.on{background:rgba(124,58,237,.25);border-color:var(--violet);color:var(--vl)}
+.vid{position:relative;border-radius:16px;overflow:hidden;background:var(--s2);aspect-ratio:9/14;margin-bottom:12px}
+.vid .thumb{width:100%;height:100%;background:linear-gradient(160deg,rgba(124,58,237,.4),rgba(20,20,42,.95));display:flex;align-items:center;justify-content:center;font-size:48px}
+.vid .meta{position:absolute;left:0;right:0;bottom:0;padding:14px 12px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.vid .meta .nm{font-size:14px}
+.vid-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stats-row{display:flex;justify-content:center;gap:28px;margin:14px 0 6px}
+.stats-row div{text-align:center}
+.stats-row b{display:block;font-size:18px}
+.stats-row span{font-size:12px;color:var(--muted)}
+.profile-head{text-align:center;padding:8px 0 4px}
+.profile-head .ava{margin:0 auto 12px;border:3px solid var(--violet)}
+.steps{display:flex;gap:6px;margin:0 0 18px}
+.steps i{flex:1;height:5px;border-radius:3px;background:var(--s2)} .steps i.on{background:var(--violet)}
+#map{height:calc(100vh - 150px);border-radius:18px;border:1px solid var(--line)}
+.pin{display:flex;flex-direction:column;align-items:center;width:110px;margin-left:-55px}
+.pin .c{width:42px;height:42px;border-radius:50%;border:3px solid #7C3AED;background:#16162B;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.pin .c img{width:100%;height:100%;object-fit:cover}
+.pin .t{background:rgba(11,11,26,.9);font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;margin-top:2px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.legal h3{font-size:16px;margin:20px 0 6px;color:var(--vl)}
+.legal p{margin:0 0 8px;line-height:1.55;color:#d9d5ee;font-size:15px}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--s2);border:1px solid var(--line);padding:11px 16px;border-radius:12px;font-size:14px;z-index:99;max-width:90%}
+.lad{display:flex;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line)}
+.empty{text-align:center;padding:40px 10px;color:var(--muted)}
+.empty i{display:block;font-style:normal;font-size:44px;margin-bottom:10px}
+
+.ava.xl{width:96px;height:96px;font-size:38px}
+.ava.sm{width:40px;height:40px;font-size:16px}
+.ava.sq{border-radius:22px}
+.srchwrap{position:relative}
+.sdrop{position:absolute;left:0;right:0;top:100%;margin-top:-8px;background:var(--s1);border:1px solid var(--line);border-radius:16px;z-index:60;max-height:62vh;overflow:auto;box-shadow:0 14px 34px rgba(0,0,0,.55)}
+.sr{display:flex;gap:12px;align-items:center;width:100%;padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
+.sr:last-child{border-bottom:0}
+.sdrop .sr:active,.sr:active{background:rgba(124,58,237,.15)}
+.tg{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:rgba(167,139,250,.18);color:var(--vl);vertical-align:middle}
+.cover{height:120px;border-radius:20px;background:linear-gradient(135deg,#2E1065,#7C3AED 65%,#A78BFA)}
+.pavw{margin:-48px 0 8px;display:flex;justify-content:center}
+.pavw .ava{border:4px solid var(--bg);box-shadow:0 0 0 2px var(--violet)}
+.acts{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.acts .btn{flex:1}
+.ibx{flex:none;width:50px;height:50px;border-radius:14px;background:var(--s1);border:1px solid var(--line);font-size:20px;display:flex;align-items:center;justify-content:center}
+.ibx.on{border-color:var(--violet);background:rgba(124,58,237,.25)}
+.plusb{position:absolute;right:-2px;bottom:6px;width:28px;height:28px;border-radius:50%;background:var(--violet);border:3px solid var(--bg);font-size:14px;display:flex;align-items:center;justify-content:center}
+.chipb{margin-top:12px;padding:8px 16px;border-radius:20px;background:var(--s1);border:1px solid var(--line);font-size:14px}
+.menu-one{width:100%;display:flex;align-items:center;gap:8px;padding:15px 16px;background:var(--s1);border:1px solid var(--line);border-radius:18px;font-size:15px;text-align:left;margin-bottom:6px}
+.menu-one em{margin-left:auto;font-style:normal;color:var(--muted)}
+.chead{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:40;background:var(--bg);padding:6px 0 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+.msgs{padding:6px 0 96px;min-height:50vh}
+.mrow{display:flex;flex-direction:column;align-items:flex-start;margin:8px 0}
+.mrow.me{align-items:flex-end}
+.msg{max-width:84%;padding:9px 12px;border-radius:16px 16px 16px 4px;background:var(--s1);border:1px solid var(--line);font-size:15px;line-height:1.4;word-wrap:break-word;overflow-wrap:anywhere}
+.msg.me{background:linear-gradient(135deg,#7C3AED,#9F67FF);border-color:transparent;border-radius:16px 16px 4px 16px}
+.msg small{display:block;font-size:11px;color:var(--vl);margin-bottom:3px;font-weight:700}
+.msg .q{border-left:3px solid var(--vl);padding-left:8px;margin-bottom:6px;font-size:12px;opacity:.85}
+.msg .mt{font-size:10px;opacity:.65;text-align:right;margin-top:3px}
+.mact{display:flex;gap:12px;margin:2px 6px 0}
+.mact button{font-size:11px;color:var(--muted)}
+.composer{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(15,15,32,.97);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
+.composer .in{max-width:480px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
+.composer input{margin:0;flex:1;padding:12px 14px}
+.sendb{flex:none;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#9F67FF);color:#fff;font-size:18px}
+.rbar{align-items:center;justify-content:space-between;gap:8px;background:var(--s2);border-left:3px solid var(--vl);padding:6px 10px;border-radius:8px;font-size:12px;color:var(--muted)}
+.sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:120;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:480px;background:var(--s1);border-radius:22px 22px 0 0;padding:8px 8px calc(12px + env(safe-area-inset-bottom));border:1px solid var(--line)}
+.sheet button{display:block;width:100%;padding:16px;font-size:16px;text-align:center;border-bottom:1px solid var(--line)}
+.sheet button.danger{color:var(--red)}
+.sheet button.cancel{color:var(--muted);border-bottom:0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+const SUPABASE_URL='https://ndempmyasibwvanccqjd.supabase.co';
+const SUPABASE_KEY='sb_publishable_wD7-VXsD2nO4ToxJ5NFvjw_cWDJicVO'; // publishable key: safe in the browser
+const LOGO='data:image/png;base64,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';
+const SUPPORT_EMAIL='Businesstracka01@gmail.com';
+const SESSION_DAYS=395; // about 13 months when "Remember me" is on (off by default)
+
+/* ---------- Cloudinary (fill these in to enable photo / video upload) ----------
+   1. Create a free account at https://cloudinary.com
+   2. Dashboard → copy Cloud name
+   3. Settings → Upload → Add upload preset → Signing mode: Unsigned
+      (name it e.g. bt_unsigned). Restrict to image/video if you want.
+   4. Paste values below. Leave empty to keep upload disabled. */
+const CLOUDINARY_CLOUD = 'qpval6hr';
+const CLOUDINARY_PRESET = 'bt_unsigned';
+window.CLOUDINARY_CLOUD = CLOUDINARY_CLOUD; // so editProfile can check
+
+/* ---------- storage + session policy ----------
+   Remember me OFF  -> session lives only in this browser tab/session (gone when you close it)
+   Remember me ON   -> kept up to SESSION_DAYS days, then login is required again            */
+const lsGet=k=>{try{return localStorage.getItem(k)}catch{return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
+let remember=lsGet('bt_remember')==='1';
+const authStorage={
+  getItem:k=>{try{return sessionStorage.getItem(k)??localStorage.getItem(k)}catch{return null}},
+  setItem:(k,v)=>{try{const a=remember?localStorage:sessionStorage,b=remember?sessionStorage:localStorage;a.setItem(k,v);b.removeItem(k)}catch{}},
+  removeItem:k=>{try{sessionStorage.removeItem(k);localStorage.removeItem(k)}catch{}}
+};
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storage:authStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let recovering=false;
+sb.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY'){recovering=true;recoveryView()}});
+
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id), $app=$('app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeImg=u=>(typeof u==='string'&&u.startsWith('https://res.cloudinary.com/'))?u:null;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+
+/* Media limits — free-plan friendly (both customers & businesses) */
+const MAX_VIDEO_MB = 100;
+const MAX_VIDEO_SEC = 180; // 3 minutes
+const MAX_IMAGE_MB = 10;
+
+/** Read video duration (seconds) via a temporary <video> element */
+function getVideoDuration(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    const v=document.createElement('video');
+    v.preload='metadata';
+    v.onloadedmetadata=()=>{URL.revokeObjectURL(url); resolve(v.duration||0);};
+    v.onerror=()=>{URL.revokeObjectURL(url); reject(new Error('Could not read video'));};
+    v.src=url;
+  });
+}
+
+/**
+ * Validate image/video before upload.
+ * Videos: max 100 MB and max 3 minutes.
+ * Images: max 10 MB.
+ */
+async function validateMediaFile(file, {allowVideo=true, allowImage=true}={}){
+  if(!file) return 'Choose a file first';
+  const isVid=file.type.startsWith('video/');
+  const isImg=file.type.startsWith('image/');
+  if(isVid && !allowVideo) return 'Video is not allowed here';
+  if(isImg && !allowImage) return 'Image is not allowed here';
+  if(!isVid && !isImg) return 'Only photos or videos are allowed';
+  const mb=file.size/(1024*1024);
+  if(isImg && mb>MAX_IMAGE_MB) return `Photo must be under ${MAX_IMAGE_MB} MB (yours is ${mb.toFixed(1)} MB)`;
+  if(isVid && mb>MAX_VIDEO_MB) return `Video must be under ${MAX_VIDEO_MB} MB (yours is ${mb.toFixed(1)} MB). Try a shorter clip or lower quality.`;
+  if(isVid){
+    try{
+      const sec=await getVideoDuration(file);
+      if(sec>MAX_VIDEO_SEC+0.5) return `Video must be 3 minutes or less (yours is ${Math.ceil(sec/60)} min ${Math.round(sec%60)}s)`;
+    }catch{
+      return 'Could not read that video. Try another file (mp4 recommended).';
+    }
+  }
+  return null; // ok
+}
+
+/**
+ * Upload to Cloudinary (unsigned preset).
+ * For videos we request a 720p-friendly delivery URL when possible.
+ * resourceType: 'image' | 'video' | 'auto'
+ */
+async function uploadToCloudinary(file, resourceType='image'){
+  if(!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET){
+    toast('Cloudinary not configured yet');
+    return null;
+  }
+  const fd=new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  // NOTE: unsigned uploads do not accept transformation params; limits live in the Cloudinary preset.
+  const endpoint=`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${resourceType}/upload`;
+  const res=await fetch(endpoint,{method:'POST',body:fd});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok){
+    const msg=data.error&&data.error.message?data.error.message:'Cloudinary upload failed';
+    throw new Error(msg);
+  }
+  const base=data.secure_url||data.url||null;
+  if(!base||!base.startsWith('https://res.cloudinary.com/')) return null;
+  // deliver a 720p / 1080px version so free-plan bandwidth stays healthy
+  const t=resourceType==='video'?'c_limit,w_1280,h_720,q_auto:good':'c_limit,w_1080,q_auto,f_auto';
+  return base.replace('/upload/','/upload/'+t+'/');
+}
+
+const LADDER=[{n:'Novice',from:0,next:2500},{n:'Intermediate',from:2500,next:8750},{n:'Pro',from:8750,next:17500},{n:'Pro Nova',from:17500,next:25000},{n:'Nova',from:25000,next:null}];
+const statusFor=e=>[...LADDER].reverse().find(s=>e>=s.from)||LADDER[0];
+const atLeast16=d=>{const n=new Date();return d<=new Date(n.getFullYear()-16,n.getMonth(),n.getDate())};
+const greet=()=>{const h=new Date().getHours();return h<12?'Good morning':h<17?'Good afternoon':'Good evening'};
+const fmtDate=d=>new Date(d).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+const initial=n=>(String(n||'?').trim()[0]||'?').toUpperCase();
+const avaHtml=(p,cls='')=>picAva(p&&p.avatar_url,p&&p.display_name,cls);
+const bizAva=b=>{const u=safeImg(b.logo_url);return u?`<img src="${esc(u)}" alt="">`:'🏪'};
+
+/* ---------- state + router ---------- */
+let pendingReq=[], gateOn=false, geo=null, mapWatch=null, watchT=null, asking=false, snooze=0;
+let me=null, profile=null, businesses=[], myBiz=null, cur={name:'home',params:{}}, stack=[], mapObj=null, query='';
+const MAIN=['home','discover','chat','account'];
+function show(name,params={},push=true){
+  window.__btShow=show;
+  if(MAIN.includes(name)) stack=[{name,params}]; else if(push) stack.push({name,params});
+  cur={name,params}; draw();
+}
+function back(){stack.pop();cur=stack[stack.length-1]||{name:'home',params:{}};draw()}
+const topbar=t=>`<div class="top"><button class="ib" data-back>‹</button><b>${esc(t)}</b></div>`;
+
+/* ---------- auth screens ---------- */
+function splash(){$app.innerHTML=`<div class="center"><img class="logo" src="${LOGO}" alt="BT"><p class="muted" style="letter-spacing:1.2px">Discover • Grow • Succeed</p></div>`}
+
+function loginView(msg=''){
+  $app.innerHTML=`<div class="screen plain" style="padding-top:40px">
+  <div style="text-align:center;margin-bottom:26px"><img class="logo" src="${LOGO}" alt="BT" style="width:100px;height:100px"><div class="muted" style="margin-top:8px">Discover • Grow • Succeed</div></div>
+  <input id="em" type="email" placeholder="Email" autocomplete="email">
+  <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+  <label class="chk"><input id="rm" type="checkbox"> <span>Remember me on this device<br><span class="muted sm">Stay signed in for up to ${SESSION_DAYS} days. Leave off on shared phones.</span></span></label>
+  <div class="err" id="er">${esc(msg)}</div>
+  <button class="btn" id="go">Log in</button>
+  <div style="text-align:center"><button class="link" id="fg">Forgot password?</button></div>
+  <div style="text-align:center"><button class="link" id="reg">New to BT? Create an account</button></div></div>`;
+  let fails=0,lock=0;
+  $('reg').onclick=()=>registerView();
+  $('fg').onclick=()=>forgotView();
+  $('go').onclick=async()=>{
+    if(Date.now()<lock){$('er').textContent='Too many attempts. Wait a minute.';return}
+    const email=$('em').value.trim(),pw=$('pw').value;
+    if(!email||!pw){$('er').textContent='Enter your email and password';return}
+    remember=$('rm').checked; lsSet('bt_remember',remember?'1':'0');
+    $('go').disabled=true;$('er').textContent='';
+    const {error}=await sb.auth.signInWithPassword({email,password:pw});
+    $('go').disabled=false;
+    if(error){
+      if(++fails>=5){lock=Date.now()+60000;fails=0}
+      $('er').textContent=/confirm/i.test(error.message)?'Verify your email first. Create the account again to get a new code.':'Wrong email or password';return}
+    lsSet('bt_login_at',String(Date.now()));
+    startApp();
+  };
+}
+
+function forgotView(){
+  $app.innerHTML=`<div class="screen plain">${topbar('Reset password')}
+  <p class="muted">Enter your email. We will send a link to choose a new password.</p>
+  <input id="em" type="email" placeholder="Email"><div class="err" id="er"></div><div class="ok" id="ok"></div>
+  <button class="btn" id="go">Send reset link</button></div>`;
+  document.querySelector('[data-back]').onclick=()=>loginView();
+  $('go').onclick=async()=>{
+    const email=$('em').value.trim(); if(!email){$('er').textContent='Enter your email';return}
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+    $('er').textContent=error?'Could not send right now. Try again shortly.':'';
+    $('ok').textContent=error?'':'If that email has an account, a reset link is on its way.';
+  };
+}
+
+function recoveryView(){
+  $app.innerHTML=`<div class="screen plain" style="padding-top:40px"><b style="font-size:22px">Choose a new password</b>
+  <p class="muted">Enter and confirm your new password.</p>
+  <input id="np" type="password" autocomplete="new-password" placeholder="New password (8+, letters and numbers)">
+  <input id="np2" type="password" autocomplete="new-password" placeholder="Confirm new password">
+  <div class="err" id="er"></div><button class="btn" id="go">Save password</button></div>`;
+  $('go').onclick=async()=>{const a=$('np').value,b=$('np2').value;
+    if(a.length<8||!/[A-Za-z]/.test(a)||!/\d/.test(a)){$('er').textContent='Password must be 8+ characters with letters and numbers';return}
+    if(a!==b){$('er').textContent='Passwords do not match';return}
+    $('go').disabled=true;const {error}=await sb.auth.updateUser({password:a});$('go').disabled=false;
+    if(error){$('er').textContent=error.message;return}
+    await sb.auth.signOut();recovering=false;history.replaceState(null,'',location.pathname);loginView('Password updated. Log in with your new password.')};
+}
+
+function registerView(){
+  let role='customer';
+  $app.innerHTML=`<div class="screen plain">${topbar('Create account')}
+  <div class="seg"><button id="rc" class="on">I am a customer</button><button id="rb">I own a business</button></div>
+  <input id="nm" placeholder="Full name" autocomplete="name">
+  <input id="un" placeholder="Unique username (letters, numbers, _)" autocapitalize="none" autocomplete="off">
+  <input id="em" type="email" placeholder="Email" autocomplete="email">
+  <input id="pw" type="password" placeholder="Password (8+, letters and numbers)" autocomplete="new-password">
+  <input id="pw2" type="password" placeholder="Confirm password" autocomplete="new-password">
+  <label class="f">Date of birth (must be 16 or older)</label>
+  <input id="dob" type="date">
+  <label class="chk"><input id="ag" type="checkbox"> <span>I agree to the <a href="#" id="tl" class="vl">Terms of Use</a> and <a href="#" id="pl" class="vl">Privacy Policy</a></span></label>
+  <div class="err" id="er"></div>
+  <button class="btn" id="go">Continue</button>
+  <p class="muted sm" id="hint" style="text-align:center">We will email you a code to confirm your address.</p></div>`;
+  document.querySelector('[data-back]').onclick=()=>loginView();
+  $('tl').onclick=e=>{e.preventDefault();openLegal('terms')};
+  $('pl').onclick=e=>{e.preventDefault();openLegal('privacy')};
+  const setRole=r=>{role=r;$('rc').className=r==='customer'?'on':'';$('rb').className=r==='business'?'on':'';
+    $('hint').textContent=r==='business'?'After confirming your email you will add your business details for review.':'We will email you a code to confirm your address.'};
+  $('rc').onclick=()=>setRole('customer');$('rb').onclick=()=>setRole('business');
+  $('go').onclick=async()=>{
+    const name=$('nm').value.trim(),un=$('un').value.trim().toLowerCase(),email=$('em').value.trim(),pw=$('pw').value,pw2=$('pw2').value,dobS=$('dob').value;
+    let e='';
+    if(name.length<2)e='Enter your name';
+    else if(!/^[a-z0-9_]{3,20}$/.test(un))e='Username: 3-20 characters, letters, numbers and underscore only';
+    else if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))e='Enter a valid email';
+    else if(pw.length<8||!/[A-Za-z]/.test(pw)||!/\d/.test(pw))e='Password must be 8+ characters with letters and numbers';
+    else if(pw!==pw2)e='Passwords do not match';
+    else if(!dobS)e='Pick your date of birth';
+    else if(!atLeast16(new Date(dobS)))e='You must be at least 16 to join BT';
+    else if(!$('ag').checked)e='Please accept the Terms and Privacy Policy';
+    if(e){$('er').textContent=e;return}
+    $('go').disabled=true;$('er').textContent='';
+    remember=false;lsSet('bt_remember','0');
+    const {data,error}=await sb.auth.signUp({email,password:pw,options:{data:{username:un,display_name:name,date_of_birth:dobS,role}}});
+    $('go').disabled=false;
+    if(error){const m=error.message.toLowerCase();
+      $('er').textContent=m.includes('database error')||m.includes('username')?'That username is taken or invalid. Try another.':m.includes('already')?'This email is already registered. Try logging in.':m.includes('sending')?'We could not send the code right now. Try again in a minute.':error.message;return}
+    if(data.session){startApp()} else verifyView(email,role);
+  };
+}
+
+function verifyView(email,role){
+  $app.innerHTML=`<div class="screen plain">${topbar('Confirm your email')}
+  <p>We sent a code to <b>${esc(email)}</b>. Check your inbox and spam folder.</p>
+  <input id="cd" inputmode="numeric" maxlength="8" placeholder="Enter code" style="text-align:center;font-size:24px;letter-spacing:8px">
+  <div class="err" id="er"></div><div class="ok" id="ok"></div>
+  <button class="btn" id="go">Verify and create account</button>
+  <div style="text-align:center"><button class="link" id="rs">Resend code</button></div></div>`;
+  document.querySelector('[data-back]').onclick=()=>registerView();
+  $('go').onclick=async()=>{
+    const token=$('cd').value.trim(); if(token.length<6){$('er').textContent='Enter the code from your email';return}
+    $('go').disabled=true;$('er').textContent='';
+    const {error}=await sb.auth.verifyOtp({email,token,type:'signup'});
+    $('go').disabled=false;
+    if(error){$('er').textContent='Wrong or expired code. Request a new one.';return}
+    lsSet('bt_login_at',String(Date.now()));
+    startApp();
+  };
+  $('rs').onclick=async()=>{const {error}=await sb.auth.resend({type:'signup',email});
+    $('er').textContent=error?'Could not resend yet. Wait a minute and try again.':'';$('ok').textContent=error?'':'New code sent. Check your inbox and spam.'};
+}
+
+/* ---------- business onboarding (3 stages) ---------- */
+async function bizWizard(step=1,d={}){
+  const steps=`<div class="steps">${[1,2,3].map(i=>`<i class="${i<=step?'on':''}"></i>`).join('')}</div>`;
+  if(step===1){
+    const {data:cats}=await sb.from('categories').select('id,name').order('id');
+    $app.innerHTML=`<div class="screen plain"><b style="font-size:22px">Set up your business</b><p class="muted">Step 1 of 3: business details</p>${steps}
+    <label class="f">Business name</label><input id="bn" value="${esc(d.name||'')}" placeholder="e.g. FreshMart">
+    <label class="f">Category</label><select id="bc">${(cats||[]).map(c=>`<option value="${c.id}" ${String(d.cat)===String(c.id)?'selected':''}>${esc(c.name)}</option>`).join('')}</select>
+    <label class="f">About your business (max 500)</label><textarea id="ab" maxlength="500" placeholder="What do you sell or offer?">${esc(d.about||'')}</textarea>
+    <div class="err" id="er"></div><button class="btn" id="nx">Next</button></div>`;
+    $('nx').onclick=()=>{const name=$('bn').value.trim();if(name.length<2){$('er').textContent='Enter your business name';return}
+      bizWizard(2,{...d,name,cat:$('bc').value,about:$('ab').value.trim()})};
+  } else if(step===2){
+    $app.innerHTML=`<div class="screen plain"><b style="font-size:22px">Where are you?</b><p class="muted">Step 2 of 3: location. Customers must be here to check in.</p>${steps}
+    <label class="f">Street address</label><input id="ad" value="${esc(d.address||'')}" placeholder="Shop number, street, area, city">
+    <button class="btn ghost" id="gps">📍 Use my current location</button>
+    <p class="${d.lat?'ok':'muted sm'}" id="gs">${d.lat?'Location saved ✓':'Stand inside your shop, then tap the button. This sets your map pin.'}</p>
+    <div class="err" id="er"></div>
+    <div style="display:flex;gap:10px"><button class="btn ghost" id="bk">Back</button><button class="btn" id="nx">Next</button></div></div>`;
+    $('gps').onclick=()=>{
+      if(!navigator.geolocation){$('er').textContent='Location is not available on this device';return}
+      $('gs').textContent='Getting location...';
+      navigator.geolocation.getCurrentPosition(p=>{d.lat=p.coords.latitude;d.lng=p.coords.longitude;$('gs').className='ok';$('gs').textContent='Location saved ✓'},
+        ()=>{$('gs').className='muted sm';$('gs').textContent='';$('er').textContent='Allow location access, then try again.'},{enableHighAccuracy:true,timeout:15000});
+    };
+    $('bk').onclick=()=>bizWizard(1,d);
+    $('nx').onclick=()=>{const address=$('ad').value.trim();if(address.length<5){$('er').textContent='Enter your address';return}
+      if(!d.lat){$('er').textContent='Tap "Use my current location" so customers can find you';return}
+      bizWizard(3,{...d,address})};
+  } else {
+    $app.innerHTML=`<div class="screen plain"><b style="font-size:22px">Review and submit</b><p class="muted">Step 3 of 3</p>${steps}
+    <div class="card"><b>${esc(d.name)}</b><p class="muted" style="margin:6px 0">${esc(d.about||'No description')}</p><div class="sm">📍 ${esc(d.address)}</div></div>
+    <p class="muted sm">The BT team reviews every business before it appears on BT. You will be able to post once you are verified.</p>
+    <div class="err" id="er"></div>
+    <div style="display:flex;gap:10px"><button class="btn ghost" id="bk">Back</button><button class="btn" id="sb">Submit for review</button></div></div>`;
+    $('bk').onclick=()=>bizWizard(2,d);
+    $('sb').onclick=async()=>{
+      $('sb').disabled=true;
+      const {error}=await sb.from('businesses').insert({owner_id:me.id,category_id:Number(d.cat),name:d.name,about:d.about||null,address:d.address,location:`SRID=4326;POINT(${d.lng} ${d.lat})`});
+      if(error){$('sb').disabled=false;$('er').textContent='Could not submit: '+error.message;return}
+      startApp();
+    };
+  }
+}
+
+/* ---------- device approval ---------- */
+function deviceId(){let d=lsGet('bt_device_id');if(!d){d=(self.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2);lsSet('bt_device_id',d)}return d}
+function deviceLabel(){
+  const u=navigator.userAgent;
+  const os=/Android/.test(u)?'Android':/iPhone|iPad/.test(u)?'iPhone/iPad':/Windows/.test(u)?'Windows':/Mac/.test(u)?'Mac':/Linux/.test(u)?'Linux':'Device';
+  const br=/Edg\//.test(u)?'Edge':/OPR\//.test(u)?'Opera':/Chrome\//.test(u)?'Chrome':/Safari\//.test(u)?'Safari':/Firefox\//.test(u)?'Firefox':'Browser';
+  return os+' '+br;
+}
+async function gateCheck(){
+  const {data,error}=await sb.rpc('register_session',{p_device:deviceId(),p_label:deviceLabel()});
+  if(error){gateOn=false;return 'approved'}   // device security not installed yet (bt_step4.sql)
+  gateOn=true;return data;
+}
+function pendingView(){
+  $app.innerHTML=`<div class="screen plain" style="padding-top:50px;text-align:center"><div style="font-size:54px">🔐</div>
+  <b style="font-size:22px">Confirm it's you</b>
+  <p class="muted">This is a new device. We asked your other BT device to approve this login. Open BT there and tap <b style="color:var(--text)">Yes, it's me</b>.</p>
+  <div class="card sm" id="ps">Waiting for approval…</div>
+  <button class="btn ghost" id="em">Can't reach your other device? Use an email code</button>
+  <button class="link" id="cx">Cancel</button></div>`;
+  const t=setInterval(async()=>{
+    if(!$('ps')){clearInterval(t);return}
+    const st=await gateCheck();
+    if(st==='approved'){clearInterval(t);startApp()}
+    else if(st==='denied'){clearInterval(t);await sb.auth.signOut();loginView('This login was denied from your other device.')}
+  },4000);
+  $('cx').onclick=async()=>{clearInterval(t);await sb.auth.signOut();loginView()};
+  $('em').onclick=async()=>{clearInterval(t);const email=me.email;await sb.auth.signOut();
+    const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
+    if(error){loginView('Could not send a code right now. Try again soon.');return}
+    otpLoginView(email)};
+}
+function otpLoginView(email){
+  $app.innerHTML=`<div class="screen plain">${topbar('Verify with email code')}
+  <p>We sent a code to <b>${esc(email)}</b>.</p>
+  <input id="cd" inputmode="numeric" maxlength="8" placeholder="Enter code" style="text-align:center;font-size:24px;letter-spacing:8px">
+  <div class="err" id="er"></div><button class="btn" id="go">Verify and continue</button></div>`;
+  document.querySelector('[data-back]').onclick=()=>loginView();
+  $('go').onclick=async()=>{const token=$('cd').value.trim();if(token.length<6){$('er').textContent='Enter the code from your email';return}
+    $('go').disabled=true;const {error}=await sb.auth.verifyOtp({email,token,type:'email'});$('go').disabled=false;
+    if(error){$('er').textContent='Wrong or expired code.';return}
+    lsSet('bt_login_at',String(Date.now()));startApp()};
+}
+function stopWatchers(){if(watchT){clearInterval(watchT);watchT=null}}
+function startWatchers(){stopWatchers();if(!gateOn)return;checkRequests();watchT=setInterval(checkRequests,8000)}
+function updateBadge(){const el=$('bd');if(el){el.textContent=pendingReq.length;el.style.display=pendingReq.length?'flex':'none'}}
+async function checkRequests(){
+  if(!me)return;
+  const {data,error}=await sb.from('trusted_devices').select('id,label,created_at').eq('approved',false).eq('denied',false).order('created_at');
+  if(error)return;
+  pendingReq=data||[];updateBadge();
+  if(pendingReq.length&&!asking&&Date.now()>snooze)askApprove(pendingReq[0]);
+}
+function askApprove(r){
+  if(asking)return;asking=true;
+  const o=document.createElement('div');
+  o.style.cssText='position:fixed;inset:0;background:rgba(5,5,15,.8);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
+  o.innerHTML=`<div class="card" style="max-width:380px;width:100%;margin:0"><div style="font-size:34px">🔐</div><b style="font-size:19px">New login request</b>
+  <p class="muted">Someone is trying to log in to your BT account on <b style="color:var(--text)">${esc(r.label||'a new device')}</b> at ${new Date(r.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}. Is this you?</p>
+  <button class="btn" id="ay">Yes, it's me</button><div style="height:8px"></div><button class="btn ghost" id="an" style="color:var(--red)">No, it wasn't me</button>
+  <button class="link" id="al" style="width:100%">Decide later</button></div>`;
+  document.body.appendChild(o);
+  const done=()=>{o.remove();asking=false};
+  o.querySelector('#al').onclick=()=>{snooze=Date.now()+60000;done()};
+  const decide=async ok=>{const {error}=await sb.rpc('approve_device',{p_id:r.id,p_ok:ok});done();
+    if(error){toast('Could not update. Try again.');return}
+    toast(ok?'Device approved':'Login denied. If it was not you, change your password now.');checkRequests()};
+  o.querySelector('#ay').onclick=()=>decide(true);o.querySelector('#an').onclick=()=>decide(false);
+}
+
+/* ---------- location ---------- */
+function getPos(){return new Promise(res=>{
+  if(!navigator.geolocation)return res(null);
+  navigator.geolocation.getCurrentPosition(p=>{geo={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};res(geo)},()=>res(null),{enableHighAccuracy:true,timeout:15000,maximumAge:20000});
+})}
+const km=m=>m<1000?Math.round(m/10)*10+' m':(m/1000).toFixed(1)+' km';
+const hav=(a,b,c,d)=>{const R=6371000,r=x=>x*Math.PI/180,x=r(c-a),y=r(d-b),h=Math.sin(x/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+async function nearbyFor(pos,radius=10000){
+  const {data,error}=await sb.rpc('nearby_businesses',{p_lat:pos.lat,p_lng:pos.lng,p_radius:radius,p_limit:60});
+  if(!error&&data)return data;
+  // fallback until bt_step4.sql is installed: filter the list on the phone
+  return businesses.filter(b=>b.lat!=null&&b.lng!=null).map(b=>({...b,distance_m:hav(pos.lat,pos.lng,b.lat,b.lng)})).filter(b=>b.distance_m<=radius).sort((x,y)=>x.distance_m-y.distance_m);
+}
+async function nearbyIfAllowed(){
+  try{
+    if(!navigator.permissions)return;
+    const st=await navigator.permissions.query({name:'geolocation'});
+    if(st.state!=='granted')return;
+    const pos=await getPos();if(!pos)return;
+    const near=await nearbyFor(pos);
+    if(near.length){businesses=near;if(cur.name==='home')draw()}
+  }catch{}
+}
+
+/* ---------- boot into app ---------- */
+async function startApp(){
+  splash();
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user){loginView();return}
+  me=user;
+  const gate=await gateCheck();
+  if(gate==='pending'){pendingView();return}
+  if(gate==='denied'){await sb.auth.signOut();loginView('This device was not approved. Log in again to ask for access.');return}
+  const [p,b,mb]=await Promise.all([
+    sb.from('profiles').select('display_name,username,role,global_exp,bio,username_changed_at,name_changed_at,avatar_url,like_count').eq('id',user.id).single(),
+    sb.rpc('list_businesses',{p_limit:50}),
+    sb.from('businesses').select('id,name,about,address,verified,follower_count,logo_url').eq('owner_id',user.id).maybeSingle()
+  ]);
+  profile=p.data;businesses=b.data||[];myBiz=mb.data||null;
+  profile=profile||{display_name:'',username:'',role:'customer',global_exp:0};
+  if(profile.role==='business'&&!myBiz){bizWizard(1);return}
+  query='';show('home');
+  if(b.error)toast('Run bt_step3.sql in Supabase to list businesses');
+  startWatchers();nearbyIfAllowed();
+}
+
+/* ---------- main drawing ---------- */
+function draw(){
+  stopPoll();
+  const v=VIEWS[cur.name]; if(!v){show('home');return}
+  const r=v(cur.params);
+  const main=MAIN.includes(cur.name);
+  $app.innerHTML=`<div class="screen ${main?'':'plain'}">${r.html}</div>`+(main?navHtml():'');
+  if(cur.name!=='map'&&mapWatch!=null){try{navigator.geolocation.clearWatch(mapWatch)}catch{}mapWatch=null}
+  document.querySelectorAll('[data-back]').forEach(b=>b.onclick=back);
+  if(main)document.querySelectorAll('nav [data-t]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.t==='plus'){
+      // Middle + button: different for business vs customer
+      if(profile && profile.role==='business') show('addDiscover');
+      else show('addStatus');
+    } else show(b.dataset.t);
+  });
+  if(r.bind)r.bind();
+  window.scrollTo(0,0);
+}
+function navHtml(){
+  const t=(k,i,l)=>`<button data-t="${k}" class="${cur.name===k?'on':''}"><span>${i}</span>${l}</button>`;
+  // Matches design: Home | Discover | + | Community | Account
+  return `<nav><div class="in">${t('home','🏠','Home')}${t('discover','🔍','Discover')}<button class="plus" data-t="plus" aria-label="Add">+</button>${t('chat','💬','Chat')}${t('account','👤','Account')}</div></nav>`;
+}
+const soon=(title,icon,text)=>({html:`${topbar(title)}<div class="empty"><i>${icon}</i><b style="color:var(--text)">${esc(title)}</b><p>${esc(text)}</p></div>`});
+
+/** Get current GPS once (for check-in) */
+function getLatLng(){
+  return new Promise(res=>{
+    if(!navigator.geolocation) return res({lat:null,lng:null});
+    navigator.geolocation.getCurrentPosition(
+      p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),
+      ()=>res({lat:null,lng:null}),
+      {enableHighAccuracy:true,timeout:12000,maximumAge:30000}
+    );
+  });
+}
+
+/** Parse a scanned QR and try check-in / open profile */
+async function handleScannedQR(raw){
+  const box=$('scanResult');
+  const render=(html)=>{ if(box){ box.style.display='block'; box.innerHTML=html; } };
+  let data=null;
+  try{ data=JSON.parse(raw); }catch{}
+  // BT business QR — needs business id + token + GPS (matches Supabase check_in)
+  if(data && data.t==='bt_biz' && data.id){
+    render(`<b>Business found</b><div class="nm" style="margin-top:6px">${esc(data.name||'Business')}</div>
+      <p class="muted sm">Getting location & checking in…</p>`);
+    const {lat,lng}=await getLatLng();
+    if(lat==null||lng==null){
+      render(`<b>Location needed</b><div class="nm" style="margin-top:6px">${esc(data.name||'Business')}</div>
+        <p class="muted sm">BT checks that you are at the business. Turn on location for this site, then scan again.</p>
+        <button class="btn sm2" style="margin-top:10px" id="qrAgain2">Scan again</button>`);
+      const a2=$('qrAgain2'); if(a2) a2.onclick=()=>window.__btShow&&window.__btShow('scanner');
+      return;
+    }
+    const token = data.token || '';
+    try{
+      const {data:result, error}=await sb.rpc('check_in',{
+        p_business: data.id,
+        p_token: token,
+        p_lat: lat,
+        p_lng: lng
+      });
+      if(error) throw error;
+      const row = Array.isArray(result) ? result[0] : result;
+      const awarded = row?.awarded ?? row?.awarded_exp ?? 100;
+      const msg = row?.result_message || row?.message || 'Check-in recorded';
+      toast(`+${awarded} EXP`);
+      render(`<b class="ok">Checked in ✓</b><div class="nm" style="margin-top:6px">${esc(data.name||'')}</div>
+        <p class="muted sm">${esc(msg)} · +${awarded} EXP</p>
+        <button class="btn sm2" style="margin-top:10px" id="qrHome">Back home</button>`);
+      const h=$('qrHome'); if(h) h.onclick=()=>window.__btShow&&window.__btShow('home');
+    }catch(e){
+      const errMsg = (e && e.message) ? e.message : 'Check-in failed';
+      render(`<b>Business QR</b><div class="nm" style="margin-top:6px">${esc(data.name||data.id)}</div>
+        <p class="muted sm">${esc(errMsg)}</p>
+        <p class="muted sm">Need: valid business token, GPS, and device approved. See Supabase SQL notes.</p>
+        <button class="btn sm2" style="margin-top:10px" id="qrHome2">OK</button>`);
+      const h=$('qrHome2'); if(h) h.onclick=()=>window.__btShow&&window.__btShow('home');
+      toast('Check-in failed');
+    }
+    return;
+  }
+  // BT user QR: open their profile
+  if(data && data.t==='bt_user' && UUID.test(String(data.id||''))){ window.__btShow&&window.__btShow('profile',{id:data.id}); return; }
+  // Plain text / unknown
+  render(`<b>Scanned</b><p class="muted sm" style="word-break:break-all;margin-top:8px">${esc(String(raw).slice(0,200))}</p>
+    <p class="muted sm">Not a BT business QR.</p>
+    <button class="btn sm2" style="margin-top:10px" id="qrAgain">Scan again</button>`);
+  const ag=$('qrAgain'); if(ag) ag.onclick=()=>window.__btShow&&window.__btShow('scanner');
+}
+const bizCard=b=>`<button class="bc" data-b="${esc(b.id)}"><div class="img">${bizAva(b)}</div><div class="t"><div class="nm">${esc(b.name)}</div><div class="muted sm">${esc(b.category)}${b.distance_m!=null?' • '+km(b.distance_m):''}</div><div class="sm vl" style="margin-top:4px">${Number(b.follower_count)||0} followers</div></div></button>`;
+
+const VIEWS={
+  /* ----- HOME ----- */
+  home(){
+    const isBiz = profile.role === 'business';
+    const exp=profile.global_exp||0,st=statusFor(exp);
+    const pct=st.next?Math.min(100,Math.max(0,(exp-st.from)/(st.next-st.from)*100)):100;
+    const first=(profile.display_name||'').split(' ')[0];
+    const top=[...businesses].slice(0,3);
+
+    // Business status card (only for business accounts)
+    const bizCardHome = isBiz ? `<div class="card" id="bz"><b>${myBiz?esc(myBiz.name):'Your business'}</b><div class="${myBiz&&myBiz.verified?'ok':'muted'} sm" style="margin-top:4px">${myBiz&&myBiz.verified?'✓ Verified. You can post on Discover.':'⏳ Pending review by the BT team.'}</div></div>` : '';
+
+    // Quick actions – 4 icons matching design (Events instead of Where You've Been)
+    const q4 = `
+    <div class="q4">
+      <button data-q="find"><i class="p">🏪</i>Find Businesses</button>
+      <button data-q="near"><i class="g">📍</i>Near me</button>
+      <button data-q="comm"><i class="b">👥</i>Communities</button>
+      ${isBiz ? `<button data-q="wyb"><i class="y">📍</i>Memories</button>` : `<button data-q="exp"><i class="y">⭐</i>My EXP</button>`}
+    </div>`;
+
+    // Trending business cards (design style with Visit button)
+    const trendCards = businesses.length
+      ? `<div class="hs">${businesses.slice(0,8).map(b=>{
+          const stBadge = (Number(b.follower_count)||0) > 50 ? 'Pro Nova' : (Number(b.follower_count)||0) > 10 ? 'Top Dog' : 'Nova';
+          return `<div class="bc" data-b="${esc(b.id)}">
+            <div class="img">${bizAva(b)}<span class="badge-st">${stBadge}</span></div>
+            <div class="t">
+              <div class="nm">${esc(b.name)}</div>
+              <div class="muted sm">${esc(b.category||'Business')}</div>
+              <div class="muted sm" style="margin-top:2px">📍 ${b.distance_m!=null?km(b.distance_m):'Near you'}</div>
+              <button class="btn visit" data-visit="${esc(b.id)}">Visit</button>
+            </div>
+          </div>`;
+        }).join('')}</div>`
+      : `<div class="card muted" style="text-align:center">No verified businesses yet. The founding cohort is coming soon.</div>`;
+
+    // EXP progress (customers only)
+    const expBlock = isBiz ? '' : `
+    <div class="card" id="ep" style="margin-top:4px">
+      <div class="row" style="align-items:center">
+        <div style="font-size:28px;margin-right:4px">⬡</div>
+        <div class="grow">
+          <div class="sm muted">EXP Progress</div>
+          <div style="font-weight:800;font-size:16px">Level • ${esc(st.n)}</div>
+          <div class="bar"><i style="width:${pct}%"></i></div>
+          <div class="muted sm">${exp.toLocaleString()} / ${st.next?st.next.toLocaleString():'∞'} EXP</div>
+        </div>
+        <div style="text-align:right">
+          <div class="sm muted">Next</div>
+          <div class="vl sm" style="font-weight:700">${st.next?esc(LADDER[LADDER.indexOf(st)+1]?.n||'—'):'Max'}</div>
+        </div>
+      </div>
+    </div>`;
+
+    const eventsBlock='';
+
+    return {html:`
+    <div class="header-row">
+      <img class="logo s" src="${LOGO}" alt="BT">
+      <div class="brand"><b>BT</b><div class="tg">Discover • Grow • Succeed</div></div>
+      <button class="ib" id="nt" aria-label="Notifications">🔔<span class="badge" id="bd" style="display:${pendingReq.length?'flex':'none'}">${pendingReq.length||''}</span></button>
+      <button class="ib" id="qr" aria-label="${isBiz?'My business QR':'QR Scanner'}">▦</button>
+      <button id="av">${avaHtml(profile)}</button>
+    </div>
+
+    <div class="srchwrap"><div class="srch"><input id="q" placeholder="Search businesses and people" autocomplete="off"><button class="mapb" id="mp" aria-label="Map">🗺️</button></div><div id="sdrop" class="sdrop" style="display:none"></div></div>
+
+    ${bizCardHome}
+
+    <div class="card hero">
+      <div class="hero-bg"></div>
+      <div class="hero-body">
+        <span class="pill">Featured</span>
+        <h2>Explore businesses around <span>you</span></h2>
+        <p>Discover shops, cafés and services near you${isBiz?'':'. Check in with QR to earn EXP'}.</p>
+        <button class="btn sm2" id="ex">Explore now →</button>
+      </div>
+    </div>
+
+    ${q4}
+
+    <div class="sec"><b>Trending near you</b><button id="sa">See all →</button></div>
+    ${trendCards}
+
+    ${eventsBlock}
+
+    <div class="row" style="align-items:stretch;gap:10px;margin-top:4px">
+      <div class="card grow" style="margin:0">
+        <b>Top communities</b>
+        ${top.length?top.map(b=>`<div class="row" style="margin-top:10px"><div class="ava" style="width:34px;height:34px;font-size:16px">${bizAva(b)}</div><div class="grow"><div class="nm sm">${esc(b.name)}</div><div class="muted" style="font-size:11px">${Number(b.follower_count)||0} members</div></div></div>`).join(''):'<div class="muted sm" style="margin-top:8px">None yet</div>'}
+      </div>
+      ${isBiz?'':`<div class="card grow" style="margin:0" id="epMini"><b>Your EXP</b><div style="font-size:22px;font-weight:800;margin-top:6px">${exp.toLocaleString()}</div><div class="vl sm">${esc(st.n)}</div><div class="bar"><i style="width:${pct}%"></i></div></div>`}
+    </div>
+    ${expBlock}`,
+    bind(){
+      liveSearch($('q'),$('sdrop'),{limit:6});
+      $('q').onkeydown=e=>{if(e.key==='Enter'){query=e.target.value;show('search')}};
+      $('mp').onclick=()=>show('map');
+      $('ex').onclick=()=>show('nearby');
+      $('sa').onclick=()=>show('nearby');
+      $('qr').onclick=()=>show(isBiz?'qrCode':'scanner');
+      $('nt').onclick=()=>show('notifications');
+      $('av').onclick=()=>show('account');
+      const ep=$('ep'),epm=$('epMini');
+      if(ep) ep.onclick=()=>show('exp');
+      if(epm) epm.onclick=()=>show('exp');
+      $('seeEvents')&&($('seeEvents').onclick=()=>toast('Events calendar coming soon'));
+      $('rsvpDemo')&&($('rsvpDemo').onclick=()=>toast('RSVP will work when Events are live'));
+      document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{
+        const k=b.dataset.q;
+        if(k==='find') show('search');
+        else if(k==='near') show('nearby');
+        else if(k==='wyb') show('wyb');
+        else if(k==='exp') show('exp');
+        else show('chat');
+      });
+      document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>show('biz',{id:b.dataset.b}));
+      document.querySelectorAll('[data-visit]').forEach(b=>b.onclick=e=>{e.stopPropagation();show('biz',{id:b.dataset.visit})});
+    }};
+  },
+
+  /* ----- DISCOVER (TikTok-style For Me / Following) ----- */
+  discover(){
+    // Mock video cards so the screen feels alive until Cloudinary + real feed
+    const mockVids = (label) => `
+      <div class="vid-grid">
+        <div class="vid"><div class="thumb">🎬</div><div class="meta"><div class="nm">Sample ${label} 1</div><div class="muted sm">Preview only</div></div></div>
+        <div class="vid"><div class="thumb">✨</div><div class="meta"><div class="nm">Sample ${label} 2</div><div class="muted sm">Preview only</div></div></div>
+        <div class="vid"><div class="thumb">🛍️</div><div class="meta"><div class="nm">Sample ${label} 3</div><div class="muted sm">Preview only</div></div></div>
+        <div class="vid"><div class="thumb">📍</div><div class="meta"><div class="nm">Sample ${label} 4</div><div class="muted sm">Preview only</div></div></div>
+      </div>
+      <p class="muted sm" style="text-align:center;margin-top:8px">Real videos appear here after businesses post (Cloudinary + feed).</p>`;
+
+    return {html:`
+    <div class="top" style="margin-bottom:4px"><b style="font-size:22px">Discover</b>
+      ${profile.role==='business'?`<button class="ib" id="goPost" style="margin-left:auto" title="Post">＋</button>`:''}
+    </div>
+    <div class="srch" style="margin-bottom:8px"><input id="dq" placeholder="🔍  Search videos, #hashtags, products…"></div>
+    <div class="chips" id="dchips">
+      <button class="on" data-chip="all">All</button>
+      <button data-chip="food">#Food</button>
+      <button data-chip="fashion">#Fashion</button>
+      <button data-chip="tech">#Tech</button>
+      <button data-chip="events">#Events</button>
+    </div>
+    <div class="seg" id="dseg">
+      <button class="on" data-tab="forme">For Me</button>
+      <button data-tab="following">Following</button>
+    </div>
+    <div id="dfeed">${mockVids('For You')}</div>`,
+    bind(){
+      const feed=$('dfeed');
+      const goPost=$('goPost');
+      if(goPost) goPost.onclick=()=>show('addDiscover');
+      document.querySelectorAll('#dseg button').forEach(btn=>{
+        btn.onclick=()=>{
+          document.querySelectorAll('#dseg button').forEach(x=>x.classList.remove('on'));
+          btn.classList.add('on');
+          const tab=btn.dataset.tab;
+          feed.innerHTML = tab==='forme'
+            ? mockVids('For You')
+            : `<div class="empty"><i>❤️</i><b style="color:var(--text)">Following</b><p>Videos from businesses you follow will show here.</p><p class="muted sm">Follow businesses from Search or the map to fill this tab.</p></div>`;
+        };
+      });
+      document.querySelectorAll('#dchips button').forEach(c=>{
+        c.onclick=()=>{
+          document.querySelectorAll('#dchips button').forEach(x=>x.classList.remove('on'));
+          c.classList.add('on');
+          toast('Hashtag filter ready when video feed is live');
+        };
+      });
+      $('dq').onkeydown=e=>{if(e.key==='Enter') toast('Video / hashtag search activates with the real feed');};
+    }};
+  },
+
+  /* ----- CHAT (statuses + search) ----- */
+  chat(){
+    return {html:`
+    <div class="top"><b style="font-size:22px">Chat</b></div>
+    <div class="mh" style="margin-top:0">Statuses</div>
+    <div class="hs" id="statusRow" style="margin-bottom:12px">
+      <button class="bc" style="width:72px;text-align:center;padding:10px 4px" id="myStatus"><div style="width:54px;height:54px;border-radius:50%;border:2px dashed var(--vl);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:22px">+</div><div class="nm sm">Your status</div></button>
+      <div class="muted sm" style="align-self:center;padding:0 12px">Statuses from people you follow will appear here (24h, from people you follow).</div>
+    </div>
+    <div class="srch"><input id="cq" placeholder="🔍  Search people or businesses to chat…"></div>
+    <div id="clist"><div class="empty"><i>💬</i><b style="color:var(--text)">Your chats</b><p>Search above to find people or business communities. Direct messaging arrives in the next update.</p></div></div>`,
+    bind(){
+      $('myStatus').onclick=()=>{
+        if(profile.role==='business') toast('Business accounts post to Discover, not personal status');
+        else show('addStatus');
+      };
+      $('cq').onkeydown=e=>{if(e.key==='Enter'){query=e.target.value;show('search',{mode:'chat'})}};
+    }};
+  },
+
+  communities:()=>soon('Communities','👥','Join business communities to get updates, polls and offers. Coming in the next update.'),
+  notifications(){
+    return {html:`${topbar('Notifications')}${pendingReq.length?pendingReq.map(r=>`<button class="card row" data-r="${esc(r.id)}" style="width:100%;text-align:left"><div style="font-size:26px">🔐</div><div class="grow"><div class="nm">New login request</div><div class="muted sm">${esc(r.label||'New device')} • tap to review</div></div></button>`).join(''):`<div class="empty"><i>🔔</i>You are all caught up. Alerts, messages and community activity will show here.</div>`}`,
+      bind(){document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const r=pendingReq.find(x=>x.id===b.dataset.r);if(r)askApprove(r)})}};
+  },
+  /* ----- QR SCANNER (camera) ----- */
+  scanner(){
+    if(profile.role==='business')return soon('Scanner','▦','Business accounts do not scan. Your single business QR code is under Account.');
+    let html5Qr=null;
+    return {html:`
+    ${topbar('QR Scanner')}
+    <p class="muted sm" style="margin-top:-6px;margin-bottom:12px">Point your camera at a business QR code to check in and earn EXP.</p>
+    <div id="qrReader" style="width:100%;max-width:400px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#000;min-height:280px"></div>
+    <div class="err" id="er" style="text-align:center;margin-top:12px"></div>
+    <div id="scanResult" style="display:none" class="card"></div>
+    <button class="btn ghost" id="stopScan" style="margin-top:12px">Close camera</button>
+    <p class="muted sm" style="text-align:center;margin-top:10px">Allow camera access when your browser asks.</p>`,
+    async bind(){
+      const onSuccess=async(decoded)=>{
+        try{ if(html5Qr) await html5Qr.stop(); }catch{}
+        html5Qr=null;
+        $('qrReader').style.display='none';
+        $('stopScan').style.display='none';
+        await handleScannedQR(decoded);
+      };
+      const start=async()=>{
+        if(typeof Html5Qrcode==='undefined'){
+          $('er').textContent='Scanner library failed to load. Check your connection and refresh.';
+          return;
+        }
+        try{
+          html5Qr=new Html5Qrcode('qrReader');
+          await html5Qr.start(
+            {facingMode:'environment'},
+            {fps:10, qrbox:{width:240,height:240}},
+            onSuccess,
+            ()=>{}
+          );
+        }catch(e){
+          $('er').textContent='Could not open camera. Allow camera permission and try again on HTTPS/mobile.';
+        }
+      };
+      $('stopScan').onclick=async()=>{
+        try{ if(html5Qr) await html5Qr.stop(); }catch{}
+        html5Qr=null; back();
+      };
+      start();
+      // cleanup when leaving view is handled by stop button / success
+    }};
+  },
+
+  /* ----- MY QR CODE (generate) ----- */
+  qrCode(){
+    const isBiz = profile.role==='business' && myBiz;
+    const label = isBiz ? `Business check-in · ${myBiz.name}` : `@${profile.username}`;
+    return {html:`
+    ${topbar('My QR code')}
+    <div class="card" style="text-align:center">
+      <p class="muted sm">${isBiz
+        ? 'Customers scan this at your location to check in and earn EXP.'
+        : 'Your personal QR — share so others can find you.'}</p>
+      <div id="qrBox" style="display:inline-block;padding:16px;background:#fff;border-radius:16px;margin:12px 0;min-height:200px;min-width:200px"></div>
+      <div class="nm" style="margin-top:4px">${esc(label)}</div>
+      <div class="muted sm" id="qrMeta" style="margin-top:6px;word-break:break-all;font-size:11px">Loading token…</div>
+      ${isBiz?`<button class="btn sm2" style="margin-top:12px" id="rotateQr">Rotate QR (new code)</button>`:''}
+    </div>
+    <button class="btn ghost" id="shareQr">Copy code text</button>`,
+    async bind(){
+      const box=$('qrBox');
+      let payload='';
+      try{
+        if(isBiz){
+          const {data, error}=await sb.rpc('my_qr_token');
+          if(error) throw error;
+          const token = typeof data==='string' ? data : (data && (data.token||String(data)));
+          payload = JSON.stringify({t:'bt_biz', id: myBiz.id, token: token, name: myBiz.name});
+          $('qrMeta').textContent = 'Token ready · customers need GPS on to check in';
+        } else {
+          payload = JSON.stringify({t:'bt_user', id: me.id, u: profile.username});
+          $('qrMeta').textContent = payload;
+        }
+      }catch(e){
+        payload = isBiz
+          ? JSON.stringify({t:'bt_biz', id: myBiz.id, token: '', name: myBiz.name})
+          : JSON.stringify({t:'bt_user', id: me.id, u: profile.username});
+        $('qrMeta').textContent = 'Could not load my_qr_token — run Supabase SQL / check business account';
+      }
+      box.innerHTML='';
+      if(typeof QRCode!=='undefined'){
+        new QRCode(box,{text:payload,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});
+      } else {
+        box.innerHTML='<p class="muted">QR library failed to load. Refresh.</p>';
+      }
+      $('shareQr').onclick=async()=>{
+        try{ await navigator.clipboard.writeText(payload); toast('Copied'); }
+        catch{ toast(payload); }
+      };
+      const rot=$('rotateQr');
+      if(rot) rot.onclick=async()=>{
+        try{
+          const {error}=await sb.rpc('rotate_qr_token');
+          if(error) throw error;
+          toast('QR rotated');
+          show('qrCode');
+        }catch(e){ toast('Could not rotate token'); }
+      };
+    }};
+  },
+
+  /* ----- UNIFIED SEARCH (people + businesses) ----- */
+  search(p={}){
+    const mode=p.mode||'all';
+    return {html:`${topbar(mode==='chat'?'Find to chat':'Search')}
+    <input id="q" placeholder="🔍  People, usernames, businesses…" value="${esc(query)}" autofocus>
+    <div id="list"><p class="muted sm">Type to search…</p></div>`,
+    bind(){
+      const draw2=async()=>{
+        const q=($('q').value||'').trim().toLowerCase();
+        if(!q){$('list').innerHTML='<p class="muted sm">Type a name or username…</p>';return;}
+        // Businesses (already loaded)
+        const bizHits=businesses.filter(b=>b.name.toLowerCase().includes(q)||(b.category||'').toLowerCase().includes(q));
+        // People – query Supabase profiles
+        const qs=q.replace(/[^a-z0-9_ ]/g,'').trim();
+        let people=[];
+        try{
+          if(!qs) throw new Error('empty');
+          const {data}=await sb.from('profiles').select('id,display_name,username,role,global_exp').or(`username.ilike.%${qs}%,display_name.ilike.%${qs}%`).limit(20);
+          people=(data||[]).filter(u=>u.id!==me.id);
+        }catch(e){}
+        let html='';
+        if(people.length){
+          html+=`<div class="mh">People</div>`+people.map(u=>`<div class="card row"><div class="ava round">${esc(initial(u.display_name))}</div><div class="grow"><div class="nm">${esc(u.display_name)}</div><div class="muted sm">@${esc(u.username)} • ${esc(u.role)}</div></div></div>`).join('');
+        }
+        if(bizHits.length){
+          html+=`<div class="mh">Businesses</div>`+bizHits.map(b=>`<div class="card row"><div class="ava">${bizAva(b)}</div><div class="grow"><div class="nm">${esc(b.name)}</div><div class="muted sm">${esc(b.category)}</div></div><div style="text-align:center"><b>${Number(b.follower_count)||0}</b><div class="muted" style="font-size:11px">followers</div></div></div>`).join('');
+        }
+        $('list').innerHTML=html||'<div class="empty"><i>🔎</i>No people or businesses found.</div>';
+      };
+      $('q').oninput=()=>{clearTimeout(window._st);window._st=setTimeout(draw2,280)};
+      draw2();
+    }};
+  },
+
+  /* ----- ADD STATUS (customers only) ----- */
+  addStatus(){
+    if(profile.role==='business'){show('addDiscover');return {html:''};}
+    return {html:`${topbar('Your Status')}
+    <div class="card"><p class="muted">Statuses are like WhatsApp / Instagram Stories. Only people who follow you can see them. They disappear after 24 hours.</p>
+    <label class="f">Video or photo</label>
+    <input type="file" id="sf" accept="video/*,image/*">
+    <label class="f" style="margin-top:12px">Caption (optional)</label>
+    <textarea id="sc" maxlength="150" placeholder="What's happening?"></textarea>
+    <div class="err" id="er"></div>
+    <button class="btn" id="sp">Post to Status</button>
+    <p class="muted sm">Max video: <b>100 MB</b> · <b>3 minutes</b>. Photos: 10 MB. Videos are kept around 720p for quality vs free-plan limits.</p></div>`,
+    bind(){
+      $('sp').onclick=async()=>{
+        const f=$('sf').files[0];
+        if(!f){$('er').textContent='Choose a video or photo first';return;}
+        if(!CLOUDINARY_CLOUD){toast('Connect Cloudinary first (see top of index.html)');return;}
+        $('sp').disabled=true;$('er').textContent='Checking file…';
+        try{
+          const bad=await validateMediaFile(f,{allowVideo:true,allowImage:true});
+          if(bad){$('er').textContent=bad;$('sp').disabled=false;return;}
+          $('er').textContent='Uploading…';
+          const isVid=f.type.startsWith('video');
+          const url=await uploadToCloudinary(f, isVid?'video':'image');
+          if(!url){ $('sp').disabled=false; return; }
+          const {error}=await sb.rpc('post_story',{
+            p_media_url: url,
+            p_media_type: isVid?'video':'image',
+            p_caption: ($('sc').value||'').trim()||null
+          });
+          if(error) throw error;
+          toast('Status posted ✓ (24h)');
+          back();
+        }catch(e){$('er').textContent=(e&&e.message)||'Upload failed. Run Step 5 SQL + check Cloudinary.';}
+        $('sp').disabled=false;
+      };
+    }};
+  },
+
+  /* ----- ADD TO DISCOVER (businesses only) ----- */
+  addDiscover(){
+    if(profile.role!=='business'){show('addStatus');return {html:''};}
+    if(myBiz && !myBiz.verified){
+      return {html:`${topbar('Post to Discover')}<div class="card"><p>Your business is still pending verification. Once the BT team verifies you, you will be able to post videos to Discover.</p></div>`};
+    }
+    return {html:`${topbar('Post to Discover')}
+    <div class="card"><p class="muted">Videos you post here appear on the Discover feed for everyone (For Me + people who follow your business).</p>
+    <label class="f">Video</label>
+    <input type="file" id="vf" accept="video/*">
+    <label class="f" style="margin-top:12px">Description + hashtags</label>
+    <textarea id="vd" maxlength="300" placeholder="Describe the product or offer. Add #hashtags so people can find it."></textarea>
+    <div class="err" id="er"></div>
+    <button class="btn" id="vp">Post to Discover</button>
+    <p class="muted sm">Max: <b>100 MB</b> · <b>3 minutes</b>. We target ~720p so free-plan bandwidth stays healthy.</p></div>`,
+    bind(){
+      $('vp').onclick=async()=>{
+        const f=$('vf').files[0];
+        if(!f){$('er').textContent='Choose a video first';return;}
+        if(!CLOUDINARY_CLOUD){toast('Connect Cloudinary first (see top of index.html)');return;}
+        $('vp').disabled=true;$('er').textContent='Checking video…';
+        try{
+          const bad=await validateMediaFile(f,{allowVideo:true,allowImage:false});
+          if(bad){$('er').textContent=bad;$('vp').disabled=false;return;}
+          $('er').textContent='Uploading (may take a minute)…';
+          const url=await uploadToCloudinary(f,'video');
+          if(!url){ $('vp').disabled=false; return; }
+          const {error}=await sb.rpc('post_discover',{
+            p_video_url: url,
+            p_caption: ($('vd').value||'').trim()||null
+          });
+          if(error) throw error;
+          toast('Posted to Discover ✓');
+          back();
+        }catch(e){$('er').textContent=(e&&e.message)||'Upload failed. Need verified business + Step 5 SQL.';}
+        $('vp').disabled=false;
+      };
+    }};
+  },
+
+  exp(){
+    if(profile.role==='business'){
+      return {html:`${topbar('EXP')}<div class="card"><p class="muted">EXP and status ladder are only for customer accounts. Businesses grow through followers, visits and Discover posts.</p></div>`};
+    }
+    const exp=profile.global_exp||0,st=statusFor(exp),pct=st.next?Math.min(100,(exp-st.from)/(st.next-st.from)*100):100;
+    return {html:`${topbar('My EXP')}<div class="card"><div class="muted sm">Your status</div><div style="font-size:30px;font-weight:800">${esc(st.n)}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="muted sm">${exp.toLocaleString()} EXP${st.next?` • ${(st.next-exp).toLocaleString()} to next status`:''}</div></div>
+    <div class="mh">Status ladder</div><div class="menu" style="padding:4px 12px">${LADDER.map(l=>`<div class="lad"><span>${exp>=l.from?'✓ ':''}${esc(l.n)}</span><span class="muted">${l.from.toLocaleString()}+ EXP</span></div>`).join('')}</div>
+    <p class="muted sm">Each verified visit earns 100 EXP. Scan limits apply per business type.</p>`};
+  },
+  map(p={}){
+    return {html:`${topbar('BT Map')}<div id="mmsg"></div><div id="map" style="position:relative"></div>`,async bind(){
+      const msg=$('mmsg'),box=$('map');
+      box.innerHTML='<div class="empty"><i>📡</i>Finding your location…</div>';
+      const pos=await getPos();
+      if(cur.name!=='map')return;
+      if(!pos){
+        box.style.display='none';
+        msg.innerHTML=`<div class="empty"><i>📍</i><b style="color:var(--text)">Turn on location</b><p>BT Map shows the area around where you are right now. Allow location for this site in your browser, then try again.</p><button class="btn" id="rt">Try again</button></div>`;
+        $('rt').onclick=()=>show('map',{},false);return}
+      if(typeof L==='undefined'){box.innerHTML='<div class="empty">Map could not load. Check your connection.</div>';return}
+      box.innerHTML='';
+      if(mapObj){mapObj.remove();mapObj=null}
+      mapObj=L.map('map').setView(p.focus?[p.focus.lat,p.focus.lng]:[pos.lat,pos.lng],p.focus?18:16);
+      const street=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'});
+      const sat=L.layerGroup([L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'}),
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19})]);
+      sat.addTo(mapObj);L.control.layers({'Satellite':sat,'Streets':street},null,{position:'topright'}).addTo(mapObj);
+      const me_=L.circleMarker([pos.lat,pos.lng],{radius:9,color:'#fff',weight:3,fillColor:'#7C3AED',fillOpacity:1}).addTo(mapObj);
+      const acc=L.circle([pos.lat,pos.lng],{radius:Math.min(pos.acc||50,300),color:'#7C3AED',weight:1,fillOpacity:.12}).addTo(mapObj);
+      const here=document.createElement('button');
+      here.textContent='◎';here.setAttribute('aria-label','My location');
+      here.style.cssText='position:absolute;right:12px;bottom:12px;z-index:999;width:46px;height:46px;border-radius:50%;background:#7C3AED;color:#fff;font-size:24px;box-shadow:0 4px 14px rgba(0,0,0,.5)';
+      here.onclick=()=>{if(geo)mapObj.setView([geo.lat,geo.lng],16)};box.appendChild(here);
+      if(mapWatch!=null&&navigator.geolocation)navigator.geolocation.clearWatch(mapWatch);
+      if(navigator.geolocation)mapWatch=navigator.geolocation.watchPosition(p=>{geo={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};me_.setLatLng([geo.lat,geo.lng]);acc.setLatLng([geo.lat,geo.lng]).setRadius(Math.min(geo.acc||50,300))},()=>{},{enableHighAccuracy:true,maximumAge:10000});
+      [100,400,1000].forEach(t=>setTimeout(()=>mapObj&&mapObj.invalidateSize(),t));
+      const near=await nearbyFor(pos,10000);
+      if(cur.name!=='map'||!mapObj)return;
+      near.forEach(b=>{const u=safeImg(b.logo_url);
+        L.marker([b.lat,b.lng],{icon:L.divIcon({html:`<div class="pin"><div class="c">${u?`<img src="${esc(u)}" alt="">`:'🏪'}</div><div class="t">${esc(b.name)}</div></div>`,className:'',iconSize:[0,0]})}).addTo(mapObj).on('click',()=>show('biz',{id:b.id}))});
+      msg.innerHTML=`<p class="muted sm" style="margin:0 0 8px 4px">${near.length?near.length+' business'+(near.length>1?'es':'')+' within 10 km of you':'No BT businesses near you yet. You are the first here.'}</p>`;
+    }};
+  },
+
+  /* ----- WHERE YOU'VE BEEN ----- */
+  wyb(){
+    return {html:`${topbar("Where You've Been")}
+    <div class="card"><b>Save a memory</b><textarea id="nt" maxlength="500" placeholder="What made this visit special?" style="margin-top:10px"></textarea>
+    <select id="bz"><option value="">Which business? (optional)</option>${businesses.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('')}</select>
+    <div class="err" id="er"></div><button class="btn" id="sv">Save memory</button><p class="muted sm">Photos and videos arrive with the next update. Memories are private to you.</p></div>
+    <div class="mh">Your memories</div><div id="ml"><p class="muted">Loading…</p></div>`,
+    async bind(){
+      const load=async()=>{const {data,error}=await sb.from('memories').select('id,note,created_at,businesses(name)').order('created_at',{ascending:false}).limit(50);
+        $('ml').innerHTML=error?'<p class="err">Could not load memories.</p>':(data&&data.length?data.map(m=>`<div class="card"><div class="muted sm">${fmtDate(m.created_at)}${m.businesses?' • '+esc(m.businesses.name):''}</div><div style="margin:6px 0">${esc(m.note)}</div><button class="link" data-del="${esc(m.id)}" style="padding:4px 0;color:var(--red);font-size:13px">Delete</button></div>`).join(''):'<div class="empty"><i>📍</i>No memories yet. Your visits will live here.</div>');
+        document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(confirm('Delete this memory?')){await sb.from('memories').delete().eq('id',b.dataset.del);load()}})};
+      $('sv').onclick=async()=>{const note=$('nt').value.trim();if(!note){$('er').textContent='Write something first';return}
+        $('sv').disabled=true;const {error}=await sb.from('memories').insert({user_id:me.id,note,business_id:$('bz').value||null});$('sv').disabled=false;
+        if(error){$('er').textContent='Could not save: '+error.message;return}$('nt').value='';$('er').textContent='';toast('Memory saved');load()};
+      load();
+    }};
+  },
+
+  /* ----- ACCOUNT (TikTok-style profile + settings) ----- */
+  account(){
+    const isBiz = profile.role === 'business';
+    const st=statusFor(profile.global_exp||0);
+    const row=(k,i,l,e='',cls='')=>`<button data-go="${k}" class="${cls}"><i>${i}</i>${l}<em>${e||'›'}</em></button>`;
+    // Simple stats (placeholders until we have real counts)
+    const following = 0, followers = 0, likes = 0;
+    return {html:`
+    <div class="profile-head">
+      <div class="ava round" style="width:92px;height:92px;font-size:38px">${esc(initial(profile.display_name))}</div>
+      <div style="font-size:20px;font-weight:800">${esc(profile.display_name)}</div>
+      <div class="muted">@${esc(profile.username)}</div>
+      ${isBiz
+        ? `<div class="muted sm" style="margin-top:6px">Business account${myBiz&&myBiz.verified?' · ✓ Verified':''}</div>`
+        : `<div class="vl sm" style="margin-top:6px">${esc(st.n)} · ${(profile.global_exp||0).toLocaleString()} EXP</div>`}
+      ${profile.bio?`<p class="muted" style="margin:10px 24px 0;font-size:14px;line-height:1.4">${esc(profile.bio)}</p>`:''}
+      <div class="stats-row">
+        <div><b>${following}</b><span>Following</span></div>
+        <div><b>${followers}</b><span>Followers</span></div>
+        <div><b>${likes}</b><span>${isBiz?'Visits':'Likes'}</span></div>
+      </div>
+      <button class="btn sm2" style="margin-top:8px;padding:10px 28px" data-go="editProfile">Edit profile</button>
+    </div>
+
+    <div class="mh">Account</div>
+    <div class="menu">
+      ${row('editProfile','✏️','Edit profile')}
+      ${row('username','@','Username','@'+esc(profile.username))}
+      ${row('security','🔒','Account and security')}
+      ${isBiz?row('myBiz','🏪','My business',myBiz&&myBiz.verified?'Verified':'Pending'):row('exp','⭐','My EXP & status',st.n)}
+      ${row('qrCode','▦','My QR code')}
+    </div>
+
+    <div class="mh">Privacy and safety</div>
+    <div class="menu">
+      ${row('blocked','🚫','Blocked accounts')}
+      ${row('privacy','👁️','Privacy settings')}
+    </div>
+
+    <div class="mh">Preferences</div>
+    <div class="menu">
+      ${row('notificationsPref','🔔','Notifications')}
+      ${row('language','🌐','Language','English')}
+    </div>
+
+    <div class="mh">About</div>
+    <div class="menu">
+      ${row('legal:privacy','🛡️','Privacy Policy')}
+      ${row('legal:terms','📄','Terms of Use')}
+      ${row('legal:cookies','🍪','Cookie Policy')}
+      ${row('about','ℹ️','About BT')}
+    </div>
+
+    <div class="menu">${row('logout','↪','Log out','','danger')}</div>`,
+    bind(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const k=b.dataset.go;
+      if(k==='logout')doLogout();
+      else if(k.startsWith('legal:'))show('legal',{k:k.slice(6)});
+      else if(k==='privacy'||k==='notificationsPref'||k==='language') toast('This section opens in the next pass');
+      else show(k)})}};
+  },
+  editProfile(){
+    return {html:`${topbar('Edit profile')}
+    <div style="text-align:center;margin-bottom:18px">
+      <div class="ava round" style="width:88px;height:88px;border-radius:50%;margin:0 auto 10px;font-size:36px" id="editAva">${esc(initial(profile.display_name))}</div>
+      <button class="link" id="ph" style="padding:4px">Change photo</button>
+      <input type="file" id="photoFile" accept="image/*" style="display:none">
+    </div>
+    <label class="f">Name</label><input id="nm" maxlength="60" value="${esc(profile.display_name)}">
+    <label class="f">Bio</label><textarea id="bio" maxlength="200" placeholder="Tell people about yourself" style="min-height:90px">${esc(profile.bio||'')}</textarea>
+    <div class="muted sm" style="margin:-6px 0 12px 4px" id="photoHint">Photo upload activates when Cloudinary is connected.</div>
+    <div class="err" id="er"></div><button class="btn" id="sv">Save</button>`,
+    bind(){
+      $('ph').onclick=()=>{
+        if(window.CLOUDINARY_CLOUD) $('photoFile').click();
+        else toast('Connect Cloudinary first (cloud name + upload preset)');
+      };
+      $('photoFile').onchange=async(e)=>{
+        const file=e.target.files&&e.target.files[0]; if(!file) return;
+        const bad=await validateMediaFile(file,{allowVideo:false,allowImage:true});
+        if(bad){toast(bad);return;}
+        toast('Uploading…');
+        try{
+          const url=await uploadToCloudinary(file,'image');
+          if(url){
+            const {error}=await sb.from('profiles').update({avatar_url:url}).eq('id',me.id);
+            if(!error){profile.avatar_url=url;$('editAva').innerHTML=`<img src="${esc(url)}" alt="">`;toast('Photo updated');}
+            else toast('Saved to Cloudinary but profile update failed');
+          }
+        }catch(err){toast((err&&err.message)||'Upload failed');}
+      };
+      $('sv').onclick=async()=>{
+        const nm=$('nm').value.trim();if(nm.length<2){$('er').textContent='Enter your name';return}
+        $('sv').disabled=true;const {error}=await sb.from('profiles').update({display_name:nm,bio:$('bio').value.trim()||null}).eq('id',me.id);$('sv').disabled=false;
+        if(error){$('er').textContent='Could not save';return}
+        profile.display_name=nm;profile.bio=$('bio').value.trim();toast('Profile updated');back();
+      };
+    }};
+  },
+  username(){
+    let next=null;if(profile.username_changed_at){const d=new Date(profile.username_changed_at);d.setMonth(d.getMonth()+4);if(d>new Date())next=d}
+    return {html:`${topbar('Username')}<p class="muted">Your username is how people find you on BT. It must be unique.</p>
+    <label class="f">Username</label><input id="un" value="${esc(profile.username)}" autocapitalize="none" autocomplete="off" ${next?'disabled':''}>
+    ${next?`<div class="card sm">You changed your username recently. You can change it again on <b>${fmtDate(next)}</b>.</div>`:`<div class="muted sm" style="margin:-6px 0 12px 4px">3-20 characters: letters, numbers, underscore. You can change it once every 4 months.</div>`}
+    <div class="err" id="er"></div>${next?'':'<button class="btn" id="sv">Save username</button>'}`,
+    bind(){const s=$('sv');if(!s)return;s.onclick=async()=>{const n=$('un').value.trim().toLowerCase();
+      if(n===profile.username){back();return}
+      if(!/^[a-z0-9_]{3,20}$/.test(n)){$('er').textContent='Use 3-20 letters, numbers or underscore';return}
+      if(!confirm('Change username to @'+n+'? You will not be able to change it again for 4 months.'))return;
+      s.disabled=true;const {error}=await sb.rpc('change_username',{p_new:n});s.disabled=false;
+      if(error){$('er').textContent=/4 months/.test(error.message)?'You can only change your username once every 4 months':'That username is taken or invalid';return}
+      profile.username=n;profile.username_changed_at=new Date().toISOString();toast('Username updated');back()}}};
+  },
+  security(){
+    return {html:`${topbar('Account and security')}<div class="menu"><button data-go="changeEmail"><i>✉️</i>Email<em>${esc(me.email)}</em></button><button data-go="changePassword"><i>🔑</i>Password<em>›</em></button><button data-go="devices"><i>📱</i>Your devices<em>›</em></button></div>
+    <p class="muted sm">Signed in on this device. If you use a shared phone, log out when you are done.</p><div class="menu"><button class="danger" id="lo"><i>↪</i>Log out of this device</button></div>`,
+    bind(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));$('lo').onclick=doLogout}};
+  },
+  changePassword(){
+    return {html:`${topbar('Change password')}<label class="f">Current password</label><input id="cp" type="password" autocomplete="current-password">
+    <label class="f">New password</label><input id="np" type="password" autocomplete="new-password" placeholder="8+ characters, letters and numbers">
+    <label class="f">Confirm new password</label><input id="np2" type="password" autocomplete="new-password">
+    <div class="err" id="er"></div><button class="btn" id="sv">Update password</button>`,
+    bind(){$('sv').onclick=async()=>{const cp=$('cp').value,np=$('np').value,np2=$('np2').value;
+      if(!cp){$('er').textContent='Enter your current password';return}
+      if(np.length<8||!/[A-Za-z]/.test(np)||!/\d/.test(np)){$('er').textContent='New password must be 8+ characters with letters and numbers';return}
+      if(np!==np2){$('er').textContent='New passwords do not match';return}
+      if(np===cp){$('er').textContent='Choose a different password';return}
+      $('sv').disabled=true;
+      const chk=await sb.auth.signInWithPassword({email:me.email,password:cp});
+      if(chk.error){$('sv').disabled=false;$('er').textContent='Current password is wrong';return}
+      const {error}=await sb.auth.updateUser({password:np});$('sv').disabled=false;
+      if(error){$('er').textContent=error.message;return}toast('Password updated');back()}}};
+  },
+  changeEmail(){
+    return {html:`${topbar('Change email')}<p class="muted">Current email: <b>${esc(me.email)}</b></p><label class="f">New email</label><input id="ne" type="email" autocomplete="email">
+    <div class="err" id="er"></div><div class="ok" id="ok"></div><button class="btn" id="sv">Send confirmation</button>`,
+    bind(){$('sv').onclick=async()=>{const ne=$('ne').value.trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ne)){$('er').textContent='Enter a valid email';return}
+      $('sv').disabled=true;const {error}=await sb.auth.updateUser({email:ne});$('sv').disabled=false;
+      if(error){$('er').textContent=error.message;return}$('er').textContent='';$('ok').textContent='Check your inbox to confirm the new address. Your email changes after you confirm.'}}};
+  },
+  blocked(){
+    return {html:`${topbar('Blocked accounts')}<p class="muted">Blocked people cannot message you or follow you.</p>
+    <div class="row"><input id="bu" placeholder="Username to block" autocapitalize="none" style="margin:0"><button class="btn sm2" id="bb">Block</button></div><div class="err" id="er" style="margin-top:8px"></div><div id="bl"></div>`,
+    bind(){const load=async()=>{const {data}=await sb.from('blocks').select('blocked_id,created_at');const ids=(data||[]).map(r=>r.blocked_id);let ps=[];
+        if(ids.length){const r=await sb.from('profiles').select('id,username,display_name').in('id',ids);ps=r.data||[]}
+        $('bl').innerHTML=ps.length?ps.map(p=>`<div class="card row"><div class="grow"><div class="nm">${esc(p.display_name)}</div><div class="muted sm">@${esc(p.username)}</div></div><button class="btn ghost sm2" data-ub="${esc(p.id)}">Unblock</button></div>`).join(''):'<div class="empty"><i>🚫</i>You have not blocked anyone.</div>';
+        document.querySelectorAll('[data-ub]').forEach(b=>b.onclick=async()=>{await sb.from('blocks').delete().eq('blocker_id',me.id).eq('blocked_id',b.dataset.ub);load()})};
+      $('bb').onclick=async()=>{const u=$('bu').value.trim().toLowerCase().replace(/^@/,'');if(!u)return;
+        const {data:p}=await sb.from('profiles').select('id').eq('username',u).maybeSingle();
+        if(!p){$('er').textContent='No account with that username';return}if(p.id===me.id){$('er').textContent='You cannot block yourself';return}
+        const {error}=await sb.from('blocks').insert({blocker_id:me.id,blocked_id:p.id});
+        $('er').textContent=error&&!/duplicate/.test(error.message)?'Could not block':'';$('bu').value='';load()};
+      load()}};
+  },
+  devices(){
+    return {html:`${topbar('Your devices')}<p class="muted">Devices that can sign in to your account. A login from a new device needs approval from one of these.</p><div id="dl"><p class="muted">Loading…</p></div>`,
+      bind(){const load=async()=>{
+        const {data,error}=await sb.from('trusted_devices').select('id,device_id,label,approved,denied,last_seen').order('last_seen',{ascending:false});
+        if(error){$('dl').innerHTML='<div class="card muted sm">Device security is not switched on yet. Run bt_step4.sql in Supabase.</div>';return}
+        $('dl').innerHTML=(data||[]).map(d=>{const mine=d.device_id===deviceId();
+          return `<div class="card row"><div style="font-size:24px">📱</div><div class="grow"><div class="nm">${esc(d.label||'Device')}${mine?' <span class="vl sm">• This device</span>':''}</div>
+          <div class="muted sm">${d.denied?'Denied':d.approved?'Approved':'Waiting for approval'} • last seen ${fmtDate(d.last_seen)}</div></div>
+          ${mine?'':`<button class="btn ghost sm2" data-rm="${esc(d.id)}" style="color:var(--red)">Remove</button>`}</div>`}).join('')||'<div class="empty"><i>📱</i>No devices yet.</div>';
+        document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{if(!confirm('Remove this device? It will need approval to log in again.'))return;
+          const {error}=await sb.rpc('remove_device',{p_id:b.dataset.rm});if(error){toast('Could not remove');return}load()})};
+        load()}};
+  },
+  myBiz(){
+    return {html:`${topbar('My business')}${myBiz?`<div class="card"><b style="font-size:18px">${esc(myBiz.name)}</b><div class="${myBiz.verified?'ok':'muted'}" style="margin:8px 0">${myBiz.verified?'✓ Verified':'⏳ Pending review'}</div><p class="muted" style="margin:0 0 8px">${esc(myBiz.about||'')}</p><div class="sm">📍 ${esc(myBiz.address||'')}</div><div class="sm vl" style="margin-top:8px">${Number(myBiz.follower_count)||0} followers</div></div>
+    <p class="muted sm">${myBiz.verified?'Your business is live on BT.':'The BT team is reviewing your details. You will appear on BT once verified.'}</p>`:'<p class="muted">No business yet.</p>'}`};
+  },
+  about:()=>({html:`${topbar('About BT')}<div style="text-align:center;margin:10px 0 20px"><img class="logo" src="${LOGO}" alt="BT"><p class="muted">Discover • Grow • Succeed</p></div>
+    <div class="card"><p style="margin:0">BT (Business Tracker) connects people with the businesses they visit in the real world. Check in with a QR code, earn EXP, build your status, and join the communities of the places you love.</p></div><p class="muted sm" style="text-align:center">Version 0.2 (early access)</p>`}),
+  legal(p){const d=LEGAL[p.k];return {html:`${topbar(d.title)}<div class="legal"><p class="muted sm">Last updated: ${d.date}</p>${d.s.map(s=>`<h3>${esc(s[0])}</h3><p>${esc(s[1])}</p>`).join('')}</div>`}}
+};
+
+function openLegal(k){
+  const d=LEGAL[k],o=document.createElement('div');
+  o.style.cssText='position:fixed;inset:0;background:#0B0B1A;z-index:200;overflow:auto';
+  o.innerHTML=`<div class="screen plain"><div class="top"><button class="ib" id="lx">✕</button><b>${esc(d.title)}</b></div><div class="legal"><p class="muted sm">Last updated: ${d.date}</p>${d.s.map(x=>`<h3>${esc(x[0])}</h3><p>${esc(x[1])}</p>`).join('')}</div></div>`;
+  document.body.appendChild(o);o.querySelector('#lx').onclick=()=>o.remove();
+}
+/* ================= ROUND 6: profiles, live search, follow, communities, chats, settings ================= */
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+let verifiedAt=0;
+const timeAgo=d=>{const s=(Date.now()-new Date(d))/1000;if(s<60)return 'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return new Date(d).toLocaleDateString(undefined,{day:'numeric',month:'short'})};
+const clock=d=>new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const picAva=(url,name,cls='')=>{const u=safeImg(url);return `<div class="ava round ${cls}">${u?`<img src="${esc(u)}" alt="">`:esc(initial(name))}</div>`};
+const bizPic=(url,cls='')=>{const u=safeImg(url);return `<div class="ava ${cls}">${u?`<img src="${esc(u)}" alt="">`:'🏪'}</div>`};
+const fe=e=>{const m=(e&&e.message)||'';if(/Device not approved/.test(m))return 'This device is not approved yet.';if(/row-level security|policy/.test(m))return 'That is not allowed.';return m||'Something went wrong.'};
+const nfol=n=>`${n} follower${n===1?'':'s'}`;
+function stopPoll(){if(window.__poll){clearInterval(window.__poll);window.__poll=null}}
+function sheet(items){
+  const o=document.createElement('div');o.className='sheetbg';
+  o.innerHTML=`<div class="sheet">${items.map((x,i)=>`<button data-i="${i}" class="${x.danger?'danger':''}">${esc(x.t)}</button>`).join('')}<button data-i="-1" class="cancel">Cancel</button></div>`;
+  o.onclick=e=>{const b=e.target.closest('button');if(e.target===o||(b&&b.dataset.i==='-1')){o.remove();return}if(b){const it=items[+b.dataset.i];o.remove();it.fn()}};
+  document.body.appendChild(o);
+}
+async function setFollow(uid,on){
+  const q=on?sb.from('follows').insert({follower_id:me.id,followee_id:uid}):sb.from('follows').delete().eq('follower_id',me.id).eq('followee_id',uid);
+  const {error}=await q;
+  if(error&&!/duplicate/.test(error.message)){toast(/row-level|policy/.test(error.message)?'You cannot follow this account.':'Could not update follow');return false}
+  return true;
+}
+function needVerify(next){ if(Date.now()-verifiedAt<9*60000)show(next); else show('verify',{next}); }
+
+/* ---------- live search (Facebook style) ---------- */
+function resultRow(r){
+  const biz=r.kind==='business';
+  const pic=biz?bizPic(r.avatar_url):picAva(r.avatar_url,r.name);
+  const sub=biz?`${esc(r.subtitle)} · ${nfol(r.followers)}`:`@${esc(r.username)} · ${nfol(r.followers)}`;
+  return `<button class="sr" data-k="${esc(r.kind)}" data-id="${esc(r.id)}">${pic}<div class="grow"><div class="nm">${esc(r.name)}${biz?' <span class="tg">Business</span>':''}</div><div class="muted sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</div></div>${r.i_follow?'<span class="tg">Following</span>':''}</button>`;
+}
+function openResult(k,id){ if(k==='business')show('biz',{id}); else show('profile',{id}); }
+function liveSearch(inp,box,o={}){
+  const full=!!o.full,limit=o.limit||10;let seq=0,t=null,last=[];
+  const paint=()=>{
+    const q=inp.value.trim();
+    const rows=last.filter(r=>!o.filter||o.filter()==='all'||r.kind===o.filter());
+    box.innerHTML=(rows.length?rows.map(resultRow).join(''):`<div class="muted sm" style="padding:14px">No results for “${esc(q)}”.</div>`)
+      +(!full&&rows.length?`<button class="sr" data-all="1"><div class="ava round" style="background:var(--s2)">🔍</div><div class="grow nm">See all results for “${esc(q)}”</div></button>`:'');
+    box.querySelectorAll('.sr[data-id]').forEach(b=>b.onclick=()=>{ if(o.pick)o.pick(b.dataset.k,b.dataset.id); else openResult(b.dataset.k,b.dataset.id) });
+    const all=box.querySelector('[data-all]');if(all)all.onclick=()=>{query=inp.value;show('search')};
+  };
+  const run=async()=>{
+    const q=inp.value.trim(),my=++seq;
+    if(!q){last=[];box.innerHTML=full?'<p class="muted sm" style="padding:6px 4px">Type a name or @username…</p>':'';box.style.display=full?'block':'none';return}
+    box.style.display='block';
+    if(!last.length)box.innerHTML='<div class="muted sm" style="padding:14px">Searching…</div>';
+    const {data,error}=await sb.rpc('search_all',{p_q:q.replace(/^@/,''),p_limit:limit});
+    if(my!==seq)return;
+    if(error){box.innerHTML='<div class="muted sm" style="padding:14px">Search is not ready yet. Run bt_step6.sql in Supabase.</div>';return}
+    last=data||[];paint();
+  };
+  inp.oninput=()=>{clearTimeout(t);t=setTimeout(run,180)};
+  if(!full){inp.onblur=()=>setTimeout(()=>{box.style.display='none'},220);inp.onfocus=()=>{if(inp.value.trim())run()}}
+  return {run,repaint:paint};
+}
+
+Object.assign(VIEWS,{
+/* ---------- search page ---------- */
+search(){
+  let kind='all';
+  return {html:`<div class="top"><button class="ib" data-back>‹</button><div class="grow"><input id="q" placeholder="Search people and businesses" value="${esc(query)}" autocomplete="off" style="margin:0"></div></div>
+  <div class="chips" id="sch"><button class="on" data-f="all">All</button><button data-f="person">People</button><button data-f="business">Businesses</button></div><div id="list"></div>`,
+  bind(){
+    const L=liveSearch($('q'),$('list'),{full:true,limit:25,filter:()=>kind});
+    document.querySelectorAll('#sch button').forEach(b=>b.onclick=()=>{kind=b.dataset.f;document.querySelectorAll('#sch button').forEach(x=>x.classList.toggle('on',x===b));L.repaint()});
+    L.run();
+  }};
+},
+
+/* ---------- person profile ---------- */
+profile(p){
+  const id=p.id;
+  return {html:`${topbar('Profile')}<div id="pv"><div class="muted" style="text-align:center;padding:40px">Loading…</div></div>`,
+  async bind(){
+    const load=async()=>{
+      if(!UUID.test(String(id)))return;
+      const {data,error}=await sb.rpc('profile_summary',{p_user:id});
+      const u=data&&data[0];
+      if(cur.name!=='profile'||!$('pv'))return;
+      if(error||!u){$('pv').innerHTML='<div class="empty"><i>🔒</i>This profile is not available.</div>';return}
+      if(u.role==='business'&&u.business_id){stack.pop();show('biz',{id:u.business_id});return}
+      const mine=u.id===me.id,st=statusFor(u.global_exp||0);
+      const canLike=profile.role==='customer'&&!mine&&u.role==='customer';
+      $('pv').innerHTML=`<div class="cover"></div><div class="pavw">${picAva(u.avatar_url,u.display_name,'xl')}</div>
+      <div style="text-align:center"><div style="font-size:22px;font-weight:800">${esc(u.display_name||u.username)}</div><div class="muted">@${esc(u.username)}</div>
+      <div class="vl sm" style="margin-top:6px">${esc(st.n)} · ${(u.global_exp||0).toLocaleString()} EXP</div>
+      ${u.follows_me&&!mine?'<div class="muted sm" style="margin-top:4px">Follows you</div>':''}
+      <div class="stats-row"><div><b>${u.following}</b><span>Following</span></div><div><b>${u.followers}</b><span>Followers</span></div><div><b id="lc">${u.like_count}</b><span>Likes</span></div></div>
+      ${u.bio?`<p style="margin:6px 10px 14px;line-height:1.45">${esc(u.bio)}</p>`:'<div style="height:8px"></div>'}</div>
+      <div class="acts">${mine?`<button class="btn" id="ed">Edit profile</button>`
+        :`<button class="btn ${u.i_follow?'ghost':''}" id="fl">${u.i_follow?(u.follows_me?'Friends ✓':'Following ✓'):(u.follows_me?'Follow back':'Follow')}</button>
+          <button class="btn ghost" id="ms">Message</button>
+          ${canLike?`<button class="ibx ${u.i_liked?'on':''}" id="lk" aria-label="Like">${u.i_liked?'❤️':'🤍'}</button>`:''}
+          <button class="ibx" id="mo" aria-label="More">⋯</button>`}</div>
+      ${!mine&&!u.i_follow?'<p class="muted sm" style="text-align:center;margin-top:10px">Follow to send messages. If they follow you back you can chat freely.</p>':''}`;
+      if(mine){$('ed').onclick=()=>show('editProfile');return}
+      $('fl').onclick=async()=>{
+        if(u.i_follow&&!confirm('Unfollow @'+u.username+'?'))return;
+        if(await setFollow(u.id,!u.i_follow))load();
+      };
+      $('ms').onclick=()=>{ if(!u.i_follow){toast('Follow @'+u.username+' first to message them');return}
+        show('dm',{id:u.id,name:u.display_name||u.username,username:u.username,avatar:u.avatar_url}) };
+      const lk=$('lk');if(lk)lk.onclick=async()=>{
+        lk.disabled=true;const {data:r,error:e}=await sb.rpc('toggle_like',{p_user:u.id});lk.disabled=false;
+        if(e){toast(fe(e));return}
+        const row=r&&r[0];if(row){lk.textContent=row.liked?'❤️':'🤍';lk.classList.toggle('on',row.liked);$('lc').textContent=row.like_count}};
+      $('mo').onclick=()=>sheet([
+        {t:u.i_blocked?'Unblock @'+u.username:'Block @'+u.username,danger:!u.i_blocked,fn:async()=>{
+          if(!u.i_blocked&&!confirm('Block @'+u.username+'? They will not be able to follow or message you.'))return;
+          if(u.i_blocked)await sb.from('blocks').delete().eq('blocker_id',me.id).eq('blocked_id',u.id);
+          else{await sb.from('blocks').insert({blocker_id:me.id,blocked_id:u.id});await sb.from('follows').delete().eq('follower_id',me.id).eq('followee_id',u.id)}
+          toast(u.i_blocked?'Unblocked':'Blocked');back()}}]);
+    };
+    load();
+  }};
+},
+
+/* ---------- business profile ---------- */
+biz(p){
+  const id=p.id;
+  return {html:`${topbar('Business')}<div id="bv"><div class="muted" style="text-align:center;padding:40px">Loading…</div></div>`,
+  async bind(){
+    const load=async()=>{
+      if(!UUID.test(String(id)))return;
+      const {data,error}=await sb.rpc('business_summary',{p_business:id});
+      const b=data&&data[0];
+      if(cur.name!=='biz'||!$('bv'))return;
+      if(error||!b){$('bv').innerHTML='<div class="empty"><i>🏪</i>This business is not available.</div>';return}
+      const away=(geo&&b.lat!=null)?km(hav(geo.lat,geo.lng,b.lat,b.lng)):'';
+      $('bv').innerHTML=`<div class="cover"></div><div class="pavw">${bizPic(b.logo_url,'xl sq')}</div>
+      <div style="text-align:center"><div style="font-size:22px;font-weight:800">${esc(b.name)} ${b.verified?'<span class="vl" title="Verified">✓</span>':''}</div>
+      <div class="muted">${esc(b.category)}${away?' · '+away+' away':''}</div>
+      ${b.verified?'':'<div class="muted sm" style="margin-top:4px">⏳ Pending review by the BT team</div>'}
+      <div class="stats-row"><div><b>${b.followers}</b><span>Followers</span></div><div><b>${b.visits}</b><span>Check-ins</span></div><div><b>${b.visitors}</b><span>Visitors</span></div></div></div>
+      <div class="acts">${b.is_owner?`<button class="btn" id="oc">Open community</button><button class="btn ghost" id="eb">Edit business</button>`
+        :b.i_follow?`<button class="btn ghost" id="fl">Joined ✓</button><button class="btn" id="oc">Open community</button>`
+        :`<button class="btn" id="fl">Follow and join community</button>`}</div>
+      <div class="card" style="margin-top:14px"><b>About</b><p class="muted" style="margin:6px 0 0;line-height:1.5">${esc(b.about||'This business has not added a description yet.')}</p></div>
+      <div class="card"><b>Location</b><div class="muted sm" style="margin:6px 0 10px">📍 ${esc(b.address||'Address not added')}</div>
+        ${b.lat!=null?`<div class="acts"><button class="btn ghost sm2" id="onmap">View on map</button><a class="btn ghost sm2" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}">Directions</a></div>`:''}</div>
+      ${(b.is_owner||b.i_follow)?`<button class="menu-one" id="mem">👥 Community members (${b.followers})<em>›</em></button>`:''}
+      <div class="mh">Videos</div><div id="bvids" class="muted sm">Loading…</div>`;
+      const fl=$('fl'),oc=$('oc');
+      if(fl)fl.onclick=async()=>{
+        if(b.i_follow&&!confirm('Leave this community? You will stop seeing its messages.'))return;
+        if(await setFollow(b.owner_id,!b.i_follow))load();};
+      if(oc)oc.onclick=()=>show('community',{id:b.id});
+      if($('eb'))$('eb').onclick=()=>show('myBiz');
+      if($('onmap'))$('onmap').onclick=()=>show('map',{focus:{lat:b.lat,lng:b.lng}});
+      if($('mem'))$('mem').onclick=()=>show('members',{id:b.id});
+      const v=await sb.from('videos').select('id,video_url,caption').eq('business_id',b.id).eq('status','active').order('created_at',{ascending:false}).limit(12);
+      if(cur.name!=='biz'||!$('bvids'))return;
+      const rows=(v.data||[]).filter(x=>safeImg(x.video_url));
+      $('bvids').innerHTML=rows.length?`<div class="vid-grid">${rows.map(x=>`<div class="vid"><video src="${esc(x.video_url)}#t=0.3" preload="metadata" playsinline controls style="width:100%;height:100%;object-fit:cover"></video></div>`).join('')}</div>`:'No videos yet.';
+    };
+    load();
+  }};
+},
+
+/* ---------- community (group chat) ---------- */
+community(p){
+  const bid=p.id;let lastId=0,info=null,replyTo=null;const seen=new Map();
+  return {html:`<div class="chead"><button class="ib" data-back>‹</button><button class="row grow" id="ch" style="text-align:left"><div id="chav"></div><div class="grow"><div class="nm" id="chn">Community</div><div class="muted sm" id="chs">&nbsp;</div></div></button><button class="ib" id="chm" aria-label="Menu">⋮</button></div>
+  <div id="msgs" class="msgs"></div><div class="composer" id="comp"></div>`,
+  async bind(){
+    if(!UUID.test(String(bid)))return;
+    const r=await sb.rpc('business_summary',{p_business:bid});info=r.data&&r.data[0];
+    if(cur.name!=='community')return;
+    if(!info){$('msgs').innerHTML='<div class="empty"><i>🔒</i>This community is not available.</div>';$('comp').remove();return}
+    if(!info.is_owner&&!info.i_follow){$('msgs').innerHTML='<div class="empty"><i>👥</i>Follow this business to join its community.</div>';$('comp').remove();return}
+    $('chav').innerHTML=bizPic(info.logo_url,'sm');$('chn').textContent=info.name;$('chs').textContent=nfol(info.followers).replace('follower','member')+' · tap for business info';
+    $('ch').onclick=()=>show('biz',{id:bid});
+    const items=[{t:'Business profile',fn:()=>show('biz',{id:bid})},{t:'Members',fn:()=>show('members',{id:bid})}];
+    if(info.is_owner)items.push({t:info.locked?'Allow members to reply':'Pause member replies',fn:async()=>{
+      const {error}=await sb.rpc('set_community_locked',{p_business:bid,p_locked:!info.locked});if(error){toast(fe(error));return}
+      info.locked=!info.locked;toast(info.locked?'Members can read only':'Members can reply');drawComp()}});
+    else items.push({t:'Leave community',danger:true,fn:async()=>{if(!confirm('Leave this community?'))return;if(await setFollow(info.owner_id,false)){toast('You left');back()}}});
+    $('chm').onclick=()=>sheet(items);
+    const drawComp=()=>{
+      const c=$('comp');if(!c)return;
+      if(info.locked&&!info.is_owner){c.innerHTML='<div class="in muted sm" style="justify-content:center;padding:10px">The business has paused replies. You can still read messages.</div>';return}
+      c.innerHTML=`<div class="in" style="flex-direction:column;align-items:stretch;gap:6px"><div id="rb" class="rbar" style="display:${replyTo?'flex':'none'}"><span id="rt"></span><button id="rx">✕</button></div>
+      <div style="display:flex;gap:8px;align-items:flex-end"><input id="mi" maxlength="1000" placeholder="${info.is_owner?'Post to your community':'Reply or share a suggestion'}" autocomplete="off"><button class="sendb" id="sd" aria-label="Send">➤</button></div></div>`;
+      const send=async()=>{const body=$('mi').value.trim();if(!body)return;$('sd').disabled=true;
+        const {error}=await sb.rpc('post_community',{p_business:bid,p_body:body,p_reply_to:replyTo});$('sd').disabled=false;
+        if(error){toast(fe(error));return}
+        $('mi').value='';replyTo=null;$('rb').style.display='none';pull(false,true)};
+      $('sd').onclick=send;$('mi').onkeydown=e=>{if(e.key==='Enter')send()};
+      $('rx').onclick=()=>{replyTo=null;$('rb').style.display='none'};
+    };
+    drawComp();
+    const paint=(rows,replace)=>{
+      const box=$('msgs');if(!box)return;
+      const near=(window.innerHeight+window.scrollY)>=document.body.scrollHeight-160;
+      if(replace){seen.clear();box.innerHTML=''}
+      if(replace&&!rows.length)box.innerHTML='<div class="empty" id="e0"><i>💬</i>No messages yet. '+(info.is_owner?'Post your first update.':'Say hello or share a suggestion.')+'</div>';
+      if(rows.length&&$('e0'))$('e0').remove();
+      rows.forEach(m=>{
+        if(seen.has(m.id))return;seen.set(m.id,m);lastId=Math.max(lastId,m.id);
+        const mine=m.sender_id===me.id,isOwner=m.sender&&m.sender.role==='business';
+        const q=m.reply_to?seen.get(m.reply_to):null;
+        const can=mine||info.is_owner;
+        const d=document.createElement('div');d.className='mrow'+(mine?' me':'');
+        d.innerHTML=`<div class="msg ${mine?'me':''}">${!mine?`<small>${esc((m.sender&&m.sender.display_name)||'Member')}${isOwner?' <span class="tg">Business</span>':''}</small>`:''}${m.reply_to?`<div class="q">${q?esc(q.body.slice(0,80)):'Original message'}</div>`:''}${esc(m.body)}<div class="mt">${clock(m.created_at)}</div></div>
+        <div class="mact"><button data-r="${m.id}">Reply</button>${can?`<button data-x="${m.id}">Delete</button>`:''}</div>`;
+        d.querySelector('[data-r]').onclick=()=>{replyTo=m.id;if($('rb')){$('rb').style.display='flex';$('rt').textContent='Replying to: '+m.body.slice(0,50);$('mi').focus()}};
+        const x=d.querySelector('[data-x]');if(x)x.onclick=async()=>{if(!confirm('Delete this message?'))return;
+          const {error}=await sb.rpc('delete_community_message',{p_id:m.id});if(error){toast(fe(error));return}d.remove();seen.delete(m.id)};
+        box.appendChild(d);
+      });
+      if(replace||near)window.scrollTo(0,document.body.scrollHeight);
+    };
+    const pull=async(first,force)=>{
+      let q=sb.from('community_messages').select('id,sender_id,body,reply_to,created_at,sender:profiles(display_name,username,avatar_url,role)').eq('business_id',bid);
+      q=first?q.order('id',{ascending:false}).limit(60):q.gt('id',lastId).order('id',{ascending:true}).limit(100);
+      const {data,error}=await q;
+      if(cur.name!=='community'||error)return;
+      let rows=data||[];if(first)rows=rows.reverse();
+      if(first||rows.length||force)paint(rows,first);
+    };
+    await pull(true);
+    stopPoll();window.__poll=setInterval(()=>{if(document.visibilityState==='visible'&&cur.name==='community')pull(false)},6000);
+  }};
+},
+
+members(p){
+  const bid=p.id;let off=0,info=null;
+  return {html:`${topbar('Community members')}<div id="ml"></div><button class="btn ghost" id="more" style="display:none;margin-top:10px">Load more</button>`,
+  async bind(){
+    const r=await sb.rpc('business_summary',{p_business:bid});info=r.data&&r.data[0];
+    const load=async()=>{
+      const {data,error}=await sb.rpc('community_members',{p_business:bid,p_limit:50,p_offset:off});
+      if(cur.name!=='members')return;
+      if(error){$('ml').innerHTML='<div class="empty"><i>🔒</i>Join this community to see its members.</div>';return}
+      const rows=data||[];
+      if(!off&&!rows.length)$('ml').innerHTML='<div class="empty"><i>👥</i>No members yet.</div>';
+      rows.forEach(u=>{const st=statusFor(u.global_exp||0);const d=document.createElement('div');d.className='sr';d.style.cursor='pointer';
+        d.innerHTML=`${picAva(u.avatar_url,u.display_name)}<div class="grow"><div class="nm">${esc(u.display_name||u.username)}</div><div class="muted sm">@${esc(u.username)} · ${esc(st.n)}</div></div>${info&&info.is_owner&&u.id!==me.id?`<button class="btn ghost sm2" data-rm style="color:var(--red)">Remove</button>`:''}`;
+        d.onclick=e=>{if(e.target.closest('[data-rm]'))return;show('profile',{id:u.id})};
+        const rm=d.querySelector('[data-rm]');if(rm)rm.onclick=async()=>{
+          if(!confirm('Remove '+(u.display_name||u.username)+' from your community? They will not be able to rejoin.'))return;
+          const {error:e}=await sb.rpc('remove_community_member',{p_business:bid,p_user:u.id});if(e){toast(fe(e));return}d.remove();toast('Member removed')};
+        $('ml').appendChild(d)});
+      off+=rows.length;$('more').style.display=rows.length===50?'block':'none';
+    };
+    $('more').onclick=load;load();
+  }};
+},
+
+/* ---------- direct messages (mutual follow) ---------- */
+dm(p){
+  const oid=p.id;let lastId=0;const seen=new Set();let u=null;
+  return {html:`<div class="chead"><button class="ib" data-back>‹</button><button class="row grow" id="ch" style="text-align:left">${picAva(p.avatar,p.name,'sm')}<div class="grow"><div class="nm">${esc(p.name)}</div><div class="muted sm">@${esc(p.username||'')}</div></div></button></div>
+  <div id="note"></div><div id="msgs" class="msgs"></div><div class="composer"><div class="in"><input id="mi" maxlength="2000" placeholder="Message" autocomplete="off"><button class="sendb" id="sd" aria-label="Send">➤</button></div></div>`,
+  async bind(){
+    if(!UUID.test(String(oid)))return;
+    $('ch').onclick=()=>show('profile',{id:oid});
+    const r=await sb.rpc('profile_summary',{p_user:oid});u=r.data&&r.data[0];
+    if(cur.name!=='dm')return;
+    if(!u){$('msgs').innerHTML='<div class="empty"><i>🔒</i>You cannot message this account.</div>';$('mi').disabled=true;return}
+    const pull=async first=>{
+      const flt=`and(sender_id.eq.${me.id},recipient_id.eq.${oid}),and(sender_id.eq.${oid},recipient_id.eq.${me.id})`;
+      let q=sb.from('messages').select('id,sender_id,body,created_at').or(flt);
+      q=first?q.order('id',{ascending:false}).limit(80):q.gt('id',lastId).order('id',{ascending:true}).limit(100);
+      const {data,error}=await q;if(cur.name!=='dm'||error)return;
+      let rows=data||[];if(first)rows=rows.reverse();
+      const box=$('msgs');if(!box)return;
+      const near=(window.innerHeight+window.scrollY)>=document.body.scrollHeight-160;
+      if(first&&!rows.length)box.innerHTML='<div class="empty" id="e0"><i>💬</i>Say hello to '+esc(p.name)+'.</div>';
+      if(rows.length&&$('e0'))$('e0').remove();
+      rows.forEach(m=>{if(seen.has(m.id))return;seen.add(m.id);lastId=Math.max(lastId,m.id);const mine=m.sender_id===me.id;
+        const d=document.createElement('div');d.className='mrow'+(mine?' me':'');
+        d.innerHTML=`<div class="msg ${mine?'me':''}">${esc(m.body)}<div class="mt">${clock(m.created_at)}</div></div>`;box.appendChild(d);
+        if(!mine&&!u.i_follow){}});
+      if(first||(near&&rows.length))window.scrollTo(0,document.body.scrollHeight);
+      const theirs=[...document.querySelectorAll('.mrow:not(.me)')].length>0;
+      $('note').innerHTML=!u.i_follow?'<div class="card sm muted">Follow @'+esc(u.username)+' to message them.</div>'
+        :(!u.follows_me&&!theirs?'<div class="card sm muted">They will see your message and can reply once they follow you back.</div>':'');
+    };
+    const send=async()=>{const body=$('mi').value.trim();if(!body)return;
+      if(!u.i_follow){toast('Follow @'+u.username+' first');return}
+      $('sd').disabled=true;const {error}=await sb.from('messages').insert({sender_id:me.id,recipient_id:oid,body});$('sd').disabled=false;
+      if(error){toast(/row-level|policy/.test(error.message)?'You cannot message this person right now.':'Could not send');return}
+      $('mi').value='';pull(false)};
+    $('sd').onclick=send;$('mi').onkeydown=e=>{if(e.key==='Enter')send()};
+    await pull(true);
+    stopPoll();window.__poll=setInterval(()=>{if(document.visibilityState==='visible'&&cur.name==='dm')pull(false)},5000);
+  }};
+},
+
+/* ---------- chat tab ---------- */
+chat(){
+  let filter='all',convs=[],coms=[];
+  return {html:`<div class="top"><b style="font-size:22px">Chat</b></div>
+  <div class="srchwrap"><div class="srch"><input id="cq" placeholder="Search people or businesses" autocomplete="off"></div><div id="cdrop" class="sdrop" style="display:none"></div></div>
+  <div class="chips" id="cf"><button class="on" data-f="all">All</button><button data-f="dm">Chats</button><button data-f="com">Communities</button></div>
+  <div id="clist"><div class="muted sm" style="text-align:center;padding:20px">Loading…</div></div>`,
+  async bind(){
+    liveSearch($('cq'),$('cdrop'),{limit:8});
+    const paint=()=>{
+      const rows=[...(filter!=='com'?convs.map(c=>({t:'dm',at:c.last_at,c})):[]),...(filter!=='dm'?coms.map(c=>({t:'com',at:c.last_at,c})):[])].sort((a,b)=>new Date(b.at)-new Date(a.at));
+      $('clist').innerHTML=rows.length?rows.map((r,i)=>{const c=r.c;
+        return r.t==='dm'
+          ?`<button class="sr" data-i="${i}">${picAva(c.avatar_url,c.display_name)}<div class="grow"><div class="nm">${esc(c.display_name||c.username)}</div><div class="muted sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.last_mine?'You: ':''}${esc(c.last_body)}</div></div><span class="muted sm">${timeAgo(c.last_at)}</span></button>`
+          :`<button class="sr" data-i="${i}">${bizPic(c.logo_url)}<div class="grow"><div class="nm">${esc(c.name)} <span class="tg">Community</span></div><div class="muted sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.last_body?esc(c.last_body):nfol(c.members).replace('follower','member')}</div></div><span class="muted sm">${c.last_body?timeAgo(c.last_at):''}</span></button>`}).join('')
+        :`<div class="empty"><i>💬</i><b style="color:var(--text)">${filter==='com'?'No communities yet':'No chats yet'}</b><p>${filter==='com'?'Follow a business to join its community.':'Search for someone above and follow them to start chatting.'}</p></div>`;
+      document.querySelectorAll('#clist .sr').forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.i],c=r.c;
+        if(r.t==='dm')show('dm',{id:c.other_id,name:c.display_name||c.username,username:c.username,avatar:c.avatar_url});else show('community',{id:c.id})});
+    };
+    document.querySelectorAll('#cf button').forEach(b=>b.onclick=()=>{filter=b.dataset.f;document.querySelectorAll('#cf button').forEach(x=>x.classList.toggle('on',x===b));paint()});
+    const [a,b]=await Promise.all([sb.rpc('my_conversations'),sb.rpc('my_communities')]);
+    if(cur.name!=='chat')return;
+    if(a.error&&b.error){$('clist').innerHTML='<div class="empty"><i>⚙️</i>Run bt_step6.sql in Supabase to switch on chats.</div>';return}
+    convs=a.data||[];coms=b.data||[];paint();
+  }};
+},
+communities(){ return VIEWS.chat() },
+
+/* ---------- businesses near me (list) ---------- */
+nearby(){
+  let radius=10000;
+  return {html:`${topbar('Businesses near you')}<div class="chips" id="rc"><button data-r="3000">3 km</button><button class="on" data-r="10000">10 km</button><button data-r="30000">30 km</button><button data-r="50000">50 km</button></div><div id="nl"><div class="muted sm" style="text-align:center;padding:24px">Finding your location…</div></div>
+  <button class="btn ghost" id="tomap" style="margin-top:10px">🗺️ See these on the map</button>`,
+  async bind(){
+    $('tomap').onclick=()=>show('map');
+    const pos=await getPos();if(cur.name!=='nearby')return;
+    if(!pos){$('nl').innerHTML=`<div class="empty"><i>📍</i><b style="color:var(--text)">Turn on location</b><p>Allow location for this site so BT can list businesses around you.</p><button class="btn" id="rt">Try again</button></div>`;$('rt').onclick=()=>show('nearby',{},false);return}
+    const load=async()=>{
+      $('nl').innerHTML='<div class="muted sm" style="text-align:center;padding:24px">Searching…</div>';
+      const {data,error}=await sb.rpc('nearby_businesses',{p_lat:pos.lat,p_lng:pos.lng,p_radius:radius,p_limit:50});
+      if(cur.name!=='nearby')return;
+      if(error){$('nl').innerHTML='<div class="empty"><i>⚙️</i>Run bt_step4.sql in Supabase first.</div>';return}
+      $('nl').innerHTML=(data||[]).length?data.map(b=>`<button class="sr" data-id="${esc(b.id)}">${bizPic(b.logo_url)}<div class="grow"><div class="nm">${esc(b.name)}</div><div class="muted sm">${esc(b.category)} · ${nfol(b.follower_count||0)}</div></div><div class="vl sm" style="white-space:nowrap">📍 ${km(b.distance_m)}</div></button>`).join('')
+        :`<div class="empty"><i>🏪</i><b style="color:var(--text)">No BT businesses within ${radius/1000} km</b><p>Try a wider distance. More businesses are joining soon.</p></div>`;
+      document.querySelectorAll('#nl .sr').forEach(b=>b.onclick=()=>show('biz',{id:b.dataset.id}));
+    };
+    document.querySelectorAll('#rc button').forEach(b=>b.onclick=()=>{radius=+b.dataset.r;document.querySelectorAll('#rc button').forEach(x=>x.classList.toggle('on',x===b));load()});
+    load();
+  }};
+},
+
+/* ---------- my profile tab (TikTok-style layout, BT theme) ---------- */
+account(){
+  const isBiz=profile.role==='business';
+  const st=statusFor(profile.global_exp||0);
+  return {html:`<div class="top"><button class="ib" id="addf" aria-label="Find people">＋</button><b></b><button class="ib" id="stg" aria-label="Settings">☰</button></div>
+  <div class="profile-head">
+    <button id="avb" style="display:block;margin:0 auto 10px;position:relative">${avaHtml(profile,'xl')}<span class="plusb">＋</span></button>
+    <div style="font-size:20px;font-weight:800">${esc(profile.display_name)}</div>
+    <div class="muted">@${esc(profile.username)}</div>
+    <div class="stats-row"><div><b id="s1">–</b><span>Following</span></div><div><b id="s2">–</b><span>Followers</span></div><div><b id="s3">–</b><span>${isBiz?'Check-ins':'Likes'}</span></div></div>
+    <div class="acts" style="justify-content:center"><button class="btn ghost sm2" id="ed" style="padding:10px 26px">Edit profile</button><button class="ibx" id="qrb" aria-label="QR code">▦</button></div>
+    ${profile.bio?`<p class="muted" style="margin:12px 24px 0;font-size:14px;line-height:1.4">${esc(profile.bio)}</p>`:`<button class="chipb" id="ab">＋ Add bio</button>`}
+  </div>
+  ${isBiz?`<div class="card" id="bz" style="margin-top:16px"><div class="row"><div class="grow"><b>${myBiz?esc(myBiz.name):'Your business'}</b><div class="${myBiz&&myBiz.verified?'ok':'muted'} sm" style="margin-top:4px">${myBiz&&myBiz.verified?'✓ Verified and live on BT':'⏳ Pending review by the BT team'}</div></div><span class="muted">›</span></div></div>`
+    :`<div class="card" id="exc" style="margin-top:16px"><div class="sm muted">Your status</div><div class="row" style="margin-top:4px"><b class="grow" style="font-size:18px">${esc(st.n)}</b><span class="vl">${(profile.global_exp||0).toLocaleString()} EXP ›</span></div></div>`}
+  <div class="menu">
+    ${isBiz?`<button data-go="myBiz"><i>🏪</i>My business page<em>›</em></button><button data-go="qrCode"><i>▦</i>Business QR code<em>›</em></button>`
+      :`<button data-go="wyb"><i>📍</i>Where you've been<em>›</em></button><button data-go="qrCode"><i>▦</i>My QR code<em>›</em></button>`}
+    <button data-go="settings"><i>⚙️</i>Settings and privacy<em>›</em></button>
+  </div>`,
+  async bind(){
+    document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
+    $('stg').onclick=()=>show('settings');$('addf').onclick=()=>show('search');
+    $('ed').onclick=()=>show('editProfile');$('avb').onclick=()=>show('editProfile');$('qrb').onclick=()=>show('qrCode');
+    const ab=$('ab');if(ab)ab.onclick=()=>show('editProfile');
+    const bz=$('bz');if(bz)bz.onclick=()=>myBiz?show('biz',{id:myBiz.id}):0;
+    const ex=$('exc');if(ex)ex.onclick=()=>show('exp');
+    const {data}=await sb.rpc('profile_summary',{p_user:me.id});const u=data&&data[0];
+    if(cur.name!=='account'||!u||!$('s1'))return;
+    $('s1').textContent=u.following;$('s2').textContent=u.followers;
+    $('s3').textContent=isBiz?(myBiz?'—':0):u.like_count;
+    if(isBiz&&myBiz){const r=await sb.rpc('business_summary',{p_business:myBiz.id});const b=r.data&&r.data[0];if(b&&$('s3'))$('s3').textContent=b.visits}
+  }};
+},
+
+/* ---------- settings and privacy (TikTok-style sections) ---------- */
+settings(){
+  const row=(k,i,l,e='')=>`<button data-go="${k}"><i>${i}</i>${l}<em>${e||'›'}</em></button>`;
+  return {html:`${topbar('Settings and privacy')}
+  <div class="mh">Account</div><div class="menu">${row('manageAccount','👤','Manage account')}${row('blocked','🚫','Blocked accounts')}${row('security','🔒','Security and login')}</div>
+  <div class="mh">Support and about</div><div class="menu">${row('mail','✉️','Contact support')}${row('legal:terms','📄','Terms of Use')}${row('legal:privacy','🛡️','Privacy Policy')}${row('legal:cookies','🍪','Cookie Policy')}${row('about','ℹ️','About BT')}</div>
+  <div class="mh">Login</div><div class="menu"><button data-go="logout" class="danger"><i>↪</i>Log out</button></div>`,
+  bind(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const k=b.dataset.go;
+    if(k==='logout')doLogout();else if(k==='mail')location.href='mailto:'+SUPPORT_EMAIL+'?subject=BT%20support';
+    else if(k.startsWith('legal:'))show('legal',{k:k.slice(6)});else show(k)})}};
+},
+manageAccount(){
+  const masked=(me.email||'').replace(/^(.).*(@.*)$/,'$1•••$2');
+  const row=(k,l,e='')=>`<button data-go="${k}">${l}<em>${esc(e)||'›'}</em></button>`;
+  return {html:`${topbar('Manage account')}
+  <div class="menu">${row('editProfile','Edit profile (photo and bio)')}${row('v:changeName','Name',profile.display_name)}${row('v:username','Username','@'+profile.username)}${row('v:changeEmail','Email',masked)}${row('v:changePassword','Password','••••••••')}</div>
+  <p class="muted sm">Changing your name, username, email or password needs your password and a code sent to your email. Name and username can each be changed once every 90 days.</p>
+  <div class="menu" style="margin-top:14px"><button data-go="v:deleteAccount" class="danger">Delete account<em>›</em></button></div>`,
+  bind(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const k=b.dataset.go;if(k.startsWith('v:'))needVerify(k.slice(2));else show(k)})}};
+},
+security(){
+  return {html:`${topbar('Security and login')}<div class="menu"><button data-go="devices"><i>📱</i>Your devices<em>›</em></button></div>
+  <p class="muted sm">Logging in on a new device sends an approval request to your other device. Sessions end after ${SESSION_DAYS} days if you chose “Remember me”, otherwise when you close the browser.</p>
+  <div class="menu"><button class="danger" id="lo"><i>↪</i>Log out of this device</button></div>`,
+  bind(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));$('lo').onclick=doLogout}};
+},
+
+/* ---------- identity check: password, then emailed code ---------- */
+verify(p){
+  let step=1,fails=0,lock=0;
+  const draw1=()=>{
+    $('vb').innerHTML=`<p class="muted">To protect your account, confirm it is you. Step 1 of 2: enter your password.</p>
+    <input id="vp" type="password" placeholder="Current password" autocomplete="current-password"><div class="err" id="er"></div><button class="btn" id="vn">Continue</button>`;
+    $('vn').onclick=async()=>{
+      if(Date.now()<lock){$('er').textContent='Too many attempts. Wait a minute.';return}
+      const pw=$('vp').value;if(!pw){$('er').textContent='Enter your password';return}
+      $('vn').disabled=true;
+      const tmp=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+      const r=await tmp.auth.signInWithPassword({email:me.email,password:pw});
+      if(r.error){$('vn').disabled=false;if(++fails>=5){lock=Date.now()+60000;fails=0}$('er').textContent='Wrong password';return}
+      try{await tmp.auth.signOut()}catch{}
+      const o=await sb.auth.signInWithOtp({email:me.email,options:{shouldCreateUser:false}});
+      if(o.error){$('vn').disabled=false;$('er').textContent='Could not send the code. Wait a minute and try again.';return}
+      step=2;draw2();
+    };
+  };
+  const draw2=()=>{
+    $('vb').innerHTML=`<p class="muted">Step 2 of 2: we sent a code to <b style="color:var(--text)">${esc(me.email)}</b>. Enter it below.</p>
+    <input id="vc" inputmode="numeric" maxlength="8" placeholder="Code" style="text-align:center;font-size:24px;letter-spacing:8px"><div class="err" id="er"></div><div class="ok" id="ok"></div>
+    <button class="btn" id="vg">Confirm</button><div style="text-align:center"><button class="link" id="vr">Send a new code</button></div>`;
+    $('vg').onclick=async()=>{
+      const token=$('vc').value.trim();if(token.length<6){$('er').textContent='Enter the code from your email';return}
+      $('vg').disabled=true;
+      const {error}=await sb.auth.verifyOtp({email:me.email,token,type:'email'});
+      if(error){$('vg').disabled=false;$('er').textContent='Wrong or expired code';return}
+      const {data:{user}}=await sb.auth.getUser();if(user)me=user;
+      const g=await gateCheck();
+      if(g==='pending'){pendingView();return}
+      if(g==='denied'){await sb.auth.signOut();loginView('This device was not approved.');return}
+      verifiedAt=Date.now();stack.pop();show(p.next);
+    };
+    $('vr').onclick=async()=>{const {error}=await sb.auth.signInWithOtp({email:me.email,options:{shouldCreateUser:false}});
+      $('er').textContent=error?'Please wait a minute before asking again.':'';$('ok').textContent=error?'':'New code sent.'};
+  };
+  return {html:`${topbar('Confirm it is you')}<div id="vb"></div>`,bind(){draw1()}};
+},
+changeName(){
+  let next=null;if(profile.name_changed_at){const d=new Date(profile.name_changed_at);d.setDate(d.getDate()+90);if(d>new Date())next=d}
+  return {html:`${topbar('Name')}<label class="f">Name</label><input id="nm" maxlength="60" value="${esc(profile.display_name)}" ${next?'disabled':''}>
+  ${next?`<div class="card sm">You changed your name recently. You can change it again on <b>${fmtDate(next)}</b>.</div>`:'<div class="muted sm" style="margin:-6px 0 12px 4px">You can change your name once every 90 days.</div>'}
+  <div class="err" id="er"></div>${next?'':'<button class="btn" id="sv">Save name</button>'}`,
+  bind(){const s=$('sv');if(!s)return;s.onclick=async()=>{const n=$('nm').value.trim();if(n.length<2){$('er').textContent='Enter your name';return}
+    if(n===profile.display_name){back();return}
+    if(!confirm('Change your name to “'+n+'”? You cannot change it again for 90 days.'))return;
+    s.disabled=true;const {error}=await sb.rpc('change_display_name',{p_name:n});s.disabled=false;
+    if(error){if(/Verify with/.test(error.message)){verifiedAt=0;stack.pop();show('verify',{next:'changeName'});return}$('er').textContent=/90 days/.test(error.message)?'You can only change your name once every 90 days':fe(error);return}
+    profile.display_name=n;profile.name_changed_at=new Date().toISOString();toast('Name updated');back()}}};
+},
+username(){
+  let next=null;if(profile.username_changed_at){const d=new Date(profile.username_changed_at);d.setDate(d.getDate()+90);if(d>new Date())next=d}
+  return {html:`${topbar('Username')}<p class="muted">Your username is how people find you on BT. It must be unique.</p>
+  <label class="f">Username</label><input id="un" value="${esc(profile.username)}" autocapitalize="none" autocomplete="off" ${next?'disabled':''}>
+  ${next?`<div class="card sm">You changed your username recently. You can change it again on <b>${fmtDate(next)}</b>.</div>`:`<div class="muted sm" style="margin:-6px 0 12px 4px">3 to 20 characters: letters, numbers, underscore. You can change it once every 90 days.</div>`}
+  <div class="err" id="er"></div>${next?'':'<button class="btn" id="sv">Save username</button>'}`,
+  bind(){const s=$('sv');if(!s)return;s.onclick=async()=>{const n=$('un').value.trim().toLowerCase().replace(/^@/,'');
+    if(n===profile.username){back();return}
+    if(!/^[a-z0-9_]{3,20}$/.test(n)){$('er').textContent='Use 3 to 20 letters, numbers or underscore';return}
+    if(!confirm('Change username to @'+n+'? You cannot change it again for 90 days.'))return;
+    s.disabled=true;const {error}=await sb.rpc('change_username',{p_new:n});s.disabled=false;
+    if(error){if(/Verify with/.test(error.message)){verifiedAt=0;stack.pop();show('verify',{next:'username'});return}
+      $('er').textContent=/90 days/.test(error.message)?'You can only change your username once every 90 days':/duplicate|unique|already/i.test(error.message)?'That username is taken. Try another.':'That username is invalid';return}
+    profile.username=n;profile.username_changed_at=new Date().toISOString();toast('Username updated');back()}}};
+},
+changePassword(){
+  return {html:`${topbar('Change password')}<label class="f">New password</label><input id="np" type="password" autocomplete="new-password" placeholder="8+ characters, letters and numbers">
+  <label class="f">Confirm new password</label><input id="np2" type="password" autocomplete="new-password"><div class="err" id="er"></div><button class="btn" id="sv">Update password</button>`,
+  bind(){$('sv').onclick=async()=>{const np=$('np').value,np2=$('np2').value;
+    if(np.length<8||!/[A-Za-z]/.test(np)||!/\d/.test(np)){$('er').textContent='Use 8+ characters with letters and numbers';return}
+    if(np!==np2){$('er').textContent='Passwords do not match';return}
+    $('sv').disabled=true;const {error}=await sb.auth.updateUser({password:np});$('sv').disabled=false;
+    if(error){$('er').textContent=/different|same/i.test(error.message)?'Choose a password you have not used before':error.message;return}
+    verifiedAt=0;toast('Password updated');back()}}};
+},
+changeEmail(){
+  return {html:`${topbar('Change email')}<p class="muted">Current email: <b>${esc(me.email)}</b></p><label class="f">New email</label><input id="ne" type="email" autocomplete="email">
+  <div class="err" id="er"></div><div class="ok" id="ok"></div><button class="btn" id="sv">Send confirmation</button>`,
+  bind(){$('sv').onclick=async()=>{const ne=$('ne').value.trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ne)){$('er').textContent='Enter a valid email';return}
+    $('sv').disabled=true;const {error}=await sb.auth.updateUser({email:ne});$('sv').disabled=false;
+    if(error){$('er').textContent=error.message;return}$('er').textContent='';$('ok').textContent='Check your inbox to confirm the new address. Your email changes after you confirm.'}}};
+},
+deleteAccount(){
+  return {html:`${topbar('Delete account')}<div class="card"><b style="color:var(--red)">This cannot be undone.</b><p class="muted sm" style="margin:8px 0 0;line-height:1.5">Your profile, follows, messages, check-ins and EXP are permanently deleted. If you own a business, its page and community are deleted too.</p></div>
+  <label class="f">Type DELETE to confirm</label><input id="dc" autocapitalize="characters" autocomplete="off"><div class="err" id="er"></div><button class="btn" id="sv" style="background:var(--red)">Delete my account</button>`,
+  bind(){$('sv').onclick=async()=>{if($('dc').value.trim()!=='DELETE'){$('er').textContent='Type DELETE exactly to continue';return}
+    if(!confirm('Delete your BT account forever?'))return;
+    $('sv').disabled=true;const {error}=await sb.rpc('delete_my_account');
+    if(error){$('sv').disabled=false;if(/Verify with/.test(error.message)){verifiedAt=0;stack.pop();show('verify',{next:'deleteAccount'});return}$('er').textContent=fe(error);return}
+    stopPoll();stopWatchers();try{await sb.auth.signOut()}catch{}loginView('Your account has been deleted.')}}};
+},
+
+/* ---------- edit profile: photo + bio ---------- */
+editProfile(){
+  return {html:`${topbar('Edit profile')}
+  <div style="text-align:center;margin-bottom:16px"><div id="editAva" style="display:inline-block">${avaHtml(profile,'xl')}</div><br><button class="link" id="ph">Change photo</button><input type="file" id="photoFile" accept="image/*" style="display:none"></div>
+  <div class="menu"><button data-n="changeName"><i>👤</i>Name<em>${esc(profile.display_name)} ›</em></button><button data-n="username"><i>@</i>Username<em>@${esc(profile.username)} ›</em></button></div>
+  <p class="muted sm">Name and username need an email code and can each change once every 90 days.</p>
+  <label class="f">Bio</label><textarea id="bio" maxlength="200" placeholder="Tell people about yourself" style="min-height:90px">${esc(profile.bio||'')}</textarea>
+  <div class="err" id="er"></div><button class="btn" id="sv">Save bio</button>`,
+  bind(){
+    document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>needVerify(b.dataset.n));
+    $('ph').onclick=()=>$('photoFile').click();
+    $('photoFile').onchange=async e=>{
+      const file=e.target.files&&e.target.files[0];if(!file)return;
+      const bad=await validateMediaFile(file,{allowVideo:false,allowImage:true});if(bad){toast(bad);return}
+      toast('Uploading…');
+      try{const url=await uploadToCloudinary(file,'image');
+        if(url){const {error}=await sb.from('profiles').update({avatar_url:url}).eq('id',me.id);
+          if(!error){profile.avatar_url=url;$('editAva').innerHTML=avaHtml(profile,'xl');toast('Photo updated')}else toast('Photo uploaded but profile was not updated')}
+      }catch(err){toast((err&&err.message)||'Upload failed')}
+    };
+    $('sv').onclick=async()=>{$('sv').disabled=true;const bio=$('bio').value.trim();
+      const {error}=await sb.from('profiles').update({bio:bio||null}).eq('id',me.id);$('sv').disabled=false;
+      if(error){$('er').textContent='Could not save';return}profile.bio=bio;toast('Saved');back()};
+  }};
+},
+
+/* ---------- my business page editor ---------- */
+myBiz(){
+  if(!myBiz)return {html:`${topbar('My business')}<p class="muted">No business yet.</p>`};
+  return {html:`${topbar('My business')}
+  <div style="text-align:center;margin-bottom:14px"><div id="blg" style="display:inline-block">${bizPic(myBiz.logo_url,'xl sq')}</div><br><button class="link" id="bph">Change logo</button><input type="file" id="bfile" accept="image/*" style="display:none"></div>
+  <div class="${myBiz.verified?'ok':'muted'} sm" style="text-align:center;margin-bottom:12px">${myBiz.verified?'✓ Verified and live on BT':'⏳ Pending review. You will appear on BT once verified.'}</div>
+  <label class="f">Business name</label><input id="bnm" maxlength="80" value="${esc(myBiz.name)}">
+  <label class="f">About</label><textarea id="bab" maxlength="500">${esc(myBiz.about||'')}</textarea>
+  <label class="f">Address</label><input id="bad" value="${esc(myBiz.address||'')}">
+  <div class="err" id="er"></div><button class="btn" id="bsv">Save</button>`,
+  bind(){
+    $('bph').onclick=()=>$('bfile').click();
+    $('bfile').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;
+      const bad=await validateMediaFile(file,{allowVideo:false,allowImage:true});if(bad){toast(bad);return}
+      toast('Uploading…');
+      try{const url=await uploadToCloudinary(file,'image');
+        if(url){const {error}=await sb.from('businesses').update({logo_url:url}).eq('id',myBiz.id);
+          if(!error){myBiz.logo_url=url;$('blg').innerHTML=bizPic(url,'xl sq');toast('Logo updated')}else toast('Could not save the logo')}
+      }catch(err){toast((err&&err.message)||'Upload failed')}};
+    $('bsv').onclick=async()=>{const name=$('bnm').value.trim();if(name.length<2){$('er').textContent='Enter your business name';return}
+      $('bsv').disabled=true;const patch={name,about:$('bab').value.trim()||null,address:$('bad').value.trim()||null};
+      const {error}=await sb.from('businesses').update(patch).eq('id',myBiz.id);$('bsv').disabled=false;
+      if(error){$('er').textContent='Could not save';return}Object.assign(myBiz,patch);toast('Saved');back()};
+  }};
+}
+});
+
+async function doLogout(){
+  if(!confirm('Log out of BT on this device?'))return;
+  stopWatchers();await sb.auth.signOut();remember=false;lsSet('bt_remember','0');try{localStorage.removeItem('bt_login_at')}catch{}
+  me=null;profile=null;loginView();
+}
+
+/* ---------- legal text (draft: have a Nigerian lawyer review before public launch) ---------- */
+const LEGAL={
+privacy:{title:'Privacy Policy',date:'16 November 2026',s:[
+['Who we are','BT (Business Tracker) is a local business discovery and community platform that connects people with businesses they visit in the physical world. In this policy, "BT", "we" and "us" means the BT team. Contact: '+SUPPORT_EMAIL+'.'],
+['What this policy covers','This policy explains what personal information BT collects, why, who we share it with, and the choices you have. We process personal data in line with the Nigeria Data Protection Act 2023 (NDPA).'],
+['Information you give us','When you sign up we collect your name, username, email address, password (stored securely, never readable by us) and date of birth. Your date of birth is used only to confirm you are at least 16 and is not shown to other users. Business accounts also give us the business name, category, description, address and map location. You may add a bio, memories, stories, messages and other content you choose to post.'],
+['Information collected when you use BT','When you check in at a business we process your device location and the business QR code to confirm you are present, and we record the visit and the EXP awarded. We keep your EXP, status, follows, blocks and settings. When you open the map, your device location is used on your phone and sent to us only to find businesses near you; it is not stored. We keep basic technical data such as sign-in times, the devices you sign in on, and security logs to protect the service.'],
+['How we use information','To create and secure your account; to verify visits and award EXP; to show businesses near you and on the map; to run communities, messaging and stories; to verify businesses and review reports; to prevent fraud and abuse; to send service emails such as confirmation codes; and to improve BT.'],
+['What other people can see','Your name, username, bio, status and follower information may be visible to other users. Your visit history, memories and Where You\'ve Been entries are private to you unless you choose to share them. Stories are visible only to the followers or people you share them with. Businesses see follower counts and may see aggregate visit activity; they do not see your private details.'],
+['Who we share data with','We do not sell your personal data. We use trusted service providers that process data for us: Supabase (database and sign-in), Cloudinary (photo and video storage and delivery), Brevo (sending emails), GitHub (hosting this web app), OpenStreetMap and Esri (map tiles and satellite imagery). We may disclose information if the law requires it or to protect users and BT from harm.'],
+['Where data is stored','Our providers may store and process data outside Nigeria. Where that happens we rely on providers that apply appropriate safeguards.'],
+['How long we keep data','We keep your data while your account is active. If you delete your account we delete or anonymise your personal data, except where we must keep limited records for security, fraud prevention or legal reasons.'],
+['Security','Access to data is restricted by account-level security rules, connections are encrypted, and passwords are hashed. No system is perfectly secure, so please use a strong, unique password and log out on shared devices.'],
+['Your rights','You can ask to access, correct, delete or export your data, to object to or restrict certain processing, and to withdraw consent. Email '+SUPPORT_EMAIL+' and we will respond within a reasonable time. You may also complain to the Nigeria Data Protection Commission.'],
+['Age','BT is for people aged 16 and over. If we learn that someone under 16 has an account, we will remove it.'],
+['Changes','We may update this policy as BT grows. We will update the date above and, for important changes, notify you in the app.']]},
+terms:{title:'Terms of Use',date:'16 November 2026',s:[
+['Welcome','By creating an account or using BT you agree to these terms. If you do not agree, please do not use BT.'],
+['Who can use BT','You must be at least 16 years old and give accurate information. You are responsible for your account and for keeping your password safe. One person may not run multiple accounts to gain EXP or status.'],
+['What BT is','BT is a discovery and community platform. It is not an online shop. BT does not sell goods on behalf of businesses and is not a party to any purchase between you and a business.'],
+['Check-ins and EXP','EXP is awarded only for genuine, verified visits made in person by scanning a business QR code at the location. Scan limits apply per business type, and visits beyond the limit earn no EXP. Cheating, including fake locations, sharing or copying QR codes, scripts or bots, may lead to EXP removal, suspension or a ban. EXP and status have no cash value.'],
+['Your content','You own what you post, but you give BT permission to host, display and deliver it as part of the service. Only post content you have the right to share. Do not post anything illegal, hateful, harassing, sexual involving minors, misleading, infringing, or that exposes someone else\'s private information.'],
+['Businesses','Businesses are reviewed before they appear on BT. Business accounts must give true details, may only post promotional content about their own business, and must follow the posting rules we set. We may remove content, hide a business or suspend an account that breaks these rules or the law.'],
+['Messaging and safety','You can block anyone at any time. Do not spam, threaten or impersonate others. We may review reports and take action, including removing content or accounts.'],
+['Hierarchy and sponsored features','Status titles and any paid or sponsored features, when available, are governed by the extra rules shown in the app at that time.'],
+['Availability','BT is in early access. We may change, pause or remove features, and the service may sometimes be unavailable. We do our best but do not promise it will always be error-free.'],
+['Suspension and ending','You can stop using BT and ask us to delete your account at any time. We may suspend or end accounts that break these terms or put others at risk.'],
+['Liability','BT is provided "as is". To the extent the law allows, BT is not responsible for what businesses or other users say or do, or for losses from dealings between you and a business. Nothing in these terms limits rights you have under Nigerian law that cannot be limited.'],
+['Governing law','These terms are governed by the laws of the Federal Republic of Nigeria.'],
+['Contact','Questions about these terms: '+SUPPORT_EMAIL+'.']]},
+cookies:{title:'Cookie Policy',date:'16 November 2026',s:[
+['Summary','BT keeps this simple. We use only the browser storage that is needed to run the service. We do not use advertising or tracking cookies.'],
+['What we store','When you sign in, your browser stores a session token so you stay signed in. If you tick "Remember me" it is kept on your device for up to '+SESSION_DAYS+' days. If you do not, it is cleared when you close the browser. We also store your "Remember me" choice.'],
+['Third parties','Map tiles and satellite imagery are loaded from OpenStreetMap and Esri, and media and fonts may be delivered by content networks. These providers may see your IP address when your device requests their files.'],
+['Your choices','You can log out at any time to clear your session. You can also clear site data in your browser settings. Blocking essential storage will stop you from staying signed in.'],
+['Contact','Questions: '+SUPPORT_EMAIL+'.']]}
+};
+
+/* ---------- boot ---------- */
+(async()=>{
+  splash();await wait(1200);
+  if(recovering)return;
+  // purge old long-lived sessions that were never opted in via "Remember me"
+  if(!remember){try{Object.keys(localStorage).filter(k=>/^sb-.*-auth-token/.test(k)).forEach(k=>localStorage.removeItem(k))}catch{}}
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){loginView();return}
+  if(remember){const at=Number(lsGet('bt_login_at')||0);
+    if(!at||Date.now()-at>SESSION_DAYS*86400000){await sb.auth.signOut();loginView('Please log in again.');return}}
+  startApp();
+})();
+</script>
+</body>
+</html>
