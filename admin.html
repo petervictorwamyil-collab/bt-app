@@ -1,187 +1,334 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow"><title>BT Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
-:root{--bg:#0B0B1A;--s1:#14142B;--s2:#1D1D3A;--line:#2A2A4D;--text:#F3F0FF;--muted:#9C97C4;--violet:#7C3AED;--vl:#C4B5FD;--red:#F87171;--green:#4ADE80}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:40px}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}input,textarea,select{font:inherit;color:var(--text);background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;margin:4px 0 10px}
-textarea{min-height:70px}
-.wrap{max-width:900px;margin:0 auto;padding:14px 16px}
-.top{display:flex;align-items:center;gap:10px;margin-bottom:10px}.top b{font-size:20px}.grow{flex:1}
-.tabs{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 14px;padding:0 16px;scrollbar-width:none}
-.tabs button{flex:none;padding:9px 14px;border-radius:20px;background:var(--s1);border:1px solid var(--line);font-weight:600;font-size:14px}
-.tabs button.on{background:rgba(124,58,237,.3);border-color:var(--violet);color:var(--vl)}
-.card{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
-.btn{background:var(--violet);padding:11px 16px;border-radius:12px;font-weight:700}.btn.ghost{background:var(--s2);border:1px solid var(--line)}.btn.red{background:#7f1d1d}.btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}
-.btn:disabled{opacity:.5}
-.muted{color:var(--muted)}.sm{font-size:13px}.err{color:var(--red);min-height:18px;margin:4px 0}.ok{color:var(--green)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
-.stat{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:12px}.stat b{font-size:24px;display:block}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.pill{display:inline-block;padding:2px 9px;border-radius:12px;font-size:12px;font-weight:700;background:var(--s2)}
-.pill.pending{color:#FBBF24}.pill.approved{color:var(--green)}.pill.rejected,.pill.suspended{color:var(--red)}
-img.pf{width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin:8px 0}
-.login{max-width:380px;margin:60px auto}
-.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--s2);border:1px solid var(--line);padding:11px 16px;border-radius:12px;z-index:9}
-video{width:100%;max-height:240px;border-radius:12px;background:#000}
-</style></head><body><div class="wrap" id="app"></div>
+:root{--bg:#0B0B1A;--s1:#14142B;--s2:#1D1D3A;--s3:#25254a;--line:#2A2A4D;--text:#F3F0FF;--muted:#9C97C4;--violet:#7C3AED;--vl:#C4B5FD;--red:#F87171;--green:#4ADE80;--amber:#FFB547;--shadow:0 8px 24px rgba(0,0,0,.28)}
+:root[data-theme=light]{--bg:#F5F3FF;--s1:#fff;--s2:#F1EEFF;--s3:#E7E2FF;--line:#E2DDF5;--text:#1B1535;--muted:#6B6590;--vl:#6D28D9;--shadow:0 6px 20px rgba(76,29,149,.08)}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.45 "Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;transition:transform .1s,background .15s,opacity .15s}button:active{transform:scale(.97)}
+input,textarea,select{font:inherit;color:var(--text);background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:11px 13px;width:100%;margin:4px 0 10px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(124,58,237,.2)}
+textarea{min-height:80px;resize:vertical}label{font-size:13px;font-weight:700;color:var(--muted)}
+a{color:var(--vl)}
+/* layout */
+.shell{display:flex;min-height:100vh}
+.side{width:250px;flex:none;background:var(--s1);border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 10px 18px;font-weight:800;font-size:18px}
+.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#7C3AED,#A78BFA);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;box-shadow:0 6px 16px rgba(124,58,237,.4)}
+.brand small{display:block;font-weight:600;font-size:11px;color:var(--muted);margin-top:-2px}
+.ng{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:14px 12px 6px}
+.nav{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:12px;font-weight:700;color:var(--muted)}
+.nav:hover{background:var(--s2);color:var(--text)}.nav.on{background:rgba(124,58,237,.18);color:var(--vl)}
+.nav .ic{width:22px;text-align:center;font-size:17px}.nav .n{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;font-size:11px;font-weight:800;padding:1px 7px}
+.main{flex:1;min-width:0}
+.bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:14px 22px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar h1{font-size:21px;margin:0;font-weight:800}.bar .grow{flex:1}
+.menu{display:none;font-size:22px;padding:4px 8px}
+.gsearch{max-width:300px;margin:0}
+.content{padding:22px;max-width:1100px}
+.who{display:flex;align-items:center;gap:8px}
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#A78BFA);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;flex:none;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+/* components */
+.card{background:var(--s1);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 4px;font-size:16px;font-weight:800}
+.btn{background:var(--violet);color:#fff;padding:10px 16px;border-radius:12px;font-weight:800;box-shadow:0 4px 14px rgba(124,58,237,.3)}
+.btn.ghost{background:var(--s2);color:var(--text);box-shadow:none;border:1px solid var(--line)}.btn.red{background:#B91C1C;box-shadow:none}.btn.green{background:#15803D;box-shadow:none}.btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}
+.btn:disabled{opacity:.5;cursor:default}
+.muted{color:var(--muted)}.sm{font-size:13px}.err{color:var(--red);min-height:20px;margin:2px 0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.grow{flex:1;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.stat{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+.stat .ico{font-size:20px}.stat b{display:block;font-size:26px;font-weight:800;line-height:1.1;margin-top:6px}.stat span{color:var(--muted);font-size:13px}
+.att{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.attc{text-align:left;background:var(--s1);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);display:block;width:100%}
+.attc.hot{border-color:var(--amber);background:linear-gradient(135deg,rgba(255,181,71,.12),var(--s1))}
+.attc b{font-size:30px;font-weight:800;display:block;line-height:1}.attc span{color:var(--muted);font-size:13px}
+.pill{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:800;background:var(--s2);color:var(--muted)}
+.pill.pending{color:var(--amber)}.pill.approved,.pill.active,.pill.resolved{color:var(--green)}.pill.rejected,.pill.suspended,.pill.removed,.pill.open{color:var(--red)}.pill.dismissed{color:var(--muted)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.chip{padding:7px 14px;border-radius:20px;background:var(--s1);border:1px solid var(--line);font-weight:700;font-size:13px}.chip.on{background:rgba(124,58,237,.22);border-color:var(--violet);color:var(--vl)}
+.item{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--s1);margin-bottom:10px}
+img.pf{width:100%;max-height:260px;object-fit:cover;border-radius:14px;margin:8px 0;cursor:zoom-in}
+video{width:100%;max-height:260px;border-radius:12px;background:#000}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:14px;margin:8px 0}.kv dt{color:var(--muted)}.kv dd{margin:0;word-break:break-word}
+.empty{text-align:center;padding:46px 14px;color:var(--muted)}.empty i{font-style:normal;font-size:44px;display:block;margin-bottom:8px}.empty b{color:var(--text);display:block;font-size:17px}
+.sk{background:linear-gradient(90deg,var(--s2),var(--s3),var(--s2));background-size:200% 100%;animation:shim 1.2s infinite linear;border-radius:14px;height:92px;margin-bottom:12px}@keyframes shim{to{background-position:-200% 0}}
+/* modal + toast */
+.modalbg{position:fixed;inset:0;background:rgba(5,5,15,.6);backdrop-filter:blur(3px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--s1);border:1px solid var(--line);border-radius:20px;padding:20px;width:100%;max-width:440px;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:pop .18s ease-out}
+.modal.wide{max-width:560px}.modal h2{margin:0 0 6px;font-size:19px}@keyframes pop{from{transform:scale(.96);opacity:0}}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--s3);color:var(--text);border:1px solid var(--line);padding:12px 18px;border-radius:14px;z-index:200;box-shadow:var(--shadow);font-weight:700}
+.toast.bad{border-color:var(--red)}
+/* chart */
+.chart text{fill:var(--muted);font-size:10px}.legend{display:flex;gap:14px;font-size:13px;margin:6px 0 0}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+/* login */
+.login{max-width:400px;margin:9vh auto;padding:0 16px}.login .card{padding:26px}
+.login .logo{width:54px;height:54px;font-size:22px;border-radius:16px;margin:0 auto 14px}
+.banner-prev{border-radius:18px;padding:18px;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(135deg,rgba(76,29,149,.9),rgba(124,58,237,.65));background-size:cover;background-position:center;color:#fff}
+.banner-prev h2{margin:6px 0 2px;font-size:21px}.banner-prev p{margin:0 0 10px;font-size:13px;opacity:.9}
+.banner-prev .go{align-self:flex-start;background:var(--violet);padding:7px 14px;border-radius:10px;font-weight:800;font-size:13px}
+@media (max-width:860px){
+  .side{position:fixed;left:0;top:0;z-index:60;transform:translateX(-102%);transition:transform .2s;box-shadow:var(--shadow)}.side.open{transform:none}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:55}
+  .menu{display:block}.content{padding:16px}.bar{padding:12px 14px}.gsearch{display:none}.kv{grid-template-columns:90px 1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body><div id="app"></div>
 <script>
 const SUPABASE_URL='https://ndempmyasibwvanccqjd.supabase.co',SUPABASE_KEY='sb_publishable_wD7-VXsD2nO4ToxJ5NFvjw_cWDJicVO';
 const CLOUD='qpval6hr',PRESET='bt_unsigned',IDLE_MS=15*60*1000;
-// admin session lives only in this tab (sessionStorage) and ends on close or after 15 idle minutes
 const store={getItem:k=>{try{return sessionStorage.getItem(k)}catch{return null}},setItem:(k,v)=>{try{sessionStorage.setItem(k,v)}catch{}},removeItem:k=>{try{sessionStorage.removeItem(k)}catch{}}};
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storage:store,persistSession:true,autoRefreshToken:true,storageKey:'bt-admin-auth'}});
 const $=id=>document.getElementById(id),app=$('app');
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
+const ago=d=>{const s=(Date.now()-new Date(d))/1000;if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+' min ago';if(s<86400)return Math.floor(s/3600)+' h ago';return Math.floor(s/86400)+' d ago'};
+const num=n=>Number(n||0).toLocaleString();
+const safeImg=u=>/^https:\/\/res\.cloudinary\.com\//.test(u||'')?u:'';
+try{const t=localStorage.getItem('bt_admin_theme');if(t)document.documentElement.dataset.theme=t}catch{}
+function toast(m,bad){const t=document.createElement('div');t.className='toast'+(bad?' bad':'');t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3000)}
 function deviceId(){try{let d=localStorage.getItem('bt_device_id');if(!d){d=(crypto.randomUUID?crypto.randomUUID():Date.now()+''+Math.random());localStorage.setItem('bt_device_id',d)}return d}catch{return 'admin-'+Math.random().toString(16).slice(2)+'xxxxxxxx'}}
-let role=null,tab='overview',idle=null;
+const rpc=async(n,a)=>{const r=await sb.rpc(n,a||{});if(r.error){const m=r.error.message||'';throw new Error(/does not exist|schema cache/i.test(m)?'This feature needs the latest SQL (bt_step10.sql) in Supabase.':m)}return r.data};
+let role=null,me=null,idle=null,page='overview',counts={pending:0,reports:0};
 function touch(){clearTimeout(idle);idle=setTimeout(async()=>{await sb.auth.signOut();login('Signed out after 15 minutes of inactivity.')},IDLE_MS)}
 ['click','keydown','touchstart'].forEach(e=>addEventListener(e,()=>{if(role)touch()},{passive:true}));
-const rpc=async(n,a)=>{const r=await sb.rpc(n,a||{});if(r.error)throw new Error(r.error.message);return r.data};
 
-function login(msg){
-  role=null;clearTimeout(idle);
-  app.innerHTML=`<div class="login card"><b style="font-size:22px">BT Admin</b><p class="muted sm">Authorised BT staff only.</p>
-  <input id="em" type="email" placeholder="Email" autocomplete="username"><input id="pw" type="password" placeholder="Password" autocomplete="current-password">
-  <div class="err" id="er">${esc(msg||'')}</div><button class="btn" id="go" style="width:100%">Log in</button></div>`;
-  $('go').onclick=async()=>{$('go').disabled=true;$('er').textContent='';
-    const {error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
-    if(error){$('go').disabled=false;$('er').textContent='Wrong email or password';return}
-    boot()};
-}
+/* ---------- modal helpers (replace prompt/confirm) ---------- */
+function modal(html,{wide}={}){const bg=document.createElement('div');bg.className='modalbg';bg.innerHTML=`<div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${html}</div>`;
+  const close=()=>{bg.remove();document.removeEventListener('keydown',esc_)};const esc_=e=>{if(e.key==='Escape')close()};document.addEventListener('keydown',esc_);
+  bg.onclick=e=>{if(e.target===bg)close()};document.body.appendChild(bg);return {el:bg.firstChild,close}}
+function confirmBox(title,text,okLabel,danger){return new Promise(res=>{const m=modal(`<h2>${esc(title)}</h2><p class="muted">${esc(text)}</p><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn ghost" id="mc">Cancel</button><button class="btn ${danger?'red':''}" id="mo">${esc(okLabel||'Confirm')}</button></div>`);
+  m.el.querySelector('#mc').onclick=()=>{m.close();res(false)};m.el.querySelector('#mo').onclick=()=>{m.close();res(true)}})}
+function askText(title,text,{presets=[],label='Reason',min=3,ok='Send',danger}={}){return new Promise(res=>{
+  const m=modal(`<h2>${esc(title)}</h2><p class="muted sm">${esc(text)}</p>${presets.length?`<div class="chips" id="pr">${presets.map(p=>`<button class="chip" data-p="${esc(p)}">${esc(p)}</button>`).join('')}</div>`:''}
+  <label>${esc(label)}</label><textarea id="tx" maxlength="300"></textarea><div class="err" id="er"></div><div class="row" style="justify-content:flex-end"><button class="btn ghost" id="mc">Cancel</button><button class="btn ${danger?'red':''}" id="mo">${esc(ok)}</button></div>`);
+  m.el.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{m.el.querySelector('#tx').value=b.dataset.p});
+  m.el.querySelector('#mc').onclick=()=>{m.close();res(null)};
+  m.el.querySelector('#mo').onclick=()=>{const v=m.el.querySelector('#tx').value.trim();if(v.length<min){m.el.querySelector('#er').textContent='Please write a little more';return}m.close();res(v)}})}
+
+/* ---------- login + device approval ---------- */
+function login(msg){role=null;clearTimeout(idle);
+  app.innerHTML=`<div class="login"><div class="card"><div class="logo">BT</div><h2 style="text-align:center;margin:0 0 4px">BT Admin</h2><p class="muted sm" style="text-align:center;margin:0 0 16px">Authorised BT staff only.</p>
+  <label>Email</label><input id="em" type="email" autocomplete="username"><label>Password</label><input id="pw" type="password" autocomplete="current-password">
+  <div class="err" id="er">${esc(msg||'')}</div><button class="btn" id="go" style="width:100%">Log in</button></div></div>`;
+  const go=async()=>{$('go').disabled=true;$('er').textContent='';const {error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
+    if(error){$('go').disabled=false;$('er').textContent='Wrong email or password';return}boot()};
+  $('go').onclick=go;$('pw').onkeydown=e=>{if(e.key==='Enter')go()}}
 async function boot(){
-  const {data:{user}}=await sb.auth.getUser();if(!user){login();return}
-  let st;
-  for(let i=0;i<40;i++){
-    const r=await sb.rpc('register_session',{p_device:deviceId(),p_label:'BT Admin (web)'});
-    st=r.error?'approved':r.data;
+  const {data:{user}}=await sb.auth.getUser();if(!user){login();return}me=user;let st;
+  for(let i=0;i<40;i++){const r=await sb.rpc('register_session',{p_device:deviceId(),p_label:'BT Admin (web)'});st=r.error?'approved':r.data;
     if(st==='approved')break;
     if(st==='denied'){await sb.auth.signOut();login('This device was denied.');return}
-    app.innerHTML=`<div class="login card" style="text-align:center"><div style="font-size:44px">🔐</div><b>Confirm it's you</b><p class="muted sm">Open BT on your phone and tap <b>Yes, it's me</b> to approve this browser. Waiting…</p><button class="btn ghost" id="cx">Cancel</button></div>`;
-    $('cx').onclick=async()=>{i=99;await sb.auth.signOut();location.reload()};
-    await new Promise(r=>setTimeout(r,4000));if(!$('cx'))return;
-  }
+    app.innerHTML=`<div class="login"><div class="card" style="text-align:center"><div class="logo">🔐</div><h2>Confirm it's you</h2><p class="muted sm">Open BT on your phone and tap <b>Yes, it's me</b> to approve this browser. Waiting…</p><button class="btn ghost" id="cx">Cancel</button></div></div>`;
+    let stop=false;$('cx').onclick=async()=>{stop=true;await sb.auth.signOut();location.reload()};
+    await new Promise(r=>setTimeout(r,4000));if(stop||!$('cx'))return}
   if(st!=='approved'){await sb.auth.signOut();login('Approval timed out. Try again.');return}
   try{role=await rpc('admin_me')}catch{role=null}
   if(!role){await sb.auth.signOut();login('This account is not a BT admin.');return}
-  touch();render();
+  try{const {data}=await sb.from('profiles').select('username,display_name,avatar_url').eq('id',user.id).single();me={...user,...data}}catch{}
+  touch();shell();refreshCounts();route();
 }
-const TABS=[['overview','Overview'],['biz','Businesses'],['users','Users'],['banners','Banners'],['notify','Notify'],['content','Videos'],['admins','Admins'],['audit','Audit']];
-function render(){
-  app.innerHTML=`<div class="top"><b>BT Admin</b><span class="pill">${role==='super_admin'?'Super admin':'Admin'}</span><div class="grow"></div><button class="btn ghost sm" id="lo">Log out</button></div>
-  <div class="tabs">${TABS.map(([k,n])=>`<button data-t="${k}" class="${k===tab?'on':''}">${n}</button>`).join('')}</div><div id="pane"><p class="muted">Loading…</p></div>`;
-  $('lo').onclick=async()=>{await sb.auth.signOut();login()};
-  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
-  (PANES[tab]||PANES.overview)().catch(e=>{$('pane').innerHTML=`<div class="card err">${esc(e.message)}</div>`});
+
+/* ---------- shell ---------- */
+const NAV=[['Workspace',[['overview','🏠','Overview'],['review','✅','Review queue'],['reports','🚩','Reports']]],
+  ['Manage',[['businesses','🏪','Businesses'],['users','👥','Users'],['content','🎬','Videos']]],
+  ['Grow',[['banners','🖼️','Banners'],['notify','🔔','Notifications']]],
+  ['System',[['admins','🛡️','Admin team'],['audit','📜','Audit log']]]];
+const TITLES={overview:'Overview',review:'Review queue',reports:'Reports',businesses:'Businesses',users:'Users',content:'Videos',banners:'Banners',notify:'Notifications',admins:'Admin team',audit:'Audit log'};
+function shell(){
+  const nm=me&&(me.display_name||me.username)||'Admin';
+  app.innerHTML=`<div class="shell"><aside class="side" id="side"><div class="brand"><div class="logo">BT</div><div>BT Admin<small>${role==='super_admin'?'Super admin':'Admin'}</small></div></div>
+  ${NAV.map(([g,items])=>`<div class="ng">${g}</div>${items.map(([k,i,n])=>`<button class="nav" data-p="${k}" id="nv_${k}"><span class="ic">${i}</span>${n}<span class="n" id="cn_${k}" style="display:none"></span></button>`).join('')}`).join('')}
+  <div style="flex:1"></div><button class="nav" id="thm"><span class="ic">🌓</span>Switch theme</button><button class="nav" id="lo"><span class="ic">↪</span>Log out</button></aside>
+  <div class="main"><div class="bar"><button class="menu" id="mn" aria-label="Menu">☰</button><h1 id="ttl"></h1><div class="grow"></div>
+  <input class="gsearch" id="gs" placeholder="Search people (press Enter)"><div class="who"><div class="av">${me&&safeImg(me.avatar_url)?`<img src="${esc(me.avatar_url)}" alt="">`:esc(nm[0].toUpperCase())}</div></div></div><div class="content" id="pane"></div></div></div>`;
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.p;$('side').classList.remove('open');const s=document.querySelector('.scrim');if(s)s.remove()});
+  $('lo').onclick=async()=>{await sb.auth.signOut();location.hash='';login()};
+  $('thm').onclick=()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('bt_admin_theme',t)}catch{}};
+  $('mn').onclick=()=>{$('side').classList.add('open');const s=document.createElement('div');s.className='scrim';s.onclick=()=>{$('side').classList.remove('open');s.remove()};document.body.appendChild(s)};
+  $('gs').onkeydown=e=>{if(e.key==='Enter'){usersQuery=$('gs').value.trim();location.hash='users';if(page==='users')route()}};
 }
-const PANES={
+addEventListener('hashchange',()=>{if(role)route()});
+function route(){page=(location.hash||'#overview').slice(1).split('?')[0];if(!PAGES[page])page='overview';
+  document.querySelectorAll('.nav[data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===page));
+  $('ttl').textContent=TITLES[page];$('pane').innerHTML='<div class="sk"></div><div class="sk"></div><div class="sk"></div>';window.scrollTo(0,0);
+  PAGES[page]().catch(e=>{$('pane').innerHTML=`<div class="card"><b>Something went wrong</b><p class="err">${esc(e.message)}</p><button class="btn ghost sm" id="rt">Try again</button></div>`;$('rt').onclick=route})}
+async function refreshCounts(){try{const a=await rpc('admin_attention');counts={pending:Number(a.pending_businesses)||0,reports:Number(a.open_reports)||0};
+  [['review',counts.pending],['reports',counts.reports]].forEach(([k,n])=>{const el=$('cn_'+k);if(el){el.textContent=n;el.style.display=n?'inline':'none'}})}catch{}}
+
+/* ---------- charts ---------- */
+function lineChart(labels,series){const W=640,H=200,P={l:30,r:8,t:10,b:22},max=Math.max(4,...series.flatMap(s=>s.data)),X=i=>P.l+i*(W-P.l-P.r)/Math.max(1,labels.length-1),Y=v=>H-P.b-(v/max)*(H-P.t-P.b);
+  const grid=[0,.5,1].map(f=>{const v=Math.round(max*f),y=Y(v);return `<line x1="${P.l}" x2="${W-P.r}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${P.l-6}" y="${y+3}" text-anchor="end">${v}</text>`}).join('');
+  const xl=labels.map((l,i)=>i%Math.ceil(labels.length/7)===0?`<text x="${X(i)}" y="${H-6}" text-anchor="middle">${esc(l)}</text>`:'').join('');
+  const lines=series.map(s=>{const d=s.data.map((v,i)=>`${i?'L':'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+    return `<path d="${d} L${X(s.data.length-1)},${Y(0)} L${X(0)},${Y(0)} Z" fill="${s.color}" opacity=".12"/><path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${s.data.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="3" fill="${s.color}"><title>${esc(labels[i])}: ${v} ${esc(s.name)}</title></circle>`).join('')}`}).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Trend chart">${grid}${xl}${lines}</svg><div class="legend">${series.map(s=>`<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join('')}</div>`}
+
+/* ---------- pages ---------- */
+let usersQuery='';
+const PAGES={
 async overview(){
-  const s=await rpc('admin_stats');
-  const L=[['Customers','customers'],['Business accounts','business_users'],['Pending businesses','biz_pending'],['Approved','biz_approved'],['Rejected','biz_rejected'],['Suspended biz','biz_suspended'],['New users (7d)','new_users_7d'],['Check-ins today','checkins_today'],['Check-ins total','checkins_total'],['Follows','follows_total'],['Videos live','videos_active'],['Statuses live','stories_active'],['Messages (24h)','messages_24h'],['Suspended users','suspended']];
-  $('pane').innerHTML=`<div class="grid">${L.map(([n,k])=>`<div class="stat"><b>${Number(s[k]||0).toLocaleString()}</b><span class="muted sm">${n}</span></div>`).join('')}</div>
-  <div class="card" style="margin-top:14px"><b>Hierarchy</b><p class="muted sm">Recalculates Top Dog and Don badges from current EXP.</p><button class="btn" id="hr">Refresh hierarchy</button></div>`;
-  $('hr').onclick=async()=>{$('hr').disabled=true;try{const n=await rpc('admin_refresh_hierarchy');toast('Done. '+n+' badges assigned')}catch(e){toast(e.message)}$('hr').disabled=false};
+  const [s,a,ts,top]=await Promise.all([rpc('admin_stats'),rpc('admin_attention').catch(()=>null),rpc('admin_timeseries',{p_days:14}).catch(()=>null),rpc('admin_top_businesses',{p_days:30,p_limit:5}).catch(()=>null)]);
+  const hr=new Date().getHours(),greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening',nm=(me&&(me.display_name||me.username)||'').split(' ')[0];
+  const A=a||{pending_businesses:s.biz_pending,open_reports:0,new_users_today:0,oldest_pending_hours:0};
+  const K=[['👤','Customers','customers'],['🏪','Business accounts','business_users'],['📍','Check-ins today','checkins_today'],['✅','Check-ins total','checkins_total'],['🆕','New users (7 days)','new_users_7d'],['🎬','Videos live','videos_active'],['💬','Messages (24h)','messages_24h'],['🤝','Follows','follows_total']];
+  $('pane').innerHTML=`<h2 style="margin:0 0 4px;font-size:24px">${greet}${nm?', '+esc(nm):''} 👋</h2><p class="muted" style="margin:0 0 16px">${A.pending_businesses||A.open_reports?'Here is what needs you today.':'Everything is calm. Nothing is waiting for you.'}</p>
+  <div class="att"><button class="attc ${A.pending_businesses?'hot':''}" data-go="review"><b>${num(A.pending_businesses)}</b><span>businesses waiting for review${A.pending_businesses&&A.oldest_pending_hours?` · oldest ${num(A.oldest_pending_hours)} h`:''}</span></button>
+  <button class="attc ${A.open_reports?'hot':''}" data-go="reports"><b>${num(A.open_reports)}</b><span>open reports</span></button>
+  <button class="attc" data-go="users"><b>${num(A.new_users_today)}</b><span>new people today</span></button></div>
+  <div class="grid">${K.map(([i,n,k])=>`<div class="stat"><span class="ico">${i}</span><b>${num(s[k])}</b><span>${n}</span></div>`).join('')}</div>
+  <div class="card"><h3>Last 14 days</h3><p class="muted sm" style="margin:0 0 6px">New people and verified check-ins per day</p>${ts?lineChart(ts.map(r=>new Date(r.day+'T00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'})),[{name:'New people',color:'#A78BFA',data:ts.map(r=>r.signups)},{name:'Check-ins',color:'#FFB547',data:ts.map(r=>r.checkins)}]):'<p class="muted">Run bt_step10.sql to see trends.</p>'}</div>
+  <div class="row" style="align-items:stretch"><div class="card grow" style="min-width:280px"><h3>Top businesses (30 days)</h3>${top&&top.length?top.map((b,i)=>`<div class="row" style="padding:8px 0;border-top:${i?'1px solid var(--line)':'0'}"><b style="width:22px;color:var(--muted)">${i+1}</b><div class="grow"><b>${esc(b.name)}</b><div class="muted sm">${num(b.followers)} followers</div></div><span class="pill">${num(b.checkins)} check-ins</span></div>`).join(''):'<p class="muted sm">No check-ins yet.</p>'}</div>
+  <div class="card grow" style="min-width:280px"><h3>Quick actions</h3><div class="row" style="margin-top:10px"><button class="btn sm" data-go="banners">New banner</button><button class="btn sm ghost" data-go="notify">Send notification</button><button class="btn sm ghost" id="hr">Refresh hierarchy</button></div>
+  <p class="muted sm" style="margin:12px 0 0">Hierarchy recalculates Top Dog and Don badges from current EXP.</p></div></div>`;
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
+  $('hr').onclick=async()=>{try{const n=await rpc('admin_refresh_hierarchy');toast(n+' badges assigned')}catch(e){toast(e.message,1)}};
 },
-async biz(){
-  let status='pending',q='';
-  const cats=(await sb.from('categories').select('id,name,grp').order('name')).data||[];
-  const draw=async()=>{
-    const rows=await rpc('admin_list_businesses',{p_status:status,p_q:q||null,p_limit:40,p_offset:0});
-    $('bl').innerHTML=rows.length?rows.map(b=>`<div class="card"><div class="row"><b class="grow">${esc(b.name)}</b><span class="pill ${esc(b.verification_status)}">${esc(b.verification_status)}</span></div>
-      <div class="muted sm">${esc(b.category)}${b.category_other?' · “'+esc(b.category_other)+'”':''} · ${b.followers} followers</div>
-      <div class="sm" style="margin-top:6px">📍 ${esc(b.address||'')} ${b.lat!=null?`<a style="color:var(--vl)" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${b.lat},${b.lng}">map</a>`:''}</div>
-      <div class="sm">📞 ${esc(b.phone||'')} · ✉ ${esc(b.owner_email||'')} · @${esc(b.owner_username||'')}</div>
-      ${b.reg_number?`<div class="sm">CAC/Reg: ${esc(b.reg_number)}</div>`:''}
-      ${b.about?`<p class="muted sm">${esc(b.about)}</p>`:''}
-      ${b.proof_photo_url&&b.proof_photo_url.startsWith('https://res.cloudinary.com/')?`<img class="pf" src="${esc(b.proof_photo_url)}" alt="Shop front">`:''}
-      ${b.rejection_reason?`<div class="sm err">Reason: ${esc(b.rejection_reason)}</div>`:''}
-      <div class="row"><select data-c="${b.id}" style="width:auto;margin:0">${cats.map(c=>`<option value="${c.id}" ${c.name===b.category?'selected':''}>${esc(c.grp)} · ${esc(c.name)}</option>`).join('')}</select><button class="btn ghost sm" data-sc="${b.id}">Change type</button></div>
-      <div class="row" style="margin-top:10px">
-        ${b.verification_status!=='approved'?`<button class="btn sm" data-a="approve" data-i="${b.id}">Approve</button>`:''}
-        ${b.verification_status!=='rejected'&&b.verification_status!=='approved'?`<button class="btn red sm" data-a="reject" data-i="${b.id}">Reject</button>`:''}
-        ${b.verification_status==='approved'?`<button class="btn red sm" data-a="suspend" data-i="${b.id}">Suspend</button>`:''}
-        ${b.verification_status==='suspended'?`<button class="btn sm" data-a="unsuspend" data-i="${b.id}">Unsuspend</button>`:''}</div></div>`).join(''):'<p class="muted">Nothing here.</p>';
-    document.querySelectorAll('[data-a]').forEach(x=>x.onclick=async()=>{
-      let reason=null;if(['reject','suspend'].includes(x.dataset.a)){reason=prompt('Reason (shown to the business):');if(!reason)return}
-      try{await rpc('admin_review_business',{p_id:x.dataset.i,p_action:x.dataset.a,p_reason:reason});toast('Done');draw()}catch(e){toast(e.message)}});
-    document.querySelectorAll('[data-sc]').forEach(x=>x.onclick=async()=>{const v=document.querySelector(`[data-c="${x.dataset.sc}"]`).value;
-      try{await rpc('admin_set_business_category',{p_id:x.dataset.sc,p_category:Number(v)});toast('Type updated')}catch(e){toast(e.message)}});
-  };
-  $('pane').innerHTML=`<div class="row"><select id="st" style="width:auto"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="suspended">Suspended</option><option value="all">All</option></select><input id="q" placeholder="Search name…" style="flex:1;min-width:140px"></div>
-  <div class="card"><b>Add a business type</b><div class="row"><input id="cn" placeholder="Type name" style="flex:2;min-width:140px"><input id="cg" placeholder="Group, e.g. Services" style="flex:2;min-width:140px"><button class="btn sm" id="ca">Add</button></div></div><div id="bl"></div>`;
-  $('st').onchange=()=>{status=$('st').value;draw()};
+async review(){
+  const rows=await rpc('admin_list_businesses',{p_status:'pending',p_q:null,p_limit:50,p_offset:0});
+  counts.pending=rows.length;const el=$('cn_review');if(el){el.textContent=rows.length;el.style.display=rows.length?'inline':'none'}
+  $('pane').innerHTML=rows.length?`<p class="muted" style="margin-top:0">Check the shop photo, call the number if unsure, then approve or ask for changes.</p>`+rows.map(bizCard).join(''):`<div class="empty"><i>🎉</i><b>All caught up</b>No businesses are waiting for review.</div>`;
+  wireBiz($('pane'),route);
+},
+async reports(){
+  let status='open';
+  const draw=async()=>{const rows=await rpc('admin_list_reports',{p_status:status,p_limit:50,p_offset:0});
+    if(status==='open'){counts.reports=rows.length;const el=$('cn_reports');if(el){el.textContent=rows.length;el.style.display=rows.length?'inline':'none'}}
+    $('rl').innerHTML=rows.length?rows.map(r=>`<div class="card"><div class="row"><b class="grow">${esc(r.kind)} report · ${esc(r.reason)}</b><span class="pill ${esc(r.status)}">${esc(r.status)}</span></div>
+      <p style="margin:8px 0;padding:10px;border-radius:12px;background:var(--s2)">${esc(r.target_label)}</p>
+      <div class="muted sm">Reported by @${esc(r.reporter_username)} · ${ago(r.created_at)}${r.target_username?` · by @${esc(r.target_username)}`:''}${r.same_target_reports>1?` · <b style="color:var(--amber)">${r.same_target_reports} reports on this</b>`:''}</div>
+      ${r.note?`<div class="sm" style="margin-top:6px">“${esc(r.note)}”</div>`:''}${r.resolution?`<div class="muted sm" style="margin-top:6px">Outcome: ${esc(r.resolution)}</div>`:''}
+      ${r.status==='open'?`<div class="row" style="margin-top:12px"><button class="btn ghost sm" data-a="dismiss" data-i="${r.id}">Dismiss</button>${r.kind==='video'||r.kind==='comment'?`<button class="btn red sm" data-a="remove" data-i="${r.id}">Remove ${r.kind}</button>`:''}${r.target_user_id?`<button class="btn red sm" data-a="suspend" data-i="${r.id}">Suspend author</button>`:''}</div>`:''}</div>`).join(''):`<div class="empty"><i>🕊️</i><b>${status==='open'?'No open reports':'Nothing here'}</b>${status==='open'?'People can report videos, comments and profiles from the app.':''}</div>`;
+    document.querySelectorAll('#rl [data-a]').forEach(b=>b.onclick=async()=>{const a=b.dataset.a;let note=null;
+      if(a==='suspend'){note=await askText('Suspend this person?','They will be locked out until you unsuspend them.',{label:'Reason (internal)',ok:'Suspend',danger:1});if(!note)return}
+      else if(a==='remove'){if(!await confirmBox('Remove this '+(b.closest('.card').querySelector('b').textContent.split(' ')[0])+'?','It will disappear for everyone.','Remove',1))return}
+      try{await rpc('admin_resolve_report',{p_id:Number(b.dataset.i),p_action:a,p_note:note});toast('Done');draw();refreshCounts()}catch(e){toast(e.message,1)}})};
+  $('pane').innerHTML=`<div class="chips" id="rs">${['open','resolved','dismissed','all'].map(s=>`<button class="chip ${s===status?'on':''}" data-s="${s}">${s[0].toUpperCase()+s.slice(1)}</button>`).join('')}</div><div id="rl"></div>`;
+  document.querySelectorAll('#rs [data-s]').forEach(b=>b.onclick=()=>{status=b.dataset.s;document.querySelectorAll('#rs .chip').forEach(x=>x.classList.toggle('on',x===b));draw()});draw();
+},
+async businesses(){
+  let status='approved',q='';
+  const draw=async()=>{$('bl').innerHTML='<div class="sk"></div><div class="sk"></div>';const rows=await rpc('admin_list_businesses',{p_status:status,p_q:q||null,p_limit:40,p_offset:0});
+    $('bl').innerHTML=rows.length?rows.map(bizCard).join(''):'<div class="empty"><i>🏪</i><b>No businesses here</b></div>';wireBiz($('bl'),draw)};
+  const cats=(await sb.from('categories').select('id,name,grp').order('name')).data||[];window.__cats=cats;
+  $('pane').innerHTML=`<div class="row"><div class="chips" id="st" style="margin:0">${[['approved','Live'],['pending','Pending'],['rejected','Needs changes'],['suspended','Suspended'],['all','All']].map(([k,n])=>`<button class="chip ${k===status?'on':''}" data-s="${k}">${n}</button>`).join('')}</div><div class="grow"></div><input id="q" placeholder="Search name, press Enter" style="max-width:260px;margin:0"></div>
+  <div class="card" style="margin-top:12px"><div class="row"><b>Add a business type</b><input id="cn" placeholder="Type name" style="flex:2;min-width:140px;margin:0"><input id="cg" placeholder="Group, e.g. Services" style="flex:2;min-width:140px;margin:0"><button class="btn sm" id="ca">Add</button></div></div><div id="bl"></div>`;
+  document.querySelectorAll('#st [data-s]').forEach(b=>b.onclick=()=>{status=b.dataset.s;document.querySelectorAll('#st .chip').forEach(x=>x.classList.toggle('on',x===b));draw()});
   $('q').onkeydown=e=>{if(e.key==='Enter'){q=$('q').value.trim();draw()}};
-  $('ca').onclick=async()=>{try{await rpc('admin_add_category',{p_name:$('cn').value,p_grp:$('cg').value||'Other'});toast('Type added');tab='biz';render()}catch(e){toast(e.message)}};
-  draw();
+  $('ca').onclick=async()=>{try{await rpc('admin_add_category',{p_name:$('cn').value,p_grp:$('cg').value||'Other'});toast('Type added');$('cn').value='';window.__cats=(await sb.from('categories').select('id,name,grp').order('name')).data||[]}catch(e){toast(e.message,1)}};draw();
 },
 async users(){
-  let q='';
-  const draw=async()=>{const rows=await rpc('admin_list_users',{p_q:q||null,p_limit:40,p_offset:0});
-    $('ul').innerHTML=rows.map(u=>`<div class="card"><div class="row"><b class="grow">@${esc(u.username)}</b><span class="pill">${esc(u.role)}</span>${u.is_admin?'<span class="pill">admin</span>':''}${u.is_suspended?'<span class="pill suspended">suspended</span>':''}</div>
-      <div class="muted sm">${esc(u.display_name||'')} · ${esc(u.email||'')} · ${Number(u.global_exp||0).toLocaleString()} EXP · joined ${new Date(u.created_at).toLocaleDateString()}</div>
-      ${u.is_admin?'':`<button class="btn ${u.is_suspended?'':'red'} sm" style="margin-top:8px" data-u="${u.id}" data-s="${u.is_suspended?0:1}">${u.is_suspended?'Unsuspend':'Suspend'}</button>`}</div>`).join('')||'<p class="muted">No users.</p>';
-    document.querySelectorAll('[data-u]').forEach(b=>b.onclick=async()=>{const s=b.dataset.s==='1';let r=null;if(s){r=prompt('Reason:');if(!r)return}
-      try{await rpc('admin_suspend_user',{p_id:b.dataset.u,p_suspend:s,p_reason:r});toast('Done');draw()}catch(e){toast(e.message)}})};
-  $('pane').innerHTML=`<input id="q" placeholder="Search username or name, press Enter"><div id="ul"></div>`;
-  $('q').onkeydown=e=>{if(e.key==='Enter'){q=$('q').value.trim();draw()}};draw();
-},
-async banners(){
-  const draw=async()=>{const {data,error}=await sb.from('home_slides').select('*').order('sort_order');if(error)throw new Error(error.message);
-    $('bl').innerHTML=(data||[]).map(s=>`<div class="card"><div class="row"><b class="grow">${esc(s.title)}</b><span class="pill ${s.active?'approved':''}">${s.active?'live':'hidden'}</span></div>
-      ${s.subtitle?`<div class="muted sm">${esc(s.subtitle)}</div>`:''}<div class="muted sm">Link: ${esc(s.link||'none')} · order ${s.sort_order}</div>
-      ${s.image_url?`<img class="pf" src="${esc(s.image_url)}" alt="">`:''}
-      <div class="row"><button class="btn ghost sm" data-tg="${s.id}" data-v="${s.active?0:1}">${s.active?'Hide':'Show'}</button><button class="btn red sm" data-del="${s.id}">Delete</button></div></div>`).join('')||'<p class="muted">No banners yet. The Home card shows the default message.</p>';
-    document.querySelectorAll('[data-tg]').forEach(b=>b.onclick=async()=>{const r=await sb.from('home_slides').update({active:b.dataset.v==='1'}).eq('id',b.dataset.tg);if(r.error)toast(r.error.message);draw()});
-    document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!confirm('Delete banner?'))return;const r=await sb.from('home_slides').delete().eq('id',b.dataset.del);if(r.error)toast(r.error.message);draw()});};
-  $('pane').innerHTML=`<div class="card"><b>New banner for the Home “Explore” card</b>
-  <input id="t" maxlength="60" placeholder="Title (required)"><input id="sbt" maxlength="140" placeholder="Short subtitle (optional)">
-  <select id="lk"><option value="">No button</option><option value="nearby">Button opens: Nearby businesses</option><option value="map">Button opens: Map</option><option value="discover">Button opens: Discover videos</option><option value="chat">Button opens: Chat</option><option value="custom">Button opens: a web link…</option></select>
-  <input id="lc" placeholder="https://…" style="display:none"><input id="so" type="number" placeholder="Order (0 first)" value="0">
-  <label class="muted sm">Background image (optional)</label><input id="im" type="file" accept="image/*"><div class="err" id="er"></div><button class="btn" id="add">Publish banner</button></div><div id="bl"></div>`;
-  $('lk').onchange=()=>{$('lc').style.display=$('lk').value==='custom'?'block':'none'};
-  $('add').onclick=async()=>{const title=$('t').value.trim();if(!title){$('er').textContent='Enter a title';return}
-    let link=$('lk').value;if(link==='custom'){link=$('lc').value.trim();if(!/^https:\/\//.test(link)){$('er').textContent='Link must start with https://';return}}
-    $('add').disabled=true;$('er').textContent='';let image_url=null;
-    try{const f=$('im').files[0];if(f){if(f.size>6e6)throw new Error('Image too big (max 6 MB)');const fd=new FormData();fd.append('file',f);fd.append('upload_preset',PRESET);
-        const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`,{method:'POST',body:fd});const j=await r.json();if(!j.secure_url)throw new Error('Image upload failed');image_url=j.secure_url.replace('/upload/','/upload/c_limit,w_1200,q_auto/')}
-      const r=await sb.from('home_slides').insert({title,subtitle:$('sbt').value.trim()||null,link:link||null,image_url,sort_order:Number($('so').value)||0,active:true});
-      if(r.error)throw new Error(r.error.message);toast('Banner published');tab='banners';render()}catch(e){$('er').textContent=e.message;$('add').disabled=false}};
-  draw();
-},
-async notify(){
-  $('pane').innerHTML=`<div class="card"><b>Send a notification</b><p class="muted sm">Appears under the bell in BT.</p>
-  <select id="au"><option value="all">Everyone</option><option value="customers">All customers</option><option value="businesses">All businesses</option><option value="user">One person…</option></select>
-  <input id="un" placeholder="Their username" style="display:none"><input id="ti" maxlength="80" placeholder="Title"><textarea id="bo" maxlength="300" placeholder="Message"></textarea>
-  <select id="ln"><option value="">No link</option><option value="nearby">Opens Nearby</option><option value="discover">Opens Discover</option><option value="map">Opens Map</option><option value="chat">Opens Chat</option></select>
-  <div class="err" id="er"></div><button class="btn" id="sd">Send</button></div>`;
-  $('au').onchange=()=>{$('un').style.display=$('au').value==='user'?'block':'none'};
-  $('sd').onclick=async()=>{if(!$('ti').value.trim()){$('er').textContent='Enter a title';return}
-    if(!confirm('Send this to '+$('au').options[$('au').selectedIndex].text+'?'))return;$('sd').disabled=true;
-    try{const n=await rpc('admin_send_notification',{p_audience:$('au').value,p_username:$('au').value==='user'?$('un').value.trim().replace(/^@/,''):null,p_title:$('ti').value.trim(),p_body:$('bo').value.trim()||null,p_link:$('ln').value||null});
-      toast('Sent to '+n+' people');$('ti').value='';$('bo').value='';$('er').textContent=''}catch(e){$('er').textContent=e.message}$('sd').disabled=false};
+  let q=usersQuery,filter='all',rows=[];usersQuery='';
+  const draw=()=>{const v=rows.filter(u=>filter==='all'||(filter==='suspended'?u.is_suspended:filter==='admin'?u.is_admin:u.role===filter));
+    $('ul').innerHTML=v.length?v.map(u=>`<button class="item" data-u="${u.id}" style="width:100%;text-align:left;align-items:center"><div class="av">${esc((u.display_name||u.username||'?')[0].toUpperCase())}</div><div class="grow"><b>${esc(u.display_name||u.username)}</b> <span class="muted">@${esc(u.username)}</span><div class="muted sm">${esc(u.email||'')} · joined ${new Date(u.created_at).toLocaleDateString()}</div></div>
+      <span class="pill">${esc(u.role)}</span>${u.is_admin?'<span class="pill approved">admin</span>':''}${u.is_suspended?'<span class="pill suspended">suspended</span>':''}</button>`).join(''):'<div class="empty"><i>🔍</i><b>No people found</b>Try another name or username.</div>';
+    document.querySelectorAll('#ul [data-u]').forEach(b=>b.onclick=()=>userDrawer(b.dataset.u,load))};
+  const load=async()=>{$('ul').innerHTML='<div class="sk"></div><div class="sk"></div>';rows=await rpc('admin_list_users',{p_q:q||null,p_limit:60,p_offset:0});draw()};
+  $('pane').innerHTML=`<div class="row"><input id="q" placeholder="Search username or name, press Enter" value="${esc(q)}" style="flex:1;min-width:200px;margin:0"></div><div class="chips" id="uf" style="margin-top:12px">${[['all','Everyone'],['customer','Customers'],['business','Businesses'],['suspended','Suspended'],['admin','Admins']].map(([k,n])=>`<button class="chip ${k===filter?'on':''}" data-f="${k}">${n}</button>`).join('')}</div><div id="ul"></div>`;
+  $('q').onkeydown=e=>{if(e.key==='Enter'){q=$('q').value.trim();load()}};
+  document.querySelectorAll('#uf [data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;document.querySelectorAll('#uf .chip').forEach(x=>x.classList.toggle('on',x===b));draw()});load();
 },
 async content(){
   const rows=await rpc('admin_list_videos',{p_limit:40,p_offset:0});
-  $('pane').innerHTML=rows.map(v=>`<div class="card"><div class="row"><b class="grow">${esc(v.business_name)}</b><span class="pill ${v.status==='active'?'approved':'rejected'}">${esc(v.status)}</span></div>
-    ${v.video_url&&v.video_url.startsWith('https://res.cloudinary.com/')?`<video src="${esc(v.video_url)}" controls preload="none" playsinline></video>`:''}
-    <div class="muted sm">${esc(v.caption||'')} · ${new Date(v.created_at).toLocaleString()}</div>
-    <button class="btn ${v.status==='active'?'red':''} sm" style="margin-top:8px" data-v="${v.id}" data-s="${v.status==='active'?'removed':'active'}">${v.status==='active'?'Remove':'Restore'}</button></div>`).join('')||'<p class="muted">No videos yet.</p>';
-  document.querySelectorAll('[data-v]').forEach(b=>b.onclick=async()=>{try{await rpc('admin_set_video_status',{p_id:b.dataset.v,p_status:b.dataset.s});toast('Done');render()}catch(e){toast(e.message)}});
+  $('pane').innerHTML=rows.length?`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">${rows.map(v=>`<div class="card" style="margin:0"><div class="row"><b class="grow">${esc(v.business_name)}</b><span class="pill ${esc(v.status)}">${esc(v.status)}</span></div>
+    ${safeImg(v.video_url)?`<video src="${esc(v.video_url)}" controls preload="none" playsinline style="margin-top:8px"></video>`:''}<div class="muted sm" style="margin:8px 0">${esc(v.caption||'No caption')} · ${ago(v.created_at)}</div>
+    <button class="btn ${v.status==='active'?'red':'green'} sm" data-v="${v.id}" data-s="${v.status==='active'?'removed':'active'}">${v.status==='active'?'Remove':'Restore'}</button></div>`).join('')}</div>`:'<div class="empty"><i>🎬</i><b>No videos yet</b>Business videos will show here.</div>';
+  document.querySelectorAll('[data-v]').forEach(b=>b.onclick=async()=>{if(b.dataset.s==='removed'&&!await confirmBox('Remove this video?','It will disappear from Discover.','Remove',1))return;
+    try{await rpc('admin_set_video_status',{p_id:b.dataset.v,p_status:b.dataset.s});toast('Done');route()}catch(e){toast(e.message,1)}});
+},
+async banners(){
+  const {data,error}=await sb.from('home_slides').select('*').order('sort_order');if(error)throw new Error(error.message);
+  let imgUrl=null;
+  $('pane').innerHTML=`<div class="row" style="align-items:flex-start"><div class="card grow" style="min-width:300px"><h3>New banner</h3><p class="muted sm" style="margin:0 0 10px">Shows on the Home “Explore” card in BT.</p>
+  <label>Title</label><input id="t" maxlength="60" placeholder="e.g. Weekend deals in Zaria"><label>Subtitle (optional)</label><input id="sbt" maxlength="140">
+  <label>Button</label><select id="lk"><option value="">No button</option><option value="nearby">Opens: Nearby businesses</option><option value="map">Opens: Map</option><option value="discover">Opens: Discover videos</option><option value="chat">Opens: Chat</option><option value="custom">Opens: a web link…</option></select><input id="lc" placeholder="https://…" style="display:none">
+  <div class="row"><div class="grow"><label>Order</label><input id="so" type="number" value="0"></div></div><label>Background image (optional)</label><input id="im" type="file" accept="image/*"><div class="err" id="er"></div><button class="btn" id="add">Publish banner</button></div>
+  <div class="grow" style="min-width:300px"><label>Preview</label><div class="banner-prev" id="bp"><span class="pill" style="align-self:flex-start;background:rgba(255,255,255,.2);color:#fff">Featured</span><h2 id="bpt">Your title</h2><p id="bps"></p><span class="go" id="bpg" style="display:none">Explore now →</span></div></div></div>
+  <h3 style="margin:18px 0 10px">Live banners</h3><div id="bl"></div>`;
+  const prev=()=>{$('bpt').textContent=$('t').value||'Your title';$('bps').textContent=$('sbt').value;$('bpg').style.display=$('lk').value?'inline-block':'none'};
+  ['t','sbt','lk'].forEach(i=>$(i).oninput=prev);$('lk').onchange=()=>{$('lc').style.display=$('lk').value==='custom'?'block':'none';prev()};
+  $('im').onchange=()=>{const f=$('im').files[0];if(f){const u=URL.createObjectURL(f);$('bp').style.backgroundImage=`linear-gradient(180deg,rgba(11,11,26,.15),rgba(11,11,26,.85)),url('${u}')`}};
+  $('bl').innerHTML=(data||[]).length?data.map(s=>`<div class="item"><div class="grow"><b>${esc(s.title)}</b> <span class="pill ${s.active?'approved':''}">${s.active?'live':'hidden'}</span>${s.subtitle?`<div class="muted sm">${esc(s.subtitle)}</div>`:''}<div class="muted sm">Button: ${esc(s.link||'none')} · order ${s.sort_order}</div>${safeImg(s.image_url)?`<img class="pf" style="max-height:140px" src="${esc(s.image_url)}" alt="">`:''}</div>
+    <div class="row"><button class="btn ghost sm" data-tg="${s.id}" data-v="${s.active?0:1}">${s.active?'Hide':'Show'}</button><button class="btn red sm" data-del="${s.id}">Delete</button></div></div>`).join(''):'<div class="empty"><i>🖼️</i><b>No banners yet</b>Home shows the default Explore card.</div>';
+  document.querySelectorAll('[data-tg]').forEach(b=>b.onclick=async()=>{const r=await sb.from('home_slides').update({active:b.dataset.v==='1'}).eq('id',b.dataset.tg);if(r.error)toast(r.error.message,1);route()});
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!await confirmBox('Delete this banner?','This cannot be undone.','Delete',1))return;const r=await sb.from('home_slides').delete().eq('id',b.dataset.del);if(r.error)toast(r.error.message,1);route()});
+  $('add').onclick=async()=>{const title=$('t').value.trim();if(!title){$('er').textContent='Enter a title';return}
+    let link=$('lk').value;if(link==='custom'){link=$('lc').value.trim();if(!/^https:\/\//.test(link)){$('er').textContent='Link must start with https://';return}}
+    $('add').disabled=true;$('er').textContent='';
+    try{const f=$('im').files[0];if(f){if(f.size>6e6)throw new Error('Image too big (max 6 MB)');const fd=new FormData();fd.append('file',f);fd.append('upload_preset',PRESET);
+        const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`,{method:'POST',body:fd});const j=await r.json();if(!j.secure_url)throw new Error('Image upload failed');imgUrl=j.secure_url.replace('/upload/','/upload/c_limit,w_1200,q_auto/')}
+      const r=await sb.from('home_slides').insert({title,subtitle:$('sbt').value.trim()||null,link:link||null,image_url:imgUrl,sort_order:Number($('so').value)||0,active:true});
+      if(r.error)throw new Error(r.error.message);toast('Banner published');route()}catch(e){$('er').textContent=e.message;$('add').disabled=false}};
+},
+async notify(){
+  $('pane').innerHTML=`<div class="row" style="align-items:flex-start"><div class="card grow" style="min-width:300px"><h3>Send a notification</h3><p class="muted sm" style="margin:0 0 10px">Appears under the bell in BT.</p>
+  <label>Who should get it?</label><select id="au"><option value="all">Everyone</option><option value="customers">All customers</option><option value="businesses">All businesses</option><option value="user">One person…</option></select><input id="un" placeholder="Their username" style="display:none">
+  <label>Title</label><input id="ti" maxlength="80"><label>Message</label><textarea id="bo" maxlength="300"></textarea>
+  <label>Opens (optional)</label><select id="ln"><option value="">Nothing</option><option value="nearby">Nearby</option><option value="discover">Discover</option><option value="map">Map</option><option value="chat">Chat</option></select><div class="err" id="er"></div><button class="btn" id="sd">Send</button></div>
+  <div class="grow" style="min-width:280px"><label>Preview</label><div class="item" style="margin-top:4px"><div style="font-size:24px">🔴</div><div class="grow"><b id="pt">Your title</b><div class="muted sm" id="pb"></div><div class="muted sm" style="margin-top:4px">just now</div></div></div></div></div>`;
+  const prev=()=>{$('pt').textContent=$('ti').value||'Your title';$('pb').textContent=$('bo').value};['ti','bo'].forEach(i=>$(i).oninput=prev);
+  $('au').onchange=()=>{$('un').style.display=$('au').value==='user'?'block':'none'};
+  $('sd').onclick=async()=>{if(!$('ti').value.trim()){$('er').textContent='Enter a title';return}
+    if(!await confirmBox('Send now?','This goes to '+$('au').options[$('au').selectedIndex].text.toLowerCase()+'. It cannot be taken back.','Send'))return;$('sd').disabled=true;
+    try{const n=await rpc('admin_send_notification',{p_audience:$('au').value,p_username:$('au').value==='user'?$('un').value.trim().replace(/^@/,''):null,p_title:$('ti').value.trim(),p_body:$('bo').value.trim()||null,p_link:$('ln').value||null});
+      toast('Sent to '+num(n)+' people');$('ti').value='';$('bo').value='';$('er').textContent='';prev()}catch(e){$('er').textContent=e.message}$('sd').disabled=false};
 },
 async admins(){
   const rows=await rpc('admin_list_admins'),sup=role==='super_admin';
-  $('pane').innerHTML=`${sup?`<div class="card"><b>Add an admin</b><p class="muted sm">The person must already have a BT account. Only super admins can do this.</p><input id="au" placeholder="Their BT username"><button class="btn" id="aa">Make admin</button></div>`
-    :`<div class="card muted sm">Only the super admin can add or remove admins.</div>`}
-  ${rows.map(a=>`<div class="card"><div class="row"><b class="grow">@${esc(a.username)}</b><span class="pill">${esc(a.role)}</span></div><div class="muted sm">${esc(a.display_name||'')}</div>
-   ${sup&&a.role!=='super_admin'?`<button class="btn red sm" style="margin-top:8px" data-r="${esc(a.username)}">Remove admin</button>`:''}</div>`).join('')}`;
-  if(sup){$('aa').onclick=async()=>{try{await rpc('admin_set_admin',{p_username:$('au').value.trim().replace(/^@/,''),p_make:true});toast('Admin added');render()}catch(e){toast(e.message)}};
-    document.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{if(!confirm('Remove @'+b.dataset.r+' as admin?'))return;try{await rpc('admin_set_admin',{p_username:b.dataset.r,p_make:false});toast('Removed');render()}catch(e){toast(e.message)}})}
+  $('pane').innerHTML=`${sup?`<div class="card"><h3>Add an admin</h3><p class="muted sm" style="margin:0 0 10px">The person must already have a BT account. Only the super admin can add or remove admins.</p><div class="row"><input id="au" placeholder="Their BT username" style="flex:1;min-width:200px;margin:0"><button class="btn" id="aa">Make admin</button></div></div>`:`<div class="card muted">Only the super admin can add or remove admins.</div>`}
+  ${rows.map(a=>`<div class="item" style="align-items:center"><div class="av">${esc((a.display_name||a.username||'?')[0].toUpperCase())}</div><div class="grow"><b>${esc(a.display_name||a.username)}</b> <span class="muted">@${esc(a.username)}</span></div><span class="pill ${a.role==='super_admin'?'approved':''}">${esc(a.role.replace('_',' '))}</span>${sup&&a.role!=='super_admin'?`<button class="btn red sm" data-r="${esc(a.username)}">Remove</button>`:''}</div>`).join('')}`;
+  if(sup){$('aa').onclick=async()=>{try{await rpc('admin_set_admin',{p_username:$('au').value.trim().replace(/^@/,''),p_make:true});toast('Admin added');route()}catch(e){toast(e.message,1)}};
+    document.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{if(!await confirmBox('Remove @'+b.dataset.r+'?','They will lose all admin access.','Remove',1))return;try{await rpc('admin_set_admin',{p_username:b.dataset.r,p_make:false});toast('Removed');route()}catch(e){toast(e.message,1)}})}
 },
 async audit(){
-  const rows=await rpc('admin_audit',{p_limit:80});
-  $('pane').innerHTML=rows.map(r=>`<div class="card sm"><b>${esc(r.action)}</b> <span class="muted">by @${esc(r.admin_username||'?')} · ${new Date(r.created_at).toLocaleString()}</span><div class="muted">${esc(r.target||'')}</div></div>`).join('')||'<p class="muted">Nothing logged yet.</p>';
+  const rows=await rpc('admin_audit',{p_limit:150});let f='';
+  const draw=()=>{const v=rows.filter(r=>!f||(r.action+' '+(r.target||'')+' '+(r.admin_username||'')).toLowerCase().includes(f));
+    $('al').innerHTML=v.length?v.map(r=>`<div class="item" style="align-items:center"><div class="grow"><b>${esc(r.action.replace(/_/g,' '))}</b><div class="muted sm" style="word-break:break-word">${esc(r.target||'')}</div></div><div class="muted sm" style="text-align:right">@${esc(r.admin_username||'?')}<br>${new Date(r.created_at).toLocaleString()}</div></div>`).join(''):'<div class="empty"><i>📜</i><b>Nothing logged</b></div>'};
+  $('pane').innerHTML=`<input id="f" placeholder="Filter: action, name or admin" style="max-width:360px"><div id="al"></div>`;$('f').oninput=()=>{f=$('f').value.trim().toLowerCase();draw()};draw();
 }};
+
+/* ---------- business cards, shared by review + businesses ---------- */
+function bizCard(b){const st=b.verification_status,photo=safeImg(b.proof_photo_url);
+  return `<div class="card" data-b="${b.id}"><div class="row"><b class="grow" style="font-size:17px">${esc(b.name)}</b><span class="pill ${esc(st)}">${esc(st)}</span></div>
+  <div class="muted sm">${esc(b.category)}${b.category_other?' · “'+esc(b.category_other)+'”':''} · ${num(b.followers)} followers${b.submitted_at?' · submitted '+ago(b.submitted_at):''}</div>
+  <dl class="kv"><dt>Address</dt><dd>${esc(b.address||'')} ${b.lat!=null?`<a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${b.lat},${b.lng}">Open map</a>`:''}</dd>
+  <dt>Phone</dt><dd>${b.phone?`<a href="tel:${esc(b.phone)}">${esc(b.phone)}</a>`:'-'}</dd><dt>Owner</dt><dd>@${esc(b.owner_username||'')} · ${esc(b.owner_email||'')}</dd>${b.reg_number?`<dt>CAC / Reg.</dt><dd>${esc(b.reg_number)}</dd>`:''}${b.about?`<dt>About</dt><dd>${esc(b.about)}</dd>`:''}</dl>
+  ${photo?`<img class="pf" src="${esc(photo)}" alt="Shop front" data-zoom="${esc(photo)}">`:'<div class="muted sm">No shop photo</div>'}
+  ${b.rejection_reason?`<div class="sm err">Last reason: ${esc(b.rejection_reason)}</div>`:''}
+  <div class="row" style="margin-top:10px">${st!=='approved'?`<button class="btn green sm" data-a="approve">Approve</button>`:''}${st==='pending'||st==='rejected'?`<button class="btn ghost sm" data-a="reject">${st==='pending'?'Ask for changes':'Update reason'}</button>`:''}${st==='approved'?`<button class="btn red sm" data-a="suspend">Suspend</button>`:''}${st==='suspended'?`<button class="btn green sm" data-a="unsuspend">Unsuspend</button>`:''}
+  <button class="btn ghost sm" data-a="type">Change type</button><button class="btn ghost sm" data-a="qr">New QR code</button></div></div>`}
+function wireBiz(root,after){
+  root.querySelectorAll('[data-zoom]').forEach(i=>i.onclick=()=>modal(`<img src="${esc(i.dataset.zoom)}" style="width:100%;border-radius:12px" alt="">`,{wide:1}));
+  root.querySelectorAll('.card[data-b] [data-a]').forEach(b=>b.onclick=async()=>{const id=b.closest('[data-b]').dataset.b,a=b.dataset.a;
+    try{
+      if(a==='approve'){if(!await confirmBox('Approve this business?','It will appear in search, Nearby and the map, and the owner is notified.','Approve'))return;await rpc('admin_review_business',{p_id:id,p_action:'approve',p_reason:null})}
+      else if(a==='reject'){const r=await askText('Ask for changes','The owner sees this and can fix and resubmit.',{presets:['Shop photo is unclear','Address is incomplete','We could not reach your phone number','Business type does not match the photo'],ok:'Send to owner'});if(!r)return;await rpc('admin_review_business',{p_id:id,p_action:'reject',p_reason:r})}
+      else if(a==='suspend'){const r=await askText('Suspend this business?','It disappears from BT until you unsuspend it.',{ok:'Suspend',danger:1});if(!r)return;await rpc('admin_review_business',{p_id:id,p_action:'suspend',p_reason:r})}
+      else if(a==='unsuspend'){await rpc('admin_review_business',{p_id:id,p_action:'unsuspend',p_reason:null})}
+      else if(a==='qr'){if(!await confirmBox('Make a new QR code?','The old printed QR stops working. The owner can show the new one in BT.','Make new code',1))return;await rpc('admin_regenerate_qr',{p_business:id});toast('New QR code created');return}
+      else if(a==='type'){const cats=window.__cats||(await sb.from('categories').select('id,name,grp').order('name')).data||[];
+        const m=modal(`<h2>Change business type</h2><select id="ct">${cats.map(c=>`<option value="${c.id}">${esc(c.grp||'')} · ${esc(c.name)}</option>`).join('')}</select><div class="row" style="justify-content:flex-end"><button class="btn ghost" id="mc">Cancel</button><button class="btn" id="mo">Save</button></div>`);
+        m.el.querySelector('#mc').onclick=m.close;m.el.querySelector('#mo').onclick=async()=>{try{await rpc('admin_set_business_category',{p_id:id,p_category:Number(m.el.querySelector('#ct').value)});m.close();toast('Type updated');after()}catch(e){toast(e.message,1)}};return}
+      toast('Done');after();refreshCounts();
+    }catch(e){toast(e.message,1)}})}
+
+/* ---------- person drawer ---------- */
+async function userDrawer(id,after){
+  const m=modal('<div class="sk"></div>',{wide:1});
+  try{const u=await rpc('admin_user_detail',{p_id:id});
+    m.el.innerHTML=`<div class="row"><div class="av" style="width:48px;height:48px;font-size:20px">${esc((u.display_name||u.username)[0].toUpperCase())}</div><div class="grow"><h2 style="margin:0">${esc(u.display_name||u.username)}</h2><div class="muted">@${esc(u.username)} · ${esc(u.role)}</div></div>${u.is_suspended?'<span class="pill suspended">suspended</span>':''}${u.is_admin?'<span class="pill approved">admin</span>':''}</div>
+    <dl class="kv"><dt>Email</dt><dd>${esc(u.email||'')}</dd><dt>Joined</dt><dd>${new Date(u.created_at).toLocaleDateString()}</dd>${u.role==='customer'?`<dt>EXP</dt><dd><b>${num(u.global_exp)}</b></dd><dt>Check-ins</dt><dd>${num(u.checkins)}</dd>`:''}<dt>Followers</dt><dd>${num(u.followers)} · following ${num(u.following)}</dd><dt>Reports on them</dt><dd>${num(u.reports_against)}</dd>${u.business?`<dt>Business</dt><dd>${esc(u.business.name)} <span class="pill ${esc(u.business.status)}">${esc(u.business.status)}</span></dd>`:''}${u.bio?`<dt>Bio</dt><dd>${esc(u.bio)}</dd>`:''}</dl>
+    ${(u.recent_checkins||[]).length?`<b class="sm">Recent check-ins</b>${u.recent_checkins.map(c=>`<div class="row sm" style="padding:6px 0;border-top:1px solid var(--line)"><span class="grow">${esc(c.name)}</span><span class="muted">${c.exp?'+'+c.exp+' EXP':'0 EXP'} · ${ago(c.created_at)}</span></div>`).join('')}`:''}
+    <div class="row" style="margin-top:16px"><button class="btn ghost" id="x">Close</button>${u.role==='customer'?'<button class="btn ghost" id="ex">Adjust EXP</button>':''}${u.is_admin?'':`<button class="btn ${u.is_suspended?'green':'red'}" id="sp">${u.is_suspended?'Unsuspend':'Suspend'}</button>`}</div>`;
+    m.el.querySelector('#x').onclick=m.close;
+    const ex=m.el.querySelector('#ex');if(ex)ex.onclick=async()=>{m.close();const m2=modal(`<h2>Adjust EXP</h2><p class="muted sm">For fixing genuine problems, such as a QR glitch. Every change is logged with your name and reason.</p><label>Change (use a minus to remove)</label><input id="d" type="number" placeholder="e.g. 100 or -100"><label>Reason</label><textarea id="r" maxlength="200"></textarea><div class="err" id="er"></div><div class="row" style="justify-content:flex-end"><button class="btn ghost" id="mc">Cancel</button><button class="btn" id="mo">Apply</button></div>`);
+      m2.el.querySelector('#mc').onclick=m2.close;m2.el.querySelector('#mo').onclick=async()=>{try{const n=await rpc('admin_adjust_exp',{p_user:id,p_delta:parseInt(m2.el.querySelector('#d').value,10)||0,p_reason:m2.el.querySelector('#r').value.trim()});m2.close();toast('EXP is now '+num(n));after()}catch(e){m2.el.querySelector('#er').textContent=e.message}}};
+    const sp=m.el.querySelector('#sp');if(sp)sp.onclick=async()=>{let r=null;if(!u.is_suspended){r=await askText('Suspend @'+u.username+'?','They are locked out until you unsuspend them.',{label:'Reason (internal)',ok:'Suspend',danger:1});if(!r)return}
+      try{await rpc('admin_suspend_user',{p_id:id,p_suspend:!u.is_suspended,p_reason:r});m.close();toast('Done');after()}catch(e){toast(e.message,1)}};
+  }catch(e){m.el.innerHTML=`<h2>Could not load</h2><p class="err">${esc(e.message)}</p><button class="btn ghost" id="x">Close</button>`;m.el.querySelector('#x').onclick=m.close}
+}
 boot();
 </script></body></html>
