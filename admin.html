@@ -133,11 +133,11 @@ async function boot(){
 }
 
 /* ---------- shell ---------- */
-const NAV=[['Workspace',[['overview','🏠','Overview'],['review','✅','Review queue'],['reports','🚩','Reports']]],
+const NAV=[['Workspace',[['overview','🏠','Overview'],['review','✅','Review queue'],['reports','🚩','Reports'],['support','💬','Support']]],
   ['Manage',[['businesses','🏪','Businesses'],['users','👥','Users'],['content','🎬','Videos']]],
   ['Grow',[['banners','🖼️','Banners'],['notify','🔔','Notifications']]],
   ['System',[['admins','🛡️','Admin team'],['audit','📜','Audit log']]]];
-const TITLES={overview:'Overview',review:'Review queue',reports:'Reports',businesses:'Businesses',users:'Users',content:'Videos',banners:'Banners',notify:'Notifications',admins:'Admin team',audit:'Audit log'};
+const TITLES={overview:'Overview',review:'Review queue',reports:'Reports',support:'Support messages',businesses:'Businesses',users:'Users',content:'Videos',banners:'Banners',notify:'Notifications',admins:'Admin team',audit:'Audit log'};
 function shell(){
   const nm=me&&(me.display_name||me.username)||'Admin';
   app.innerHTML=`<div class="shell"><aside class="side" id="side"><div class="brand"><div class="logo">BT</div><div>BT Admin<small>${role==='super_admin'?'Super admin':'Admin'}</small></div></div>
@@ -156,8 +156,23 @@ function route(){page=(location.hash||'#overview').slice(1).split('?')[0];if(!PA
   document.querySelectorAll('.nav[data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===page));
   $('ttl').textContent=TITLES[page];$('pane').innerHTML='<div class="sk"></div><div class="sk"></div><div class="sk"></div>';window.scrollTo(0,0);
   PAGES[page]().catch(e=>{$('pane').innerHTML=`<div class="card"><b>Something went wrong</b><p class="err">${esc(e.message)}</p><button class="btn ghost sm" id="rt">Try again</button></div>`;$('rt').onclick=route})}
-async function refreshCounts(){try{const a=await rpc('admin_attention');counts={pending:Number(a.pending_businesses)||0,reports:Number(a.open_reports)||0};
-  [['review',counts.pending],['reports',counts.reports]].forEach(([k,n])=>{const el=$('cn_'+k);if(el){el.textContent=n;el.style.display=n?'inline':'none'}})}catch{}}
+async function refreshCounts(){try{const a=await rpc('admin_attention');counts={pending:Number(a.pending_businesses)||0,reports:Number(a.open_reports)||0,tickets:Number(a.open_tickets)||0};
+  [['review',counts.pending],['reports',counts.reports],['support',counts.tickets]].forEach(([k,n])=>{const el=$('cn_'+k);if(el){el.textContent=n;el.style.display=n?'inline':'none'}})}catch{}}
+
+async function openTicket(t,after){
+  const th=await rpc('ticket_thread',{p_ticket:t.id});
+  const p=t.payload;const gm=p&&p.lat!=null?`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`:'';
+  const m=modal(`<h2>${esc(t.subject)}</h2><p class="muted sm">${esc(t.business_name||t.display_name||t.username)} · @${esc(t.username)} · ${esc(t.role)} · ${esc(t.category)}</p>
+  <div style="max-height:40vh;overflow:auto">${th.map(x=>`<div style="margin:8px 0;padding:10px 12px;border-radius:12px;background:${x.from_admin?'var(--s2)':'rgba(124,58,237,.18)'}"><b class="sm">${x.from_admin?'BT team':'@'+esc(t.username)}</b> <span class="muted sm">${ago(x.created_at)}</span><div style="white-space:pre-wrap;margin-top:4px">${esc(x.body)}</div></div>`).join('')}</div>
+  ${p&&p.lat!=null?`<div class="card sm" style="margin:10px 0"><b>Requested new location</b><div class="muted">${esc(p.address||'')}</div><a class="link" target="_blank" rel="noopener" href="${gm}">Check it on Google Maps</a></div>`:''}
+  <label>Reply</label><textarea id="rt" maxlength="1000"></textarea><div class="err" id="er"></div>
+  <div class="row" style="justify-content:flex-end"><button class="btn ghost" id="mc">Close window</button>${t.category==='location'&&p&&t.status==='open'?'<button class="btn green" id="ap">Apply this location</button>':''}<button class="btn ghost" id="rc">Reply and close</button><button class="btn" id="rp">Reply</button></div>`,{wide:true});
+  const q=s=>m.el.querySelector(s),send=async close=>{const b=q('#rt').value.trim();if(!b&&!close){q('#er').textContent='Write a reply';return}
+    try{await rpc('admin_reply_ticket',{p_ticket:t.id,p_body:b,p_close:!!close});toast('Sent');m.close();after();refreshCounts()}catch(e){q('#er').textContent=e.message}};
+  q('#mc').onclick=()=>m.close();q('#rp').onclick=()=>send(false);q('#rc').onclick=()=>send(true);
+  if(q('#ap'))q('#ap').onclick=async()=>{if(!await confirmBox('Move this business?','Its pin and address change now. Its 3-month cycle is not used up.','Apply'))return;
+    try{await rpc('admin_apply_location_ticket',{p_ticket:t.id});toast('Location applied');m.close();after();refreshCounts()}catch(e){q('#er').textContent=e.message}};
+}
 
 /* ---------- charts ---------- */
 function lineChart(labels,series){const W=640,H=200,P={l:30,r:8,t:10,b:22},max=Math.max(4,...series.flatMap(s=>s.data)),X=i=>P.l+i*(W-P.l-P.r)/Math.max(1,labels.length-1),Y=v=>H-P.b-(v/max)*(H-P.t-P.b);
@@ -178,6 +193,7 @@ async overview(){
   $('pane').innerHTML=`<h2 style="margin:0 0 4px;font-size:24px">${greet}${nm?', '+esc(nm):''} 👋</h2><p class="muted" style="margin:0 0 16px">${A.pending_businesses||A.open_reports?'Here is what needs you today.':'Everything is calm. Nothing is waiting for you.'}</p>
   <div class="att"><button class="attc ${A.pending_businesses?'hot':''}" data-go="review"><b>${num(A.pending_businesses)}</b><span>businesses waiting for review${A.pending_businesses&&A.oldest_pending_hours?` · oldest ${num(A.oldest_pending_hours)} h`:''}</span></button>
   <button class="attc ${A.open_reports?'hot':''}" data-go="reports"><b>${num(A.open_reports)}</b><span>open reports</span></button>
+  <button class="attc ${A.open_tickets?'hot':''}" data-go="support"><b>${num(A.open_tickets)}</b><span>unanswered messages</span></button>
   <button class="attc" data-go="users"><b>${num(A.new_users_today)}</b><span>new people today</span></button></div>
   <div class="grid">${K.map(([i,n,k])=>`<div class="stat"><span class="ico">${i}</span><b>${num(s[k])}</b><span>${n}</span></div>`).join('')}</div>
   <div class="card"><h3>Last 14 days</h3><p class="muted sm" style="margin:0 0 6px">New people and verified check-ins per day</p>${ts?lineChart(ts.map(r=>new Date(r.day+'T00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'})),[{name:'New people',color:'#A78BFA',data:ts.map(r=>r.signups)},{name:'Check-ins',color:'#FFB547',data:ts.map(r=>r.checkins)}]):'<p class="muted">Run bt_step10.sql to see trends.</p>'}</div>
@@ -208,6 +224,15 @@ async reports(){
       try{await rpc('admin_resolve_report',{p_id:Number(b.dataset.i),p_action:a,p_note:note});toast('Done');draw();refreshCounts()}catch(e){toast(e.message,1)}})};
   $('pane').innerHTML=`<div class="chips" id="rs">${['open','resolved','dismissed','all'].map(s=>`<button class="chip ${s===status?'on':''}" data-s="${s}">${s[0].toUpperCase()+s.slice(1)}</button>`).join('')}</div><div id="rl"></div>`;
   document.querySelectorAll('#rs [data-s]').forEach(b=>b.onclick=()=>{status=b.dataset.s;document.querySelectorAll('#rs .chip').forEach(x=>x.classList.toggle('on',x===b));draw()});draw();
+},
+async support(){
+  let status='open';
+  const draw=async()=>{const rows=await rpc('admin_list_tickets',{p_status:status,p_limit:60});
+    if(status==='open'){const n=rows.filter(r=>r.admin_unread).length;counts.tickets=n;const el=$('cn_support');if(el){el.textContent=n;el.style.display=n?'inline':'none'}}
+    $('tl').innerHTML=rows.length?rows.map(t=>`<button class="item" data-t="${t.id}" style="width:100%;text-align:left;align-items:center"><div style="font-size:22px">${t.admin_unread?'🔴':t.status==='closed'?'✅':'💬'}</div><div class="grow"><b>${esc(t.subject)}</b> <span class="pill">${esc(t.category)}</span><div class="muted sm">${esc(t.business_name||t.display_name||t.username)} · @${esc(t.username)} · ${ago(t.updated_at)}</div><div class="muted sm">${t.last_from_admin?'You: ':''}${esc((t.last_body||'').slice(0,100))}</div></div></button>`).join(''):'<div class="empty"><i>📭</i><b>No messages</b>Messages from customers and businesses show here.</div>';
+    document.querySelectorAll('#tl [data-t]').forEach(b=>b.onclick=()=>openTicket(rows.find(r=>String(r.id)===b.dataset.t),draw))};
+  $('pane').innerHTML=`<div class="chips" id="ts">${['open','closed','all'].map(s=>`<button class="chip ${s===status?'on':''}" data-s="${s}">${s[0].toUpperCase()+s.slice(1)}</button>`).join('')}</div><div id="tl"></div>`;
+  document.querySelectorAll('#ts [data-s]').forEach(b=>b.onclick=()=>{status=b.dataset.s;document.querySelectorAll('#ts .chip').forEach(x=>x.classList.toggle('on',x===b));draw()});draw();
 },
 async businesses(){
   let status='approved',q='';
@@ -241,27 +266,41 @@ async content(){
 },
 async banners(){
   const {data,error}=await sb.from('home_slides').select('*').order('sort_order');if(error)throw new Error(error.message);
-  let imgUrl=null;
-  $('pane').innerHTML=`<div class="row" style="align-items:flex-start"><div class="card grow" style="min-width:300px"><h3>New banner</h3><p class="muted sm" style="margin:0 0 10px">Shows on the Home “Explore” card in BT.</p>
-  <label>Title</label><input id="t" maxlength="60" placeholder="e.g. Weekend deals in Zaria"><label>Subtitle (optional)</label><input id="sbt" maxlength="140">
-  <label>Button</label><select id="lk"><option value="">No button</option><option value="nearby">Opens: Nearby businesses</option><option value="map">Opens: Map</option><option value="discover">Opens: Discover videos</option><option value="chat">Opens: Chat</option><option value="custom">Opens: a web link…</option></select><input id="lc" placeholder="https://…" style="display:none">
-  <div class="row"><div class="grow"><label>Order</label><input id="so" type="number" value="0"></div></div><label>Background image (optional)</label><input id="im" type="file" accept="image/*"><div class="err" id="er"></div><button class="btn" id="add">Publish banner</button></div>
-  <div class="grow" style="min-width:300px"><label>Preview</label><div class="banner-prev" id="bp"><span class="pill" style="align-self:flex-start;background:rgba(255,255,255,.2);color:#fff">Featured</span><h2 id="bpt">Your title</h2><p id="bps"></p><span class="go" id="bpg" style="display:none">Explore now →</span></div></div></div>
-  <h3 style="margin:18px 0 10px">Live banners</h3><div id="bl"></div>`;
-  const prev=()=>{$('bpt').textContent=$('t').value||'Your title';$('bps').textContent=$('sbt').value;$('bpg').style.display=$('lk').value?'inline-block':'none'};
-  ['t','sbt','lk'].forEach(i=>$(i).oninput=prev);$('lk').onchange=()=>{$('lc').style.display=$('lk').value==='custom'?'block':'none';prev()};
-  $('im').onchange=()=>{const f=$('im').files[0];if(f){const u=URL.createObjectURL(f);$('bp').style.backgroundImage=`linear-gradient(180deg,rgba(11,11,26,.15),rgba(11,11,26,.85)),url('${u}')`}};
-  $('bl').innerHTML=(data||[]).length?data.map(s=>`<div class="item"><div class="grow"><b>${esc(s.title)}</b> <span class="pill ${s.active?'approved':''}">${s.active?'live':'hidden'}</span>${s.subtitle?`<div class="muted sm">${esc(s.subtitle)}</div>`:''}<div class="muted sm">Button: ${esc(s.link||'none')} · order ${s.sort_order}</div>${safeImg(s.image_url)?`<img class="pf" style="max-height:140px" src="${esc(s.image_url)}" alt="">`:''}</div>
-    <div class="row"><button class="btn ghost sm" data-tg="${s.id}" data-v="${s.active?0:1}">${s.active?'Hide':'Show'}</button><button class="btn red sm" data-del="${s.id}">Delete</button></div></div>`).join(''):'<div class="empty"><i>🖼️</i><b>No banners yet</b>Home shows the default Explore card.</div>';
+  let kind='',biz=null;
+  $('pane').innerHTML=`<div class="row" style="align-items:flex-start"><div class="card grow" style="min-width:300px"><h3>New Explore post</h3><p class="muted sm" style="margin:0 0 10px">Shows on the Home “Explore” card. Add a picture, or a video of up to 15 seconds, to promote a business.</p>
+  <label>Title</label><input id="t" maxlength="60" placeholder="e.g. Fresh bread every morning"><label>Subtitle (optional)</label><input id="sbt" maxlength="140">
+  <label>Picture or short video</label><input id="im" type="file" accept="image/*,video/*"><div id="fp" style="margin-top:8px"></div>
+  <label>Tag (what happens when people tap it)</label><div class="chips" id="fk"><button class="chip on" data-k="">No tag</button><button class="chip" data-k="location">📍 Business location</button><button class="chip" data-k="group">👥 Business group</button></div>
+  <p class="muted sm" id="fh" style="margin:6px 0"></p>
+  <div id="bx" style="display:none"><label>Business</label><input id="bq" placeholder="Search business name" autocomplete="off"><div id="bo"></div><div id="bs" class="sm" style="margin:6px 0"></div></div>
+  <div class="row"><div class="grow"><label>Order</label><input id="so" type="number" value="0"></div></div><div class="err" id="er"></div><button class="btn" id="add">Publish</button></div>
+  <div class="grow" style="min-width:300px"><label>Preview</label><div class="banner-prev" id="bp"><span class="pill" style="align-self:flex-start;background:rgba(255,255,255,.2);color:#fff">Featured</span><h2 id="bpt">Your title</h2><p id="bps"></p><span class="go" id="bpg" style="display:none">Tap action</span></div></div></div>
+  <h3 style="margin:18px 0 10px">Live on Home</h3><div id="bl"></div>`;
+  const prev=()=>{$('bpt').textContent=$('t').value||'Your title';$('bps').textContent=$('sbt').value;$('bpg').style.display=kind?'inline-block':'none';$('bpg').textContent=kind==='location'?'📍 Get directions':'👥 Visit community'};
+  ['t','sbt'].forEach(i=>$(i).oninput=prev);
+  $('im').onchange=()=>{const f=$('im').files[0];if(!f)return;const u=URL.createObjectURL(f);$('fp').innerHTML=f.type.startsWith('video/')?`<video src="${u}" controls muted playsinline style="max-height:180px;max-width:100%"></video>`:`<img class="pf" style="max-height:180px" src="${u}" alt="">`;if(!f.type.startsWith('video/'))$('bp').style.backgroundImage=`linear-gradient(180deg,rgba(11,11,26,.15),rgba(11,11,26,.85)),url('${u}')`};
+  document.querySelectorAll('#fk [data-k]').forEach(b=>b.onclick=()=>{kind=b.dataset.k;document.querySelectorAll('#fk .chip').forEach(x=>x.classList.toggle('on',x===b));$('bx').style.display=kind?'block':'none';
+    $('fh').textContent=kind==='location'?'Tapping opens Google Maps directions to the business.':kind==='group'?'Tapping opens the business page, where people can follow and join its community.':'';prev()});
+  let tm=null;$('bq').oninput=()=>{clearTimeout(tm);tm=setTimeout(async()=>{try{const r=await rpc('admin_business_options',{p_q:$('bq').value.trim()||null});
+    $('bo').innerHTML=r.map(b=>`<button class="item" data-b="${b.id}" style="width:100%;text-align:left"><div class="grow"><b>${esc(b.name)}</b><div class="muted sm">${esc(b.address||'')}${b.has_location?'':' · no location saved'}</div></div></button>`).join('');
+    document.querySelectorAll('#bo [data-b]').forEach(x=>x.onclick=()=>{biz=r.find(y=>y.id===x.dataset.b);$('bs').innerHTML='Selected: <b>'+esc(biz.name)+'</b>';$('bo').innerHTML=''})}catch(e){toast(e.message,1)}},300)};
+  $('bl').innerHTML=(data||[]).length?data.map(s=>`<div class="item"><div class="grow"><b>${esc(s.title)}</b> <span class="pill ${s.active?'approved':''}">${s.active?'live':'hidden'}</span>${s.tag_kind?`<span class="pill">${s.tag_kind==='location'?'📍 location':'👥 group'}</span>`:''}${s.subtitle?`<div class="muted sm">${esc(s.subtitle)}</div>`:''}<div class="muted sm">Order ${s.sort_order}${s.link?' · opens '+esc(s.link):''}</div>${safeImg(s.image_url)?(s.media_type==='video'?`<video src="${esc(s.image_url)}" controls preload="none" playsinline style="margin-top:6px;max-height:140px"></video>`:`<img class="pf" style="max-height:140px" src="${esc(s.image_url)}" alt="">`):''}</div>
+    <div class="row"><button class="btn ghost sm" data-tg="${s.id}" data-v="${s.active?0:1}">${s.active?'Hide':'Show'}</button><button class="btn red sm" data-del="${s.id}">Delete</button></div></div>`).join(''):'<div class="empty"><i>🖼️</i><b>No posts yet</b>Home shows the default Explore card.</div>';
   document.querySelectorAll('[data-tg]').forEach(b=>b.onclick=async()=>{const r=await sb.from('home_slides').update({active:b.dataset.v==='1'}).eq('id',b.dataset.tg);if(r.error)toast(r.error.message,1);route()});
-  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!await confirmBox('Delete this banner?','This cannot be undone.','Delete',1))return;const r=await sb.from('home_slides').delete().eq('id',b.dataset.del);if(r.error)toast(r.error.message,1);route()});
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!await confirmBox('Delete this post?','This cannot be undone.','Delete',1))return;const r=await sb.from('home_slides').delete().eq('id',b.dataset.del);if(r.error)toast(r.error.message,1);route()});
   $('add').onclick=async()=>{const title=$('t').value.trim();if(!title){$('er').textContent='Enter a title';return}
-    let link=$('lk').value;if(link==='custom'){link=$('lc').value.trim();if(!/^https:\/\//.test(link)){$('er').textContent='Link must start with https://';return}}
-    $('add').disabled=true;$('er').textContent='';
-    try{const f=$('im').files[0];if(f){if(f.size>6e6)throw new Error('Image too big (max 6 MB)');const fd=new FormData();fd.append('file',f);fd.append('upload_preset',PRESET);
-        const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`,{method:'POST',body:fd});const j=await r.json();if(!j.secure_url)throw new Error('Image upload failed');imgUrl=j.secure_url.replace('/upload/','/upload/c_limit,w_1200,q_auto/')}
-      const r=await sb.from('home_slides').insert({title,subtitle:$('sbt').value.trim()||null,link:link||null,image_url:imgUrl,sort_order:Number($('so').value)||0,active:true});
-      if(r.error)throw new Error(r.error.message);toast('Banner published');route()}catch(e){$('er').textContent=e.message;$('add').disabled=false}};
+    if(kind&&!biz){$('er').textContent='Choose the business to tag';return}
+    if(kind==='location'&&!biz.has_location){$('er').textContent='This business has no saved location';return}
+    const f=$('im').files[0];const isV=!!f&&f.type.startsWith('video/');
+    if(f){if(!isV&&!f.type.startsWith('image/')){$('er').textContent='Picture or video only';return}
+      if(f.size>(isV?25e6:8e6)){$('er').textContent=isV?'Video too big (max 25 MB)':'Picture too big (max 8 MB)';return}
+      if(isV){const dur=await new Promise(r=>{const v=document.createElement('video');v.preload='metadata';v.onloadedmetadata=()=>r(v.duration);v.onerror=()=>r(0);v.src=URL.createObjectURL(f)});
+        if(!dur||dur>15.5){$('er').textContent=dur?'Video is '+Math.round(dur)+' seconds. Maximum is 15 seconds.':'Could not read this video';return}}}
+    $('add').disabled=true;$('er').textContent=f?'Uploading…':'';
+    try{let url=null;if(f){const fd=new FormData();fd.append('file',f);fd.append('upload_preset',PRESET);
+        const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/${isV?'video':'image'}/upload`,{method:'POST',body:fd});const j=await r.json();if(!j.secure_url)throw new Error('Upload failed');url=isV?j.secure_url:j.secure_url.replace('/upload/','/upload/c_limit,w_1200,q_auto/')}
+      const r=await sb.from('home_slides').insert({title,subtitle:$('sbt').value.trim()||null,image_url:url,media_type:isV?'video':'image',tag_kind:kind||null,business_id:kind?biz.id:null,sort_order:Number($('so').value)||0,active:true});
+      if(r.error)throw new Error(r.error.message);toast('Published');route()}catch(e){$('er').textContent=e.message;$('add').disabled=false}};
 },
 async notify(){
   $('pane').innerHTML=`<div class="row" style="align-items:flex-start"><div class="card grow" style="min-width:300px"><h3>Send a notification</h3><p class="muted sm" style="margin:0 0 10px">Appears under the bell in BT.</p>
