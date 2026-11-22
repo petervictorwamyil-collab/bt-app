@@ -206,7 +206,103 @@ nav button.plus{flex:none;width:56px;height:56px;border-radius:50%;background:li
 .dside{position:absolute;right:8px;bottom:20px;display:flex;flex-direction:column;gap:14px}
 .dside button{display:flex;flex-direction:column;align-items:center;font-size:24px;color:#fff}.dside button span{font-size:11px}
 .hbadge{display:inline-block;padding:4px 10px;border-radius:14px;font-size:12px;font-weight:700;background:rgba(124,58,237,.25);border:1px solid var(--violet);color:var(--vl)}.hbadge.don{background:linear-gradient(135deg,#7C3AED,#C4B5FD);color:#1a0b3a}
+
+/* ===== Round 8: friendlier, warmer look (same violet on navy) ===== */
+:root{--amber:#FFB547;--amber2:#FF8A3D}
+html,body{font-family:"Nunito",ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font-family:inherit}
+.card{border-radius:22px;border-color:rgba(167,139,250,.12);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.btn{border-radius:16px;box-shadow:0 6px 18px rgba(124,58,237,.35)}
+.btn.ghost{box-shadow:none}
+.hello{margin:4px 2px 14px}
+.hello h1{margin:0;font-size:26px;line-height:1.2;font-weight:800;letter-spacing:-.2px}
+.hello p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.4}
+.rank{display:flex;align-items:center;gap:14px;padding:14px 14px 14px 14px;margin-bottom:14px;border-radius:24px;background:radial-gradient(120% 140% at 0% 0%,rgba(124,58,237,.38),rgba(20,20,42,.95) 60%);border:1px solid rgba(167,139,250,.25);box-shadow:0 10px 28px rgba(76,29,149,.35);cursor:pointer}
+.ring2{--p:0;flex:none;width:72px;height:72px;border-radius:50%;background:conic-gradient(var(--amber) calc(var(--p)*1%),rgba(255,255,255,.12) 0);display:flex;align-items:center;justify-content:center}
+.ring2 .in{width:58px;height:58px;border-radius:50%;background:#14142A;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.ring2 .in b{font-size:17px;font-weight:800}.ring2 .in span{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.08em}
+.rank .rk{font-size:22px;font-weight:800;line-height:1.15}
+.ck{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 12px;border-radius:16px;background:linear-gradient(135deg,var(--amber),var(--amber2));color:#2A1300;font-size:20px;font-weight:800;box-shadow:0 6px 16px rgba(255,138,61,.35)}
+.ck span{font-size:11px;font-weight:800}
+.q4 button{border-radius:20px;border-color:rgba(167,139,250,.12)}
+.bc{border-radius:20px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.sec b{font-size:18px;font-weight:800}
+.bar{height:8px;border-radius:6px}
+.bar i{background:linear-gradient(90deg,var(--violet),var(--amber))}
+.empty{padding:44px 14px}.empty i{font-size:42px;display:block;margin-bottom:8px;font-style:normal}
+/* celebration */
+.cel{position:fixed;inset:0;z-index:400;background:radial-gradient(90% 70% at 50% 25%,rgba(124,58,237,.55),#0B0B1A 70%);display:flex;align-items:center;justify-content:center;animation:cin .25s ease-out;overflow:hidden}
+.cel.out{opacity:0;transition:opacity .2s}
+@keyframes cin{from{opacity:0}to{opacity:1}}
+.cbody{position:relative;z-index:2;width:100%;max-width:360px;padding:24px;text-align:center}
+.pulse{width:96px;height:96px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,var(--violet),#9F67FF);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 0 rgba(167,139,250,.6);animation:pls 1.6s ease-out 2}
+.pulse.calm{background:var(--s2);box-shadow:none;animation:none}
+@keyframes pls{0%{box-shadow:0 0 0 0 rgba(167,139,250,.55)}100%{box-shadow:0 0 0 34px rgba(167,139,250,0)}}
+.tick{stroke-dasharray:50;stroke-dashoffset:50;animation:tk .5s .15s ease-out forwards}
+@keyframes tk{to{stroke-dashoffset:0}}
+.cbody h2{margin:0;font-size:26px;font-weight:800}
+.cn{color:var(--vl);font-weight:700;margin-top:4px}
+.gain{font-size:56px;font-weight:800;color:var(--amber);margin:14px 0 2px;line-height:1;text-shadow:0 4px 24px rgba(255,181,71,.35)}.gain small{font-size:20px}
+.cm{color:var(--muted);font-size:14px;margin-bottom:14px}
+.cprog{background:rgba(20,20,42,.8);border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin:0 0 14px;text-align:left}
+.cprog .row2{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.cprog .bar i{transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.rankup{background:rgba(255,181,71,.14);border:1px solid rgba(255,181,71,.5);color:var(--amber);padding:10px;border-radius:14px;margin-bottom:14px;font-size:14px}
+.confetti{position:absolute;inset:0;pointer-events:none;z-index:1}
+.confetti i{position:absolute;top:-12px;left:var(--x);width:8px;height:14px;background:var(--c);border-radius:2px;transform:rotate(var(--r));animation:fall 2.4s var(--d) ease-in forwards;opacity:.95}
+@keyframes fall{to{top:105%;transform:translateX(30px) rotate(calc(var(--r) + 540deg));opacity:.7}}
+@media (prefers-reduced-motion:reduce){.pulse,.tick,.confetti i{animation:none}.tick{stroke-dashoffset:0}}
+.hero .pill,.slide .pill{align-self:flex-start;width:fit-content;padding:4px 10px;border-radius:10px}
+
+/* ===== Round 8b: app-wide polish ===== */
+button{transition:transform .12s ease,background .15s ease,opacity .15s}
+button:active{transform:scale(.97)}
+.screen{animation:fadeup .28s ease-out both}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+input,select,textarea{border-radius:16px;padding:14px 16px;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(124,58,237,.25)}
+.welcome{margin:18px 0 4px;font-size:28px;font-weight:800;letter-spacing:-.3px}
+nav{background:rgba(15,15,32,.92);border-top:1px solid rgba(167,139,250,.15)}
+nav button.on{color:#fff}nav button.on span{transform:translateY(-1px)}
+nav button.on:not(.plus)::after{content:"";display:block;width:5px;height:5px;border-radius:50%;background:var(--amber);margin:3px auto 0}
+nav button.plus{box-shadow:0 8px 24px rgba(124,58,237,.55),0 0 0 4px rgba(11,11,26,.9)}
+.toast{border-radius:16px;background:#1f1f42;box-shadow:0 10px 30px rgba(0,0,0,.45);font-weight:600}
+.menu{border-radius:20px}
+.sr{border-radius:14px}.sr:active{background:rgba(124,58,237,.12)}
+.ava.round{box-shadow:0 0 0 2px rgba(167,139,250,.35)}
+.acts{display:flex;gap:10px}.acts .btn{white-space:nowrap}
+.bubble,.msg .b{border-radius:20px}
+.ring2.big{width:92px;height:92px}.ring2.big .in{width:76px;height:76px}.ring2.big .in b{font-size:22px}
+.journey{background:var(--s1);border:1px solid var(--line);border-radius:22px;padding:8px 14px;margin-bottom:14px}
+.jstep{display:flex;gap:12px;align-items:center;padding:10px 0;position:relative;opacity:.55}
+.jstep:not(:last-child)::before{content:"";position:absolute;left:15px;top:42px;bottom:-8px;width:2px;background:var(--line)}
+.jstep .dot{width:32px;height:32px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex:none}
+.jstep.done{opacity:1}.jstep.done .dot{background:var(--violet)}
+.jstep.here{opacity:1}.jstep.here .dot{background:linear-gradient(135deg,var(--amber),var(--amber2));box-shadow:0 0 0 4px rgba(255,181,71,.2)}
+.tips div{padding:8px 0;line-height:1.45}.tips div+div{border-top:1px solid var(--line)}
+/* skeleton loaders */
+.sk{background:linear-gradient(90deg,rgba(255,255,255,.05),rgba(255,255,255,.12),rgba(255,255,255,.05));background-size:200% 100%;animation:shim 1.3s infinite linear;border-radius:10px}
+@keyframes shim{to{background-position:-200% 0}}
+.skr{display:flex;gap:12px;align-items:center;padding:12px}
+.sk.c{width:48px;height:48px;border-radius:50%;flex:none}.sk.b{width:48px;height:48px;border-radius:14px;flex:none}
+.sk.l1{height:13px;width:60%;margin-bottom:8px}.sk.l2{height:11px;width:35%}
+.sk.full{width:100%;height:100%;border-radius:16px}
+@media (prefers-reduced-motion:reduce){.sk,.screen{animation:none}}
+
+.dside button .ic{font-style:normal;font-size:28px;line-height:1;transition:transform .15s}
+.dside button.pop .ic{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+.cmsheet{max-height:78vh;display:flex;flex-direction:column;padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+.cmh{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 10px}.cmh button{font-size:18px;color:var(--muted);padding:4px 8px}
+.cmlist{overflow-y:auto;flex:1;min-height:120px}
+.cmr{display:flex;gap:10px;align-items:flex-start;padding:10px 0}
+.cmb{font-size:14px;line-height:1.4;word-break:break-word;margin-top:2px}
+.cmd{opacity:.6;padding:4px}
+.cmin{display:flex;gap:8px;align-items:center;padding-top:10px;border-top:1px solid var(--line)}.cmin input{margin:0;flex:1}.cmin .btn{flex:none}
+.cmr .grow{min-width:0;flex:1}.cmr .tg{display:inline-block}.cmd{flex:none;width:auto}.cmh b{white-space:nowrap}.cmh button{flex:none;width:auto}.cmr .ava{flex:none}
+.sheet .cmd,.sheet .cmh button,.sheet .cmin .btn{display:inline-block;width:auto;border-bottom:0;padding:6px 10px;font-size:18px}.sheet .cmin .btn{font-size:14px;padding:12px 18px}.sheet #cmm{display:block;width:100%;border-bottom:0;font-size:14px}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 <div id="app"></div>
@@ -350,7 +446,8 @@ function splash(){$app.innerHTML=`<div class="center"><img class="logo" src="${L
 
 function loginView(msg=''){
   $app.innerHTML=`<div class="screen plain" style="padding-top:40px">
-  <div style="text-align:center;margin-bottom:26px"><img class="logo" src="${LOGO}" alt="BT" style="width:100px;height:100px"><div class="muted" style="margin-top:8px">Discover • Grow • Succeed</div></div>
+  <div style="text-align:center;margin-bottom:26px"><img class="logo" src="${LOGO}" alt="BT" style="width:100px;height:100px"><div class="muted" style="margin-top:8px">Discover • Grow • Succeed</div>
+  <h1 class="welcome">Welcome back 👋</h1><p class="muted" style="margin:0">Pick up where you left off.</p></div>
   <input id="em" type="email" placeholder="Email" autocomplete="email">
   <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
   <label class="chk"><input id="rm" type="checkbox"> <span>Remember me on this device<br><span class="muted sm">Stay signed in for up to ${SESSION_DAYS} days. Leave off on shared phones.</span></span></label>
@@ -698,7 +795,9 @@ async function handleScannedQR(raw){
       const row = Array.isArray(result) ? result[0] : result;
       const awarded = row?.awarded ?? row?.awarded_exp ?? 100;
       const msg = row?.result_message || row?.message || 'Check-in recorded';
-      toast(`+${awarded} EXP`);
+      const before=profile.global_exp||0;
+      if(awarded>0)profile.global_exp=before+awarded;
+      celebrate(data.name||'',awarded,msg,before);
       render(`<b class="ok">Checked in ✓</b><div class="nm" style="margin-top:6px">${esc(data.name||'')}</div>
         <p class="muted sm">${esc(msg)} · +${awarded} EXP</p>
         <button class="btn sm2" style="margin-top:10px" id="qrHome">Back home</button>`);
@@ -723,6 +822,69 @@ async function handleScannedQR(raw){
   const ag=$('qrAgain'); if(ag) ag.onclick=()=>window.__btShow&&window.__btShow('scanner');
 }
 const bizCard=b=>`<button class="bc" data-b="${esc(b.id)}"><div class="img">${bizAva(b)}</div><div class="t"><div class="nm">${esc(b.name)}</div><div class="muted sm">${esc(b.category)}${b.distance_m!=null?' • '+km(b.distance_m):''}</div><div class="sm vl" style="margin-top:4px">${Number(b.follower_count)||0} followers</div></div></button>`;
+
+
+/* ---------- check-in celebration ---------- */
+function celebrate(name,awarded,msg,before){
+  const calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const win=awarded>0,after=(before||0)+awarded,s0=statusFor(before||0),s1=statusFor(after);
+  const pctOf=(e,s)=>s.next?Math.min(100,Math.max(0,(e-s.from)/(s.next-s.from)*100)):100;
+  const ranked=s1.n!==s0.n;
+  const o=document.createElement('div');o.className='cel';
+  const bits=win&&!calm?Array.from({length:26},(_,i)=>`<i style="--x:${(Math.random()*100).toFixed(0)}%;--d:${(Math.random()*.6).toFixed(2)}s;--r:${Math.floor(Math.random()*360)}deg;--c:${['#FFB547','#A78BFA','#7C3AED','#F3F0FF','#4ade80'][i%5]}"></i>`).join(''):'';
+  o.innerHTML=`<div class="confetti">${bits}</div><div class="cbody">
+    <div class="pulse ${win?'':'calm'}"><svg viewBox="0 0 52 52" width="64" height="64"><circle cx="26" cy="26" r="24" fill="none" stroke="currentColor" stroke-width="3" opacity=".35"/>${win?'<path d="M14 27l8 8 16-17" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" class="tick"/>':'<path d="M26 14v13l8 5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'}</svg></div>
+    <h2>${win?'You’re checked in!':'Visit logged'}</h2><div class="cn">${esc(name)}</div>
+    ${win?`<div class="gain"><span id="cexp">0</span><small> EXP</small></div>`:''}
+    <div class="cm">${esc(msg)}</div>
+    ${win?`<div class="cprog"><div class="row2"><b>${esc(s1.n)}</b><span class="muted sm">${s1.next?(s1.next-after).toLocaleString()+' EXP to next rank':'Top rank'}</span></div><div class="bar"><i id="cbar" style="width:${pctOf(before||0,s0)}%"></i></div></div>`:''}
+    ${ranked?`<div class="rankup">🎉 Rank up! You are now <b>${esc(s1.n)}</b></div>`:''}
+    <button class="btn" id="cok">${win?'Awesome':'OK'}</button></div>`;
+  document.body.appendChild(o);
+  try{if(win&&navigator.vibrate)navigator.vibrate([30,40,30])}catch{}
+  const close=()=>{o.classList.add('out');setTimeout(()=>{o.remove();if(typeof show==='function')show('home')},200)};
+  o.querySelector('#cok').onclick=close;
+  if(win){
+    const el=o.querySelector('#cexp'),t0=performance.now(),dur=calm?1:900;
+    const tick=t=>{const k=Math.min(1,(t-t0)/dur);el.textContent='+'+Math.round(awarded*(1-Math.pow(1-k,3)));if(k<1&&document.body.contains(o))requestAnimationFrame(tick)};requestAnimationFrame(tick);
+    setTimeout(()=>{const b=o.querySelector('#cbar');if(b)b.style.width=(ranked?100:pctOf(after,s1))+'%'},350);
+  }
+}
+
+
+const skel=(n=4,round=true)=>Array.from({length:n},()=>`<div class="skr"><div class="sk ${round?'c':'b'}"></div><div class="grow"><div class="sk l1"></div><div class="sk l2"></div></div></div>`).join('');
+const ringHtml=(exp,size='')=>{const st=statusFor(exp),pct=st.next?Math.min(100,Math.max(0,(exp-st.from)/(st.next-st.from)*100)):100;
+  return `<div class="ring2 ${size}" style="--p:${pct.toFixed(1)}"><div class="in"><b>${exp>=1000?(exp/1000).toFixed(exp>=10000?0:1).replace('.0','')+'k':exp}</b><span>EXP</span></div></div>`};
+
+
+/* ---------- video comments sheet ---------- */
+function openComments(videoId,onCount){
+  const bg=document.createElement('div');bg.className='sheetbg';bg.style.zIndex=300;
+  bg.innerHTML=`<div class="sheet cmsheet"><div class="cmh"><b id="cmt">Comments</b><button id="cmx" aria-label="Close">✕</button></div><div class="cmlist" id="cml">${skel(3)}</div>
+    <div class="cmin"><input id="cmi" maxlength="300" placeholder="Add a comment…" autocomplete="off"><button class="btn sm2" id="cms">Post</button></div></div>`;
+  document.body.appendChild(bg);
+  const close=()=>bg.remove();bg.onclick=e=>{if(e.target===bg)close()};bg.querySelector('#cmx').onclick=close;
+  let rows=[],last=null,done=false;
+  const paint=()=>{const L=bg.querySelector('#cml');
+    L.innerHTML=rows.length?rows.map((c,i)=>`<div class="cmr">${picAva(c.avatar_url,c.display_name,'sm')}<div class="grow"><div class="sm"><b>${esc(c.display_name||c.username)}</b>${c.is_owner?' <span class="tg">Business</span>':''} <span class="muted">${timeAgo(c.created_at)}</span></div><div class="cmb">${esc(c.body)}</div></div>${c.can_delete?`<button class="cmd" data-i="${i}" aria-label="Delete">🗑</button>`:''}</div>`).join('')+(done?'':'<button class="link" id="cmm" style="width:100%">Load more</button>')
+      :'<div class="empty" style="padding:24px"><i>💬</i><b style="color:var(--text)">No comments yet</b><p>Be the first to say something.</p></div>';
+    bg.querySelector('#cmt').textContent='Comments'+(rows.length?' ('+rows.length+(done?'':'+')+')':'');
+    L.querySelectorAll('.cmd').forEach(b=>b.onclick=async()=>{const c=rows[+b.dataset.i];if(!confirm('Delete this comment?'))return;
+      const {error}=await sb.rpc('delete_video_comment',{p_id:c.id});if(error){toast(error.message);return}
+      rows.splice(+b.dataset.i,1);paint();if(onCount)onCount(Math.max(0,(Number(cnt())||0)-1))});
+    const m=L.querySelector('#cmm');if(m)m.onclick=()=>load();};
+  const cnt=()=>{const el=document.querySelector(`[data-cm="${videoId}"] span`);return el?el.textContent:0};
+  async function load(){const {data,error}=await sb.rpc('video_comments_list',{p_video:videoId,p_limit:20,p_before:last});
+    if(error){bg.querySelector('#cml').innerHTML=`<div class="empty"><i>⚙️</i>${esc(/does not exist|schema cache/i.test(error.message)?'Run bt_step9.sql in Supabase to switch on comments.':error.message)}</div>`;return}
+    const d=data||[];rows=rows.concat(d);if(d.length<20)done=true;if(d.length)last=d[d.length-1].id;paint()}
+  const send=async()=>{const i=bg.querySelector('#cmi'),t=i.value.trim();if(!t)return;
+    const btn=bg.querySelector('#cms');btn.disabled=true;
+    const {error}=await sb.rpc('post_video_comment',{p_video:videoId,p_body:t});btn.disabled=false;
+    if(error){toast(error.message);return}
+    i.value='';rows=[];last=null;done=false;await load();if(onCount)onCount((Number(cnt())||0)+1)};
+  bg.querySelector('#cms').onclick=send;bg.querySelector('#cmi').onkeydown=e=>{if(e.key==='Enter')send()};
+  load();
+}
 
 const VIEWS={
   /* ----- HOME ----- */
@@ -750,7 +912,7 @@ const VIEWS={
       ? `<div class="hs">${businesses.slice(0,8).map(b=>{
           const stBadge = (Number(b.follower_count)||0) > 50 ? 'Pro Nova' : (Number(b.follower_count)||0) > 10 ? 'Top Dog' : 'Nova';
           return `<div class="bc" data-b="${esc(b.id)}">
-            <div class="img">${bizAva(b)}<span class="badge-st">${stBadge}</span></div>
+            <div class="img">${bizAva(b)}</div>
             <div class="t">
               <div class="nm">${esc(b.name)}</div>
               <div class="muted sm">${esc(b.category||'Business')}</div>
@@ -780,6 +942,14 @@ const VIEWS={
     </div>`;
 
     const eventsBlock='';
+    const nearN=businesses.filter(b=>b.distance_m!=null&&b.distance_m<=2000).length;
+    const nextName=st.next?(LADDER[LADDER.indexOf(st)+1]||{}).n:'';
+    const sub=isBiz?(myBiz&&myBiz.verified?'Your business is live. Customers can find you.':'Finish setup to appear on BT.')
+      :nearN?`${nearN} spot${nearN===1?'':'s'} near you right now. Check in to earn EXP.`:'Find a spot near you and check in to earn EXP.';
+    const hello=`<div class="hello"><h1>${greet()}${first?', '+esc(first):''} 👋</h1><p>${sub}</p></div>`;
+    const rankCard=isBiz?'':`<div class="rank" id="ep"><div class="ring2" style="--p:${pct.toFixed(1)}"><div class="in"><b>${exp>=1000?(exp/1000).toFixed(exp>=10000?0:1).replace('.0','')+'k':exp}</b><span>EXP</span></div></div>
+      <div class="grow"><div class="sm muted">Your rank</div><div class="rk">${esc(st.n)}</div><div class="muted sm">${st.next?`${(st.next-exp).toLocaleString()} EXP to ${esc(nextName)}`:'Top rank reached 👑'}</div></div>
+      <button class="ck" id="ck" aria-label="Check in">▦<span>Check in</span></button></div>`;
 
     return {html:`
     <div class="header-row">
@@ -790,9 +960,11 @@ const VIEWS={
       <button id="av">${avaHtml(profile)}</button>
     </div>
 
-    <div class="srchwrap"><div class="srch"><input id="q" placeholder="Search businesses and people" autocomplete="off"><button class="mapb" id="mp" aria-label="Map">🗺️</button></div><div id="sdrop" class="sdrop" style="display:none"></div></div>
-
+    ${hello}
+    ${rankCard}
     ${bizCardHome}
+
+    <div class="srchwrap"><div class="srch"><input id="q" placeholder="Search businesses and people" autocomplete="off"><button class="mapb" id="mp" aria-label="Map">🗺️</button></div><div id="sdrop" class="sdrop" style="display:none"></div></div>
 
     <div id="hero"><div class="card hero">
       <div class="hero-bg"></div>
@@ -804,21 +976,15 @@ const VIEWS={
       </div>
     </div></div>
 
-    ${q4}
-
-    <div class="sec"><b>Trending near you</b><button id="sa">See all →</button></div>
+    <div class="sec"><b>Near you right now</b><button id="sa">See all →</button></div>
     ${trendCards}
 
-    ${eventsBlock}
+    ${q4}
 
-    <div class="row" style="align-items:stretch;gap:10px;margin-top:4px">
-      <div class="card grow" style="margin:0">
-        <b>Top communities</b>
-        ${top.length?top.map(b=>`<div class="row" style="margin-top:10px"><div class="ava" style="width:34px;height:34px;font-size:16px">${bizAva(b)}</div><div class="grow"><div class="nm sm">${esc(b.name)}</div><div class="muted" style="font-size:11px">${Number(b.follower_count)||0} members</div></div></div>`).join(''):'<div class="muted sm" style="margin-top:8px">None yet</div>'}
-      </div>
-      ${isBiz?'':`<div class="card grow" style="margin:0" id="epMini"><b>Your EXP</b><div style="font-size:22px;font-weight:800;margin-top:6px">${exp.toLocaleString()}</div><div class="vl sm">${esc(st.n)}</div><div class="bar"><i style="width:${pct}%"></i></div></div>`}
-    </div>
-    ${expBlock}`,
+    <div class="card" style="margin-top:4px">
+      <b>Top communities</b>
+      ${top.length?top.map(b=>`<div class="row" style="margin-top:10px"><div class="ava" style="width:36px;height:36px;font-size:16px">${bizAva(b)}</div><div class="grow"><div class="nm sm">${esc(b.name)}</div><div class="muted" style="font-size:11px">${Number(b.follower_count)||0} members</div></div></div>`).join(''):'<div class="muted sm" style="margin-top:8px">Communities appear here as businesses join.</div>'}
+    </div>`,
     bind(){
       liveSearch($('q'),$('sdrop'),{limit:6});loadSlides();
       $('q').onkeydown=e=>{if(e.key==='Enter'){query=e.target.value;show('search')}};
@@ -828,6 +994,7 @@ const VIEWS={
       $('qr').onclick=()=>show(isBiz?'qrCode':'scanner');
       $('nt').onclick=()=>show('notifications');
       $('av').onclick=()=>show('account');
+      const ck=$('ck');if(ck)ck.onclick=e=>{e.stopPropagation();show('scanner')};
       const ep=$('ep'),epm=$('epMini');
       if(ep) ep.onclick=()=>show('exp');
       if(epm) epm.onclick=()=>show('exp');
@@ -1147,9 +1314,14 @@ const VIEWS={
       return {html:`${topbar('EXP')}<div class="card"><p class="muted">EXP and status ladder are only for customer accounts. Businesses grow through followers, visits and Discover posts.</p></div>`};
     }
     const exp=profile.global_exp||0,st=statusFor(exp),pct=st.next?Math.min(100,(exp-st.from)/(st.next-st.from)*100):100;
-    return {html:`${topbar('My EXP')}<div class="card"><div class="muted sm">Your status</div><div style="font-size:30px;font-weight:800">${esc(st.n)}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="muted sm">${exp.toLocaleString()} EXP${st.next?` • ${(st.next-exp).toLocaleString()} to next status`:''}</div></div>
-    <div class="mh">Status ladder</div><div class="menu" style="padding:4px 12px">${LADDER.map(l=>`<div class="lad"><span>${exp>=l.from?'✓ ':''}${esc(l.n)}</span><span class="muted">${l.from.toLocaleString()}+ EXP</span></div>`).join('')}</div>
-    <p class="muted sm">Each verified visit earns 100 EXP. Scan limits apply per business type.</p>`};
+    const nx=st.next?(LADDER[LADDER.indexOf(st)+1]||{}).n:'';
+    return {html:`${topbar('My EXP')}
+    <div class="rank" style="cursor:default">${ringHtml(exp,'big')}<div class="grow"><div class="sm muted">Your rank</div><div class="rk" style="font-size:28px">${esc(st.n)}</div><div class="muted sm">${st.next?`${(st.next-exp).toLocaleString()} EXP to ${esc(nx)}`:'You reached the top 👑'}</div></div></div>
+    <div class="mh">The journey</div><div class="journey">${LADDER.map((l,k)=>{const done=exp>=l.from&&(k===LADDER.length-1||exp<LADDER[k+1].from)?'here':exp>=l.from?'done':'';
+      return `<div class="jstep ${done}"><div class="dot">${done==='done'?'✓':done==='here'?'📍':k+1}</div><div class="grow"><b>${esc(l.n)}</b><div class="muted sm">${l.from.toLocaleString()}+ EXP${done==='here'?' · you are here':''}</div></div></div>`}).join('')}</div>
+    <div class="mh">How to earn EXP</div>
+    <div class="card tips"><div>▦ <b>Scan a business QR</b><span class="muted sm"> while you are at the shop: +100 EXP</span></div><div>⏱ <b>Come back later</b><span class="muted sm"> each business has a daily limit and a short wait between scans</span></div><div>🐕 <b>Become a Top Dog</b><span class="muted sm"> by being the top regular at a business you love</span></div></div>
+    <button class="btn" id="goScan" style="margin-top:6px">Scan to check in</button>`,bind(){$('goScan').onclick=()=>show('scanner')}};
   },
   map(p={}){
     return {html:`${topbar('BT Map')}<div id="mmsg"></div><div id="map" style="position:relative"></div>`,async bind(){
@@ -1359,7 +1531,7 @@ const VIEWS={
       load()}};
   },
   devices(){
-    return {html:`${topbar('Your devices')}<p class="muted">Devices that can sign in to your account. A login from a new device needs approval from one of these.</p><div id="dl"><p class="muted">Loading…</p></div>`,
+    return {html:`${topbar('Your devices')}<p class="muted">Devices that can sign in to your account. A login from a new device needs approval from one of these.</p><div id="dl">${skel(2,false)}</div>`,
       bind(){const load=async()=>{
         const {data,error}=await sb.from('trusted_devices').select('id,device_id,label,approved,denied,last_seen').order('last_seen',{ascending:false});
         if(error){$('dl').innerHTML='<div class="card muted sm">Device security is not switched on yet. Run bt_step4.sql in Supabase.</div>';return}
@@ -1459,7 +1631,7 @@ search(){
 /* ---------- person profile ---------- */
 profile(p){
   const id=p.id;
-  return {html:`${topbar('Profile')}<div id="pv"><div class="muted" style="text-align:center;padding:40px">Loading…</div></div>`,
+  return {html:`${topbar('Profile')}<div id="pv">${skel(3)}</div>`,
   async bind(){
     const load=async()=>{
       if(!UUID.test(String(id)))return;
@@ -1509,7 +1681,7 @@ profile(p){
 /* ---------- business profile ---------- */
 biz(p){
   const id=p.id;
-  return {html:`${topbar('Business')}<div id="bv"><div class="muted" style="text-align:center;padding:40px">Loading…</div></div>`,
+  return {html:`${topbar('Business')}<div id="bv">${skel(3,false)}</div>`,
   async bind(){
     const load=async()=>{
       if(!UUID.test(String(id)))return;
@@ -1685,7 +1857,7 @@ chat(){
   return {html:`<div class="top"><b style="font-size:22px">Chat</b></div>
   <div class="srchwrap"><div class="srch"><input id="cq" placeholder="Search people or businesses" autocomplete="off"></div><div id="cdrop" class="sdrop" style="display:none"></div></div>
   <div class="chips" id="cf"><button class="on" data-f="all">All</button><button data-f="dm">Chats</button><button data-f="com">Communities</button></div>
-  <div id="clist"><div class="muted sm" style="text-align:center;padding:20px">Loading…</div></div>`,
+  <div id="clist">${skel(5)}</div>`,
   async bind(){
     liveSearch($('cq'),$('cdrop'),{limit:8});
     const paint=()=>{
@@ -1744,7 +1916,7 @@ account(){
     ${profile.bio?`<p class="muted" style="margin:12px 24px 0;font-size:14px;line-height:1.4">${esc(profile.bio)}</p>`:`<button class="chipb" id="ab">＋ Add bio</button>`}
   </div>
   ${isBiz?`<div class="card" id="bz" style="margin-top:16px"><div class="row"><div class="grow"><b>${myBiz?esc(myBiz.name):'Your business'}</b><div class="${bizStatusCls()} sm" style="margin-top:4px">${bizStatusLine()}</div></div><span class="muted">›</span></div></div>`
-    :`<div class="card" id="exc" style="margin-top:16px"><div class="sm muted">Your status</div><div class="row" style="margin-top:4px"><b class="grow" style="font-size:18px">${esc(st.n)}</b><span class="vl">${(profile.global_exp||0).toLocaleString()} EXP ›</span></div></div>`}
+    :`<div class="rank" id="exc" style="margin-top:16px">${ringHtml(profile.global_exp||0)}<div class="grow"><div class="sm muted">Your rank</div><div class="rk">${esc(st.n)}</div><div class="muted sm">${(profile.global_exp||0).toLocaleString()} EXP · tap for details</div></div><span class="vl" style="font-size:22px">›</span></div>`}
   <div class="menu">
     ${isBiz?`<button data-go="myBiz"><i>🏪</i>My business page<em>›</em></button><button data-go="qrCode"><i>▦</i>Business QR code<em>›</em></button>`
       :`<button data-go="wyb"><i>📍</i>Where you've been<em>›</em></button><button data-go="qrCode"><i>▦</i>My QR code<em>›</em></button>`}
@@ -2096,7 +2268,7 @@ chat(){
   <div class="mh" style="margin-top:0">Statuses</div><div class="hs" id="sbar2" style="margin-bottom:10px"><div class="muted sm" style="padding:10px">Loading…</div></div>
   <div class="srchwrap"><div class="srch"><input id="cq" placeholder="Search people or businesses" autocomplete="off"></div><div id="cdrop" class="sdrop" style="display:none"></div></div>
   <div class="chips" id="cf"><button class="on" data-f="all">All</button><button data-f="dm">Chats</button><button data-f="com">Communities</button></div>
-  <div id="clist"><div class="muted sm" style="text-align:center;padding:20px">Loading…</div></div>`,
+  <div id="clist">${skel(5)}</div>`,
   async bind(){
     liveSearch($('cq'),$('cdrop'),{limit:8});
     const paintBar=()=>{
@@ -2145,13 +2317,13 @@ discover(){
   <div class="srch" style="margin-bottom:8px"><input id="dq" placeholder="Search videos, #hashtags, businesses" autocomplete="off"></div>
   <div class="chips" id="dchips"><button class="on" data-q="">All</button><button data-q="#food">#Food</button><button data-q="#fashion">#Fashion</button><button data-q="#beauty">#Beauty</button><button data-q="#tech">#Tech</button><button data-q="#deals">#Deals</button></div>
   <div class="seg" id="dseg"><button class="on" data-tab="all">For Me</button><button data-tab="following">Following</button></div>
-  <div class="dfeed" id="dfeed"><div class="muted sm" style="text-align:center;padding:30px">Loading videos…</div></div>`,
+  <div class="dfeed" id="dfeed"><div class="dcard"><div class="sk full"></div></div></div>`,
   bind(){
     const feed=$('dfeed');
     if($('goPost'))$('goPost').onclick=()=>show('addDiscover');
     const card=v=>`<div class="dcard" data-id="${esc(v.id)}"><video src="${esc(v.video_url)}" poster="${esc(posterOf(v.video_url))}" loop muted playsinline preload="metadata"></video>
       <div class="dshade"></div>
-      <div class="dside"><button data-bm="${esc(v.id)}" class="${v.bookmarked?'on':''}" aria-label="Bookmark">${v.bookmarked?'🔖':'🏷️'}<span>Save</span></button><button data-mu aria-label="Sound">🔇<span>Sound</span></button></div>
+      <div class="dside"><button data-lk="${esc(v.id)}" class="${v.i_liked?'on':''}" data-n="${v.like_count||0}" aria-label="Like"><b class="ic">${v.i_liked?'❤️':'🤍'}</b><span>${v.like_count||0}</span></button><button data-cm="${esc(v.id)}" data-n="${v.comment_count||0}" aria-label="Comments"><b class="ic">💬</b><span>${v.comment_count||0}</span></button><button data-bm="${esc(v.id)}" class="${v.bookmarked?'on':''}" aria-label="Bookmark">${v.bookmarked?'🔖':'🏷️'}<span>Save</span></button><button data-mu aria-label="Sound">🔇<span>Sound</span></button></div>
       <div class="dinfo"><button class="row" data-b="${esc(v.business_id)}" style="text-align:left">${bizPic(v.logo_url,'sm')}<b>${esc(v.business_name)}</b></button>
         ${v.caption?`<p>${esc(v.caption)}</p>`:''}${v.i_follow?'':`<button class="btn sm2" data-f="${esc(v.business_id)}" style="width:auto;padding:8px 16px">Follow</button>`}</div></div>`;
     const wire=root=>{
@@ -2159,6 +2331,14 @@ discover(){
       root.querySelectorAll('[data-f]').forEach(b=>b.onclick=async()=>{
         const bz=await sb.rpc('business_summary',{p_business:b.dataset.f});const x=bz.data&&bz.data[0];if(!x)return;
         if(await setFollow(x.owner_id,true)){toast('Following');document.querySelectorAll(`[data-f="${b.dataset.f}"]`).forEach(e=>e.remove())}});
+      root.querySelectorAll('[data-lk]').forEach(b=>b.onclick=async()=>{
+        if(profile.role!=='customer'){toast('Only customers can like videos');return}
+        const on=!b.classList.contains('on');
+        b.classList.toggle('on',on);b.querySelector('.ic').textContent=on?'❤️':'🤍';b.classList.remove('pop');void b.offsetWidth;if(on)b.classList.add('pop');
+        const {data,error}=await sb.rpc('set_video_like',{p_video:b.dataset.lk,p_on:on});
+        if(error){b.classList.toggle('on',!on);b.querySelector('.ic').textContent=on?'🤍':'❤️';toast(/does not exist|schema cache/i.test(error.message)?'Run bt_step9.sql in Supabase to switch on likes':error.message);return}
+        b.querySelector('span').textContent=data});
+      root.querySelectorAll('[data-cm]').forEach(b=>b.onclick=()=>openComments(b.dataset.cm,n=>{b.querySelector('span').textContent=n}));
       root.querySelectorAll('[data-bm]').forEach(b=>b.onclick=async()=>{
         const on=b.classList.contains('on');
         const {error}=on?await sb.from('bookmarks').delete().eq('user_id',me.id).eq('video_id',b.dataset.bm):await sb.from('bookmarks').insert({user_id:me.id,video_id:b.dataset.bm});
@@ -2174,7 +2354,7 @@ discover(){
         if(e.target===feed.lastElementChild)load()}else v.pause()}),{root:feed,threshold:[0,.6,1]});
     async function load(reset){
       if(busy||(end&&!reset))return;busy=true;
-      if(reset){before=null;end=false;feed.innerHTML='<div class="muted sm" style="text-align:center;padding:30px">Loading videos…</div>'}
+      if(reset){before=null;end=false;feed.innerHTML='<div class="dcard"><div class="sk full"></div></div>'}
       const {data,error}=await sb.rpc('discover_feed',{p_tab:tab,p_q:q||null,p_limit:8,p_before:before});
       busy=false;if(cur.name!=='discover')return;
       if(error){feed.innerHTML='<div class="empty"><i>⚙️</i>Run bt_step7.sql in Supabase to switch on the video feed.</div>';return}
@@ -2198,7 +2378,7 @@ notifications(){
   async bind(){
     const dev=pendingReq.map(r=>`<button class="card row" data-r="${esc(r.id)}" style="width:100%;text-align:left"><div style="font-size:26px">🔐</div><div class="grow"><div class="nm">New login request</div><div class="muted sm">${esc(r.label||'New device')} • tap to review</div></div></button>`).join('');
     const bindDev=()=>document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const r=pendingReq.find(x=>x.id===b.dataset.r);if(r)askApprove(r)});
-    $('nl').innerHTML=dev+'<div class="muted sm" style="text-align:center;padding:16px">Loading…</div>';bindDev();
+    $('nl').innerHTML=dev+skel(3);bindDev();
     const {data,error}=await sb.rpc('my_notifications',{p_limit:40});
     if(cur.name!=='notifications')return;
     const rows=data||[];
