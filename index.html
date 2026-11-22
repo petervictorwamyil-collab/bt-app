@@ -301,6 +301,8 @@ nav button.plus{box-shadow:0 8px 24px rgba(124,58,237,.55),0 0 0 4px rgba(11,11,
 .cmin{display:flex;gap:8px;align-items:center;padding-top:10px;border-top:1px solid var(--line)}.cmin input{margin:0;flex:1}.cmin .btn{flex:none}
 .cmr .grow{min-width:0;flex:1}.cmr .tg{display:inline-block}.cmd{flex:none;width:auto}.cmh b{white-space:nowrap}.cmh button{flex:none;width:auto}.cmr .ava{flex:none}
 .sheet .cmd,.sheet .cmh button,.sheet .cmin .btn{display:inline-block;width:auto;border-bottom:0;padding:6px 10px;font-size:18px}.sheet .cmin .btn{font-size:14px;padding:12px 18px}.sheet #cmm{display:block;width:100%;border-bottom:0;font-size:14px}
+.dlic{position:absolute;right:12px;top:12px;width:42px;height:42px;border-radius:50%;background:var(--violet);color:#fff;font-size:20px;box-shadow:0 6px 16px rgba(124,58,237,.4);display:flex;align-items:center;justify-content:center}
+.dlic+p{margin:0 48px 0 0}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -536,7 +538,7 @@ function registerView(){
     else if(!$('ag').checked)e='Please accept the Terms and Privacy Policy';
     if(e){$('er').textContent=e;return}
     $('go').disabled=true;$('er').textContent='';
-    remember=false;lsSet('bt_remember','0');
+    window.__su={un,name};remember=false;lsSet('bt_remember','0');
     const {data,error}=await sb.auth.signUp({email,password:pw,options:{data:{username:un,display_name:name,date_of_birth:dobS,role}}});
     $('go').disabled=false;
     if(error){const m=error.message.toLowerCase();
@@ -560,6 +562,8 @@ function verifyView(email,role){
     $('go').disabled=false;
     if(error){$('er').textContent='Wrong or expired code. Request a new one.';return}
     lsSet('bt_login_at',String(Date.now()));
+    // if they started as a customer then switched to business (or back) with the same email, apply the type they chose last
+    try{const su=window.__su||{};if(su.un){const r=await sb.rpc('finish_signup',{p_role:role,p_username:su.un,p_display:su.name});if(r.error&&/taken/i.test(r.error.message))toast('That username was taken. You can change it in your profile.')}}catch{}
     startApp();
   };
   $('rs').onclick=async()=>{const {error}=await sb.auth.resend({type:'signup',email});
@@ -706,11 +710,19 @@ async function nearbyIfAllowed(){
 }
 
 /* ---------- boot into app ---------- */
+function suspendedView(){
+  $app.innerHTML=`<div class="screen plain" style="text-align:center;padding-top:80px"><div style="font-size:56px">⛔</div><h2>Your account is suspended</h2>
+  <p class="muted">The BT team has paused this account. If you think this is a mistake, email us and we will look into it.</p>
+  <a class="btn" style="display:inline-block;text-decoration:none" href="mailto:Businesstracka01@gmail.com?subject=Account%20suspended">Contact BT</a>
+  <div style="margin-top:14px"><button class="link" id="so">Log out</button></div></div>`;
+  $('so').onclick=async()=>{await sb.auth.signOut();loginView()};
+}
 async function startApp(){
   splash();
   const {data:{user}}=await sb.auth.getUser();
   if(!user){loginView();return}
   me=user;
+  try{const as=await sb.rpc('account_status');if(as.data==='suspended'){suspendedView();return}}catch{}
   const gate=await gateCheck();
   if(gate==='pending'){pendingView();return}
   if(gate==='denied'){await sb.auth.signOut();loginView('This device was not approved. Log in again to ask for access.');return}
@@ -866,10 +878,11 @@ function openComments(videoId,onCount){
   const close=()=>bg.remove();bg.onclick=e=>{if(e.target===bg)close()};bg.querySelector('#cmx').onclick=close;
   let rows=[],last=null,done=false;
   const paint=()=>{const L=bg.querySelector('#cml');
-    L.innerHTML=rows.length?rows.map((c,i)=>`<div class="cmr">${picAva(c.avatar_url,c.display_name,'sm')}<div class="grow"><div class="sm"><b>${esc(c.display_name||c.username)}</b>${c.is_owner?' <span class="tg">Business</span>':''} <span class="muted">${timeAgo(c.created_at)}</span></div><div class="cmb">${esc(c.body)}</div></div>${c.can_delete?`<button class="cmd" data-i="${i}" aria-label="Delete">🗑</button>`:''}</div>`).join('')+(done?'':'<button class="link" id="cmm" style="width:100%">Load more</button>')
+    L.innerHTML=rows.length?rows.map((c,i)=>`<div class="cmr">${picAva(c.avatar_url,c.display_name,'sm')}<div class="grow"><div class="sm"><b>${esc(c.display_name||c.username)}</b>${c.is_owner?' <span class="tg">Business</span>':''} <span class="muted">${timeAgo(c.created_at)}</span></div><div class="cmb">${esc(c.body)}</div></div>${c.can_delete?`<button class="cmd" data-i="${i}" aria-label="Delete">🗑</button>`:''}${!c.mine?`<button class="cmd" data-rc="${c.id}" aria-label="Report">🚩</button>`:''}</div>`).join('')+(done?'':'<button class="link" id="cmm" style="width:100%">Load more</button>')
       :'<div class="empty" style="padding:24px"><i>💬</i><b style="color:var(--text)">No comments yet</b><p>Be the first to say something.</p></div>';
     bg.querySelector('#cmt').textContent='Comments'+(rows.length?' ('+rows.length+(done?'':'+')+')':'');
-    L.querySelectorAll('.cmd').forEach(b=>b.onclick=async()=>{const c=rows[+b.dataset.i];if(!confirm('Delete this comment?'))return;
+    L.querySelectorAll('[data-rc]').forEach(b=>b.onclick=()=>reportSheet('comment',b.dataset.rc));
+    L.querySelectorAll('.cmd[data-i]').forEach(b=>b.onclick=async()=>{const c=rows[+b.dataset.i];if(!confirm('Delete this comment?'))return;
       const {error}=await sb.rpc('delete_video_comment',{p_id:c.id});if(error){toast(error.message);return}
       rows.splice(+b.dataset.i,1);paint();if(onCount)onCount(Math.max(0,(Number(cnt())||0)-1))});
     const m=L.querySelector('#cmm');if(m)m.onclick=()=>load();};
@@ -884,6 +897,46 @@ function openComments(videoId,onCount){
     i.value='';rows=[];last=null;done=false;await load();if(onCount)onCount((Number(cnt())||0)+1)};
   bg.querySelector('#cms').onclick=send;bg.querySelector('#cmi').onkeydown=e=>{if(e.key==='Enter')send()};
   load();
+}
+
+
+/* ---------- QR download (poster PDF / image) ---------- */
+function qrSource(payload,size){return new Promise(res=>{const d=document.createElement('div');d.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(d);
+  new QRCode(d,{text:payload,width:size,height:size,correctLevel:QRCode.CorrectLevel.M});
+  setTimeout(()=>{const c=d.querySelector('canvas');const out=document.createElement('canvas');out.width=out.height=size;out.getContext('2d').drawImage(c,0,0);d.remove();res(out)},60)})}
+async function qrPoster({payload,heading,sub,name,note}){
+  const W=1240,H=1754,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  const F='Nunito,system-ui,-apple-system,Segoe UI,Roboto,sans-serif',ctr=(t,y,font,col)=>{g.font=font;g.fillStyle=col;g.textAlign='center';g.fillText(t,W/2,y)};
+  g.fillStyle='#fff';g.fillRect(0,0,W,H);
+  const gr=g.createLinearGradient(0,0,W,340);gr.addColorStop(0,'#4C1D95');gr.addColorStop(1,'#7C3AED');g.fillStyle=gr;g.fillRect(0,0,W,340);
+  g.fillStyle='rgba(255,255,255,.18)';g.beginPath();g.roundRect(W/2-56,56,112,112,30);g.fill();
+  ctr('BT',140,`800 56px ${F}`,'#fff');ctr('Business Tracker',232,`700 36px ${F}`,'#EDE9FE');ctr('Discover • Grow • Succeed',286,`600 26px ${F}`,'#C4B5FD');
+  ctr(heading,470,`800 84px ${F}`,'#1B1535');ctr(sub,540,`600 38px ${F}`,'#6B6590');
+  const size=720,q=await qrSource(payload,size),x=(W-size)/2,y=590;
+  g.fillStyle='#fff';g.strokeStyle='#7C3AED';g.lineWidth=10;g.beginPath();g.roundRect(x-40,y-40,size+80,size+80,40);g.fill();g.stroke();g.drawImage(q,x,y);
+  let nm=name,fs=70;g.font=`800 ${fs}px ${F}`;while(g.measureText(nm).width>W-160&&fs>34){fs-=4;g.font=`800 ${fs}px ${F}`}
+  ctr(nm,y+size+135,`800 ${fs}px ${F}`,'#1B1535');
+  ctr(note,y+size+195,`600 34px ${F}`,'#6B6590');
+  g.fillStyle='#F5F3FF';g.fillRect(0,H-190,W,190);
+  ctr('Open the BT app → tap the center ＋ → Scan',H-100,`700 36px ${F}`,'#4C1D95');
+  return c}
+function saveBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)}
+function loadJsPDF(){return window.jspdf?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=ok;s.onerror=()=>no(new Error('Could not load the PDF tool. Check your internet or use the image option.'));document.head.appendChild(s)})}
+async function downloadQr(kind,opts){
+  const base='BT-QR-'+String(opts.name||'code').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').slice(0,40);
+  toast('Preparing…');
+  try{const c=await qrPoster(opts);
+    if(kind==='png'){c.toBlob(b=>{if(!b){toast('Could not make the image');return}saveBlob(b,base+'.png');toast('Image saved')},'image/png');return}
+    await loadJsPDF();const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+    pdf.addImage(c.toDataURL('image/jpeg',.95),'JPEG',0,0,210,297);pdf.save(base+'.pdf');toast('PDF saved')
+  }catch(e){toast((e&&e.message)||'Could not download')}}
+
+
+/* ---------- reporting ---------- */
+function reportSheet(kind,target){
+  const go=async reason=>{const {error}=await sb.rpc('submit_report',{p_kind:kind,p_target:String(target),p_reason:reason});
+    toast(error?(/does not exist|schema cache/i.test(error.message)?'Reporting is not switched on yet':error.message):'Thanks. The BT team will review this.')};
+  sheet([{t:'Spam or scam',fn:()=>go('spam')},{t:'Inappropriate content',fn:()=>go('inappropriate')},{t:'Harassment or bullying',fn:()=>go('harassment')},{t:'Fake or misleading',fn:()=>go('fake')},{t:'Something else',fn:()=>go('other')}]);
 }
 
 const VIEWS={
@@ -1144,7 +1197,8 @@ const VIEWS={
     const label = isBiz ? `Business check-in · ${myBiz.name}` : `@${profile.username}`;
     return {html:`
     ${topbar('My QR code')}
-    <div class="card" style="text-align:center">
+    <div class="card" style="text-align:center;position:relative">
+      <button class="dlic" id="dlq" aria-label="Download QR code" title="Download">⬇</button>
       <p class="muted sm">${isBiz
         ? 'Customers scan this at your location to check in and earn EXP.'
         : 'Your personal QR — share so others can find you.'}</p>
@@ -1153,6 +1207,8 @@ const VIEWS={
       <div class="muted sm" id="qrMeta" style="margin-top:6px;word-break:break-all;font-size:11px">Loading token…</div>
       ${isBiz?`<button class="btn sm2" style="margin-top:12px" id="rotateQr">Rotate QR (new code)</button>`:''}
     </div>
+    <button class="btn" id="dlq2">⬇ Download to print (PDF or image)</button>
+    ${isBiz?'<p class="muted sm" style="text-align:center;margin:8px 4px">Print the PDF and stick it at your counter or door, so customers can scan without you opening BT. If you rotate the code, print the new one.</p>':''}
     <button class="btn ghost" id="shareQr">Copy code text</button>`,
     async bind(){
       const box=$('qrBox');
@@ -1180,6 +1236,12 @@ const VIEWS={
       } else {
         box.innerHTML='<p class="muted">QR library failed to load. Refresh.</p>';
       }
+      const openDl=()=>{
+        const o={payload,name:isBiz?myBiz.name:(profile.display_name||profile.username),
+          heading:isBiz?'Scan to check in':'Scan to find me',sub:isBiz?'Earn EXP every time you visit':'Follow me on BT',
+          note:isBiz?'Turn on GPS and stand inside the shop':'@'+profile.username};
+        sheet([{t:'Download PDF (A4, ready to print)',fn:()=>downloadQr('pdf',o)},{t:'Download image (PNG, for Word or WhatsApp)',fn:()=>downloadQr('png',o)}])};
+      $('dlq').onclick=openDl;$('dlq2').onclick=openDl;
       $('shareQr').onclick=async()=>{
         try{ await navigator.clipboard.writeText(payload); toast('Copied'); }
         catch{ toast(payload); }
@@ -1577,7 +1639,7 @@ function sheet(items){
 async function setFollow(uid,on){
   const q=on?sb.from('follows').insert({follower_id:me.id,followee_id:uid}):sb.from('follows').delete().eq('follower_id',me.id).eq('followee_id',uid);
   const {error}=await q;
-  if(error&&!/duplicate/.test(error.message)){toast(/row-level|policy/.test(error.message)?'You cannot follow this account.':'Could not update follow');return false}
+  if(error&&!/duplicate/.test(error.message)){toast(/row-level|policy/.test(error.message)?(profile&&profile.role==='business'?'Businesses can only follow their own Top Dog or Don.':'You cannot follow this account.'):'Could not update follow');return false}
   return true;
 }
 function needVerify(next){ if(Date.now()-verifiedAt<9*60000)show(next); else show('verify',{next}); }
@@ -1668,6 +1730,7 @@ profile(p){
         if(e){toast(fe(e));return}
         const row=r&&r[0];if(row){lk.textContent=row.liked?'❤️':'🤍';lk.classList.toggle('on',row.liked);$('lc').textContent=row.like_count}};
       $('mo').onclick=()=>sheet([
+        {t:'Report @'+u.username,fn:()=>reportSheet('user',u.id)},
         {t:u.i_blocked?'Unblock @'+u.username:'Block @'+u.username,danger:!u.i_blocked,fn:async()=>{
           if(!u.i_blocked&&!confirm('Block @'+u.username+'? They will not be able to follow or message you.'))return;
           if(u.i_blocked)await sb.from('blocks').delete().eq('blocker_id',me.id).eq('blocked_id',u.id);
@@ -1697,6 +1760,7 @@ biz(p){
       <div class="stats-row"><div><b>${b.followers}</b><span>Followers</span></div><div><b>${b.visits}</b><span>Check-ins</span></div><div><b>${b.visitors}</b><span>Visitors</span></div></div></div>
       <div class="acts">${b.is_owner?`<button class="btn" id="oc">Open community</button><button class="btn ghost" id="eb">Edit business</button>`
         :b.i_follow?`<button class="btn ghost" id="fl">Joined ✓</button><button class="btn" id="oc">Open community</button>`
+        :profile.role==='business'?`<div class="muted sm" style="padding:8px">Businesses cannot join other businesses' communities.</div>`
         :`<button class="btn" id="fl">Follow and join community</button>`}</div>
       <div class="card" style="margin-top:14px"><b>About</b><p class="muted" style="margin:6px 0 0;line-height:1.5">${esc(b.about||'This business has not added a description yet.')}</p></div>
       <div class="card"><b>Location</b><div class="muted sm" style="margin:6px 0 10px">📍 ${esc(b.address||'Address not added')}</div>
@@ -2323,9 +2387,9 @@ discover(){
     if($('goPost'))$('goPost').onclick=()=>show('addDiscover');
     const card=v=>`<div class="dcard" data-id="${esc(v.id)}"><video src="${esc(v.video_url)}" poster="${esc(posterOf(v.video_url))}" loop muted playsinline preload="metadata"></video>
       <div class="dshade"></div>
-      <div class="dside"><button data-lk="${esc(v.id)}" class="${v.i_liked?'on':''}" data-n="${v.like_count||0}" aria-label="Like"><b class="ic">${v.i_liked?'❤️':'🤍'}</b><span>${v.like_count||0}</span></button><button data-cm="${esc(v.id)}" data-n="${v.comment_count||0}" aria-label="Comments"><b class="ic">💬</b><span>${v.comment_count||0}</span></button><button data-bm="${esc(v.id)}" class="${v.bookmarked?'on':''}" aria-label="Bookmark">${v.bookmarked?'🔖':'🏷️'}<span>Save</span></button><button data-mu aria-label="Sound">🔇<span>Sound</span></button></div>
+      <div class="dside"><button data-lk="${esc(v.id)}" class="${v.i_liked?'on':''}" data-n="${v.like_count||0}" aria-label="Like"><b class="ic">${v.i_liked?'❤️':'🤍'}</b><span>${v.like_count||0}</span></button><button data-cm="${esc(v.id)}" data-n="${v.comment_count||0}" aria-label="Comments"><b class="ic">💬</b><span>${v.comment_count||0}</span></button><button data-bm="${esc(v.id)}" class="${v.bookmarked?'on':''}" aria-label="Bookmark">${v.bookmarked?'🔖':'🏷️'}<span>Save</span></button><button data-rp="${esc(v.id)}" aria-label="Report"><b class="ic">🚩</b><span>Report</span></button><button data-mu aria-label="Sound">🔇<span>Sound</span></button></div>
       <div class="dinfo"><button class="row" data-b="${esc(v.business_id)}" style="text-align:left">${bizPic(v.logo_url,'sm')}<b>${esc(v.business_name)}</b></button>
-        ${v.caption?`<p>${esc(v.caption)}</p>`:''}${v.i_follow?'':`<button class="btn sm2" data-f="${esc(v.business_id)}" style="width:auto;padding:8px 16px">Follow</button>`}</div></div>`;
+        ${v.caption?`<p>${esc(v.caption)}</p>`:''}${v.i_follow||profile.role==='business'?'':`<button class="btn sm2" data-f="${esc(v.business_id)}" style="width:auto;padding:8px 16px">Follow</button>`}</div></div>`;
     const wire=root=>{
       root.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>show('biz',{id:b.dataset.b}));
       root.querySelectorAll('[data-f]').forEach(b=>b.onclick=async()=>{
@@ -2338,6 +2402,7 @@ discover(){
         const {data,error}=await sb.rpc('set_video_like',{p_video:b.dataset.lk,p_on:on});
         if(error){b.classList.toggle('on',!on);b.querySelector('.ic').textContent=on?'🤍':'❤️';toast(/does not exist|schema cache/i.test(error.message)?'Run bt_step9.sql in Supabase to switch on likes':error.message);return}
         b.querySelector('span').textContent=data});
+      root.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>reportSheet('video',b.dataset.rp));
       root.querySelectorAll('[data-cm]').forEach(b=>b.onclick=()=>openComments(b.dataset.cm,n=>{b.querySelector('span').textContent=n}));
       root.querySelectorAll('[data-bm]').forEach(b=>b.onclick=async()=>{
         const on=b.classList.contains('on');
