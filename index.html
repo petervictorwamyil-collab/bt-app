@@ -171,7 +171,7 @@ nav button.plus{flex:none;width:56px;height:56px;border-radius:50%;background:li
 .slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:0;margin-bottom:14px;border-radius:18px;scrollbar-width:none}
 .slides::-webkit-scrollbar{display:none}
 .slide{flex:none;width:100%;scroll-snap-align:start;min-height:170px;padding:18px 16px;display:flex;flex-direction:column;justify-content:flex-end;background-size:cover;background-position:center;border-radius:18px;border:1px solid var(--line)}
-.slide h2{margin:6px 0 4px;font-size:22px;line-height:1.25;font-weight:800}
+.slide{position:relative;overflow:hidden}.slide>video,.slide>.sbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}.slide>.sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,11,26,.05),rgba(11,11,26,.85));z-index:0}.slide>*:not(video):not(.sbg):not(.sh){position:relative;z-index:1}.slide h2{margin:6px 0 4px;font-size:22px;line-height:1.25;font-weight:800}
 .slide p{margin:0 0 12px;color:rgba(243,240,255,.88);font-size:13px}
 .picker{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--s1);padding:6px}
 .picker .ph{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--vl);padding:10px 8px 4px}
@@ -199,7 +199,7 @@ nav button.plus{flex:none;width:56px;height:56px;border-radius:50%;background:li
 .dfeed{height:calc(100vh - 290px);min-height:380px;overflow-y:auto;scroll-snap-type:y mandatory;border-radius:16px;scrollbar-width:none}
 .dfeed::-webkit-scrollbar{display:none}
 .dcard{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;background:#000;border-radius:16px;overflow:hidden}
-.dcard video{width:100%;height:100%;object-fit:cover}
+.dcard video{width:100%;height:100%;object-fit:cover}.bub{max-width:82%;padding:10px 13px;border-radius:16px;margin:6px 0;line-height:1.4;white-space:pre-wrap;word-break:break-word}.bub.me{margin-left:auto;background:var(--violet);color:#fff}.bub.ad{background:var(--card,#1b1b36);border:1px solid rgba(255,255,255,.1)}
 .dshade{position:absolute;inset:auto 0 0 0;height:50%;background:linear-gradient(0deg,rgba(0,0,0,.8),transparent);pointer-events:none}
 .dinfo{position:absolute;left:12px;right:70px;bottom:14px;color:#fff}.dinfo p{margin:6px 0 8px;font-size:14px}
 .dinfo .row{gap:8px;align-items:center;color:#fff}
@@ -1409,6 +1409,9 @@ const VIEWS={
       here.textContent='◎';here.setAttribute('aria-label','My location');
       here.style.cssText='position:absolute;right:12px;bottom:12px;z-index:999;width:46px;height:46px;border-radius:50%;background:#7C3AED;color:#fff;font-size:24px;box-shadow:0 4px 14px rgba(0,0,0,.5)';
       here.onclick=()=>{if(geo)mapObj.setView([geo.lat,geo.lng],16)};box.appendChild(here);
+      const gm=document.createElement('a');gm.textContent='Open in Google Maps';gm.target='_blank';gm.rel='noopener';
+      gm.href='https://www.google.com/maps/search/?api=1&query='+(p.focus?p.focus.lat+','+p.focus.lng:pos.lat+','+pos.lng);
+      gm.style.cssText='position:absolute;left:12px;bottom:12px;z-index:999;padding:11px 14px;border-radius:24px;background:#fff;color:#1a1a2e;font-weight:700;font-size:13px;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.5)';box.appendChild(gm);
       if(mapWatch!=null&&navigator.geolocation)navigator.geolocation.clearWatch(mapWatch);
       if(navigator.geolocation)mapWatch=navigator.geolocation.watchPosition(p=>{geo={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};me_.setLatLng([geo.lat,geo.lng]);acc.setLatLng([geo.lat,geo.lng]).setRadius(Math.min(geo.acc||50,300))},()=>{},{enableHighAccuracy:true,maximumAge:10000});
       [100,400,1000].forEach(t=>setTimeout(()=>mapObj&&mapObj.invalidateSize(),t));
@@ -2006,7 +2009,7 @@ settings(){
   const row=(k,i,l,e='')=>`<button data-go="${k}"><i>${i}</i>${l}<em>${e||'›'}</em></button>`;
   return {html:`${topbar('Settings and privacy')}
   <div class="mh">Account</div><div class="menu">${row('manageAccount','👤','Manage account')}${row('blocked','🚫','Blocked accounts')}${row('security','🔒','Security and login')}</div>
-  <div class="mh">Support and about</div><div class="menu">${row('mail','✉️','Contact support')}${row('legal:terms','📄','Terms of Use')}${row('legal:privacy','🛡️','Privacy Policy')}${row('legal:cookies','🍪','Cookie Policy')}${row('about','ℹ️','About BT')}</div>
+  <div class="mh">Support and about</div><div class="menu">${row('support','✉️','Contact BT team')}${row('legal:terms','📄','Terms of Use')}${row('legal:privacy','🛡️','Privacy Policy')}${row('legal:cookies','🍪','Cookie Policy')}${row('about','ℹ️','About BT')}</div>
   <div class="mh">Login</div><div class="menu"><button data-go="logout" class="danger"><i>↪</i>Log out</button></div>`,
   bind(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const k=b.dataset.go;
     if(k==='logout')doLogout();else if(k==='mail')location.href='mailto:'+SUPPORT_EMAIL+'?subject=BT%20support';
@@ -2016,7 +2019,7 @@ manageAccount(){
   const masked=(me.email||'').replace(/^(.).*(@.*)$/,'$1•••$2');
   const row=(k,l,e='')=>`<button data-go="${k}">${l}<em>${esc(e)||'›'}</em></button>`;
   return {html:`${topbar('Manage account')}
-  <div class="menu">${row('editProfile','Edit profile (photo and bio)')}${row('v:changeName','Name',profile.display_name)}${row('v:username','Username','@'+profile.username)}${row('v:changeEmail','Email',masked)}${row('v:changePassword','Password','••••••••')}</div>
+  <div class="menu">${row('editProfile','Edit profile (photo and bio)')}${row('v:changeName','Name',profile.display_name)}${row('v:username','Username','@'+profile.username)}${row('v:changeEmail','Email',masked)}${row('v:changePassword','Password','••••••••')}${profile.role==='business'?row('v:changeLocation','Business location'):''}</div>
   <p class="muted sm">Changing your name, username, email or password needs your password and a code sent to your email. Name and username can each be changed once every 90 days.</p>
   <div class="menu" style="margin-top:14px"><button data-go="v:deleteAccount" class="danger">Delete account<em>›</em></button></div>`,
   bind(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const k=b.dataset.go;if(k.startsWith('v:'))needVerify(k.slice(2));else show(k)})}};
@@ -2186,9 +2189,82 @@ function bizStatusLine(){
   return s==='approved'?'✓ Verified and live on BT':s==='rejected'?'⚠ Needs changes. Tap to fix':s==='suspended'?'⛔ Suspended by BT':'⏳ Under review by the BT team';
 }
 function bizStatusCls(){const s=myBiz&&(myBiz.verification_status||(myBiz.verified?'approved':'pending'));return s==='approved'?'ok':s==='rejected'||s==='suspended'?'err':'muted'}
+/* ---------- business location change + support inbox ---------- */
+Object.assign(VIEWS,{
+changeLocation(){
+  return {html:`${topbar('Business location')}<div id="lc">${skel(2,false)}</div>`,
+  async bind(){
+    const {data,error}=await sb.rpc('my_location_status');const st=data&&data[0];
+    if(cur.name!=='changeLocation')return;
+    if(error||!st){$('lc').innerHTML='<div class="empty"><i>⚙️</i>Location change is not switched on yet. Ask BT to run bt_step12.sql.</div>';return}
+    const cur_=`<div class="card"><b>Current location</b><div class="muted sm" style="margin:6px 0">📍 ${esc(st.address||'Not set')}</div>${st.lat!=null?`<a class="link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${st.lat},${st.lng}">See it on Google Maps</a>`:''}</div>`;
+    if(!st.can_change){
+      $('lc').innerHTML=`${cur_}<div class="card sm">You moved your location recently. You can change it yourself again on <b>${fmtDate(st.next_change_at)}</b> (once every 3 months).</div>
+      <p class="muted sm">Moved to a wrong place by mistake? Ask the BT team and they can fix it sooner.</p><button class="btn" id="ask">Ask BT to change it</button>`;
+      $('ask').onclick=()=>show('supportNew',{cat:'location'});return}
+    let pt=null;
+    $('lc').innerHTML=`${cur_}<p class="muted sm">Stand at your business, turn on GPS, then tap the button. You can change your location once every 3 months.</p>
+    <button class="btn ghost" id="gp">📍 Use my current location</button><div class="muted sm" id="gs" style="margin:6px 0"></div>
+    <label class="f">New address</label><input id="na" maxlength="200" placeholder="Street, area, city"><div class="err" id="er"></div><button class="btn" id="sv">Save new location</button>`;
+    $('gp').onclick=async()=>{$('gs').textContent='Finding you…';const p=await getPos();if(!p){$('gs').textContent='Could not get your location. Turn on GPS and allow location.';return}pt=p;$('gs').textContent='✓ Location captured (accuracy about '+Math.round(p.acc||0)+' m)'};
+    $('sv').onclick=async()=>{const a=$('na').value.trim();if(!pt){$('er').textContent='Tap “Use my current location” first';return}
+      if(a.length<5){$('er').textContent='Enter your new address';return}
+      if(!confirm('Move your business to this new location? You cannot change it again for 3 months.'))return;
+      $('sv').disabled=true;const r=await sb.rpc('change_business_location',{p_lat:pt.lat,p_lng:pt.lng,p_address:a});$('sv').disabled=false;
+      if(r.error){if(/Verify with/.test(r.error.message)){verifiedAt=0;stack.pop();show('verify',{next:'changeLocation'});return}$('er').textContent=fe(r.error);return}
+      toast('Location updated');try{const m=await sb.rpc('my_business');if(m.data&&m.data[0])myBiz=m.data[0]}catch{}back()};
+  }};
+},
+support(){
+  return {html:`${topbar('Contact BT team')}<p class="muted sm">Send a message, report a problem or ask for help. The BT team replies here and you get a notification.</p><button class="btn" id="nw">✏️ New message</button><div id="tl" style="margin-top:12px">${skel(2,false)}</div>`,
+  async bind(){
+    $('nw').onclick=()=>show('supportNew',{});
+    const {data,error}=await sb.rpc('my_tickets');if(cur.name!=='support')return;
+    if(error){$('tl').innerHTML='<div class="empty"><i>⚙️</i>Messaging is not switched on yet. Ask BT to run bt_step12.sql.</div>';return}
+    const rows=data||[];
+    $('tl').innerHTML=rows.length?rows.map(t=>`<button class="card row" data-t="${t.id}" style="width:100%;text-align:left;${t.user_unread?'border-color:var(--violet)':''}"><div style="font-size:24px">${t.user_unread?'🔴':t.status==='closed'?'✅':'💬'}</div><div class="grow"><div class="nm">${esc(t.subject)}</div><div class="muted sm">${esc((t.last_body||'').slice(0,80))}</div><div class="muted sm" style="margin-top:4px">${t.status==='closed'?'Closed · ':''}${timeAgo(t.updated_at)}</div></div></button>`).join('')
+      :'<div class="empty"><i>💬</i>No messages yet.</div>';
+    document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>show('supportThread',{id:b.dataset.t}));
+  }};
+},
+supportNew(p){
+  const cats=[['account','Account'],...(profile.role==='business'?[['location','Change location']]:[]),['qr','QR code'],['report','Report a problem'],['other','Other']];
+  let cat=p&&p.cat||'other',pt=null;
+  return {html:`${topbar('New message')}<label class="f">What is it about?</label><div class="chips" id="cc">${cats.map(([k,n])=>`<button data-c="${k}" class="${k===cat?'on':''}">${n}</button>`).join('')}</div>
+  <label class="f">Title</label><input id="sj" maxlength="80" placeholder="Short title">
+  <label class="f">Message</label><textarea id="bd2" maxlength="1000" placeholder="Tell us what happened"></textarea>
+  <div id="lx" style="display:none"><div class="muted sm">Stand at your new business spot, then tap below. The BT team will check and apply it.</div><button class="btn ghost" id="gp" style="margin-top:6px">📍 Attach my current location</button><div class="muted sm" id="gs" style="margin:6px 0"></div><label class="f">New address</label><input id="na" maxlength="200"></div>
+  <div class="err" id="er"></div><button class="btn" id="sd">Send to BT</button>`,
+  bind(){
+    const sync=()=>{$('lx').style.display=cat==='location'?'block':'none';if(cat==='location'&&!$('sj').value)$('sj').value='Please change my business location'};
+    document.querySelectorAll('#cc [data-c]').forEach(b=>b.onclick=()=>{cat=b.dataset.c;document.querySelectorAll('#cc button').forEach(x=>x.classList.toggle('on',x===b));sync()});sync();
+    $('gp').onclick=async()=>{$('gs').textContent='Finding you…';const g=await getPos();if(!g){$('gs').textContent='Could not get your location. Turn on GPS.';return}pt=g;$('gs').textContent='✓ Location attached'};
+    $('sd').onclick=async()=>{const sj=$('sj').value.trim(),bd=$('bd2').value.trim();
+      if(sj.length<3){$('er').textContent='Add a short title';return}if(bd.length<3){$('er').textContent='Write your message';return}
+      let payload=null;if(cat==='location'){if(!pt){$('er').textContent='Attach your current location first';return}if($('na').value.trim().length<5){$('er').textContent='Enter the new address';return}payload={lat:pt.lat,lng:pt.lng,address:$('na').value.trim()}}
+      $('sd').disabled=true;const {data,error}=await sb.rpc('open_ticket',{p_category:cat,p_subject:sj,p_body:bd,p_payload:payload});
+      if(error){$('sd').disabled=false;$('er').textContent=/does not exist|schema cache/i.test(error.message)?'Messaging is not switched on yet.':fe(error);return}
+      toast('Sent to the BT team');stack.pop();show('supportThread',{id:data},false)};
+  }};
+},
+supportThread(p){
+  const id=Number(p.id);
+  return {html:`${topbar('Message')}<div id="th">${skel(2,false)}</div><div id="rb" style="display:none;margin-top:12px"><textarea id="rp" maxlength="1000" placeholder="Write a reply"></textarea><div class="err" id="er"></div><button class="btn" id="rs">Send</button></div>`,
+  async bind(){
+    const load=async()=>{const {data,error}=await sb.rpc('ticket_thread',{p_ticket:id});if(cur.name!=='supportThread')return;
+      if(error){$('th').innerHTML='<div class="empty"><i>💬</i>Message not found.</div>';return}
+      const rows=data||[];$('th').innerHTML=rows.map(m=>`<div class="bub ${m.from_admin?'ad':'me'}">${m.from_admin?'<b class="sm">BT team</b><br>':''}${esc(m.body)}<div class="muted sm" style="margin-top:4px;${m.from_admin?'':'color:#ddd'}">${timeAgo(m.created_at)}</div></div>`).join('')+(rows[0]&&rows[0].status==='closed'?'<div class="muted sm" style="text-align:center;margin-top:8px">Closed. Reply below to reopen.</div>':'');
+      $('rb').style.display='block'};
+    await load();
+    $('rs').onclick=async()=>{const b=$('rp').value.trim();if(!b)return;$('rs').disabled=true;const {error}=await sb.rpc('reply_ticket',{p_ticket:id,p_body:b});$('rs').disabled=false;
+      if(error){$('er').textContent=fe(error);return}$('rp').value='';$('er').textContent='';load()};
+  }};
+}
+});
+
 function goLink(l){
   l=String(l||'').trim();
-  if(['nearby','map','chat','discover','search','home'].includes(l)){show(l);return}
+  if(['nearby','map','chat','discover','search','home','support'].includes(l)){show(l);return}
   const m=/^biz:([0-9a-f-]{36})$/i.exec(l);if(m){show('biz',{id:m[1]});return}
   if(/^https:\/\//i.test(l))window.open(l,'_blank','noopener');
 }
@@ -2197,12 +2273,17 @@ const posterOf=u=>String(u||'').replace('/upload/','/upload/so_0,c_limit,w_480/'
 /* ---------- home banners (managed by BT admins) ---------- */
 async function loadSlides(){
   const box=$('hero');if(!box)return;
-  const {data,error}=await sb.from('home_slides').select('id,title,subtitle,image_url,link').eq('active',true).order('sort_order').limit(8);
-  if(error||!data||!data.length||cur.name!=='home'||!$('hero'))return;
+  let r=await sb.rpc('home_slides_feed');
+  if(r.error)r=await sb.from('home_slides').select('id,title,subtitle,image_url,link').eq('active',true).order('sort_order').limit(8);
+  const data=r.data||[];
+  if(!data.length||cur.name!=='home'||!$('hero'))return;
   box.className='slides';
-  box.innerHTML=data.map(s=>{const img=safeImg(s.image_url);
-    return `<div class="slide" style="${img?`background-image:linear-gradient(180deg,rgba(11,11,26,.15),rgba(11,11,26,.85)),url('${esc(img)}')`:'background:linear-gradient(135deg,rgba(76,29,149,.9),rgba(124,58,237,.65))'}">
-      <span class="pill">Featured</span><h2>${esc(s.title)}</h2>${s.subtitle?`<p>${esc(s.subtitle)}</p>`:''}${s.link?`<button class="btn sm2" data-l="${esc(s.link)}">Explore now →</button>`:''}</div>`}).join('');
+  box.innerHTML=data.map(s=>{const img=safeImg(s.image_url),vid=s.media_type==='video'&&img;
+    const cta=s.tag_kind==='location'&&s.lat!=null?`<a class="btn sm2" target="_blank" rel="noopener" style="text-decoration:none;text-align:center" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}">📍 Get directions</a>`
+      :s.tag_kind==='group'&&s.business_id?`<button class="btn sm2" data-l="biz:${esc(s.business_id)}">👥 Visit community →</button>`
+      :s.link?`<button class="btn sm2" data-l="${esc(s.link)}">Explore now →</button>`:'';
+    return `<div class="slide" style="${img&&!vid?`background-image:linear-gradient(180deg,rgba(11,11,26,.15),rgba(11,11,26,.85)),url('${esc(img)}')`:'background:linear-gradient(135deg,rgba(76,29,149,.9),rgba(124,58,237,.65))'}">${vid?`<video src="${esc(img)}" autoplay muted loop playsinline preload="metadata"></video><div class="sh"></div>`:''}
+      <span class="pill">Featured</span><h2>${esc(s.title)}</h2>${s.subtitle?`<p>${esc(s.subtitle)}</p>`:''}${cta}</div>`}).join('');
   box.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>goLink(b.dataset.l));
   if(data.length>1){let i=0;clearInterval(window.__slide);window.__slide=setInterval(()=>{const h=$('hero');if(!h||cur.name!=='home'){clearInterval(window.__slide);return}
     i=(i+1)%data.length;h.scrollTo({left:h.clientWidth*i,behavior:'smooth'})},5000)}
@@ -2265,17 +2346,17 @@ async function bizWizard(step=1,d={}){
     $app.innerHTML=`<div class="screen plain"><b style="font-size:22px">Prove it is real</b><p class="muted">Step 3 of 3: shop photo and review</p>${steps}
     <label class="f">Photo of your shop front</label>
     <div id="pv" class="proof">${d.photo?`<img src="${esc(d.photo)}" alt="">`:'<span class="muted sm">No photo yet</span>'}</div>
-    <button class="btn ghost" id="pb">${d.photo?'Change photo':'📷 Take or choose a photo'}</button><input type="file" id="pf" accept="image/*" capture="environment" style="display:none">
+    <div style="display:flex;gap:10px"><button class="btn ghost" id="pb">${d.photo?'📷 Retake':'📷 Take photo'}</button><button class="btn ghost" id="pg">🖼️ ${d.photo?'Choose another':'Choose from gallery'}</button></div><input type="file" id="pf" accept="image/*" capture="environment" style="display:none"><input type="file" id="pf2" accept="image/*" style="display:none">
     <label class="f" style="margin-top:14px">CAC / business registration number (optional)</label><input id="rg" maxlength="40" value="${esc(d.reg||'')}" placeholder="e.g. RC1234567 (leave empty if you have none)">
     <div class="card" style="margin-top:12px"><b>${esc(d.name)}</b><div class="vl sm">${esc(d.catName==='Other'?'Other: '+d.other:d.catName)}</div><p class="muted" style="margin:6px 0">${esc(d.about||'No description')}</p><div class="sm">📍 ${esc(d.address)}</div><div class="sm">📞 ${esc(d.phone)}</div></div>
     <p class="muted sm">The BT team reviews every business before it appears on BT. You will get a notification when you are approved.</p>
     <div class="err" id="er"></div>
     <div style="display:flex;gap:10px"><button class="btn ghost" id="bk">Back</button><button class="btn" id="sb">Submit for review</button></div></div>`;
-    $('pb').onclick=()=>$('pf').click();
-    $('pf').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;
+    $('pb').onclick=()=>$('pf').click();$('pg').onclick=()=>$('pf2').click();
+    $('pf').onchange=$('pf2').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;
       const bad=await validateMediaFile(f,{allowVideo:false,allowImage:true});if(bad){$('er').textContent=bad;return}
       $('er').textContent='Uploading photo…';
-      try{const u=await uploadToCloudinary(f,'image');if(u){d.photo=u;$('pv').innerHTML=`<img src="${esc(u)}" alt="">`;$('pb').textContent='Change photo';$('er').textContent=''}}
+      try{const u=await uploadToCloudinary(f,'image');if(u){d.photo=u;$('pv').innerHTML=`<img src="${esc(u)}" alt="">`;$('pb').textContent='📷 Retake';$('pg').textContent='🖼️ Choose another';$('er').textContent=''}}
       catch(err){$('er').textContent=(err&&err.message)||'Upload failed'}};
     $('bk').onclick=()=>bizWizard(2,{...d,reg:$('rg').value.trim()});
     $('sb').onclick=async()=>{
