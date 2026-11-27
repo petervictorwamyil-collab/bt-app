@@ -35,6 +35,36 @@ body.nh .pill{background:rgba(94,200,255,.14);color:#8fdcff}
 body.nh .link,body.nh .sec button{color:#C9B3FF}
 body.nh .logo{border-radius:26px;box-shadow:0 12px 40px rgba(150,60,255,.55)}
 body.nh .logo.s{border-radius:11px;box-shadow:none}
+
+/* r14: "money" finish — royal violet + gold, applied app-wide */
+body.nh{--gold:#F5C451;--gold2:#FFB547;--gold-g:linear-gradient(135deg,#FFE08A,#F5C451 45%,#D99A1E)}
+body.nh .q4 button{background:linear-gradient(165deg,rgba(255,255,255,.06),rgba(255,255,255,.015)),var(--s1);border-color:rgba(245,196,81,.22)}
+body.nh .q4 button i{box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 10px rgba(5,3,24,.35)}
+body.nh .q4 button i.p{background:linear-gradient(135deg,#5A0FB8,#9B5CFF)}
+body.nh .q4 button i.g{background:linear-gradient(135deg,#0E7C66,#2FD6A3)}
+body.nh .q4 button i.b{background:linear-gradient(135deg,#2B4BD6,#5EC8FF)}
+body.nh .q4 button i.y{background:var(--gold-g)}
+body.nh nav button.on{color:var(--gold)}
+body.nh nav button.on span{filter:drop-shadow(0 0 8px rgba(245,196,81,.8))}
+body.nh nav button.plus{background:var(--gold-g);color:#2a1552;box-shadow:0 8px 24px rgba(245,196,81,.45),inset 0 1px 0 rgba(255,255,255,.5)}
+body.nh .mapb{background:var(--gold-g);color:#2a1552;box-shadow:0 6px 18px rgba(245,196,81,.35)}
+body.nh .badge{background:var(--gold-g);color:#2a1552}
+body.nh .pill{background:rgba(245,196,81,.16);color:#FFD97A;border:1px solid rgba(245,196,81,.3)}
+body.nh .hero h2 span,body.nh .vl{color:#FFD97A}
+body.nh .sec b{background:linear-gradient(90deg,#fff,#FFE9B0);-webkit-background-clip:text;background-clip:text;color:transparent}
+body.nh .sec button,body.nh .link{color:var(--gold)}
+body.nh .bar i,body.nh .steps i.on{background:linear-gradient(90deg,#7A1FFF,#E040FB 55%,#F5C451)}
+body.nh .ava.round,body.nh .ring{background:linear-gradient(135deg,#7A1FFF,#E040FB 50%,#F5C451)}
+body.nh .profile-head .ava{border-color:var(--gold)}
+body.nh .chips button.on,body.nh .hbadge{background:linear-gradient(135deg,rgba(122,31,255,.4),rgba(245,196,81,.2));border-color:var(--gold);color:#FFE9B0}
+body.nh .seg button.on{border-bottom-color:var(--gold)}
+body.nh .card{border-color:rgba(245,196,81,.2)}
+body.nh .bc{border-color:rgba(245,196,81,.2)}
+body.nh .bc .badge-st{color:var(--gold);border-color:rgba(245,196,81,.35)}
+body.nh .menu button i{filter:drop-shadow(0 0 6px rgba(245,196,81,.35))}
+body.nh .btn:not(.ghost){background:linear-gradient(135deg,#4B0082 0%,#7A1FFF 60%,#A84DFF);box-shadow:0 6px 18px rgba(122,31,255,.4),inset 0 1px 0 rgba(255,255,255,.25),0 0 0 1px rgba(245,196,81,.25)}
+body.nh .logo{box-shadow:0 12px 40px rgba(245,196,81,.35),0 0 0 2px rgba(245,196,81,.35)}
+body.nh .tg{background:var(--gold-g);color:#2a1552;border-radius:8px;padding:1px 7px;font-weight:800}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
 body{min-height:100vh;background:radial-gradient(900px 500px at 80% -10%,rgba(124,58,237,.28),transparent 60%),radial-gradient(700px 400px at -10% 30%,rgba(76,29,149,.25),transparent 60%),var(--bg);background-attachment:fixed}
@@ -193,12 +223,12 @@ nav button.plus{flex:none;width:56px;height:56px;border-radius:50%;background:li
 .mact{display:flex;gap:12px;margin:2px 44px 0}
 .mrow.me .mact{margin:2px 44px 0 0}
 .mact button{font-size:11px;color:var(--muted)}
-.composer{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#1b0d3a;border-top:1px solid #3a1478;padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
+.composer{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#0a0a0a;border-top:1px solid #2a1552;padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
 .composer .in{max-width:480px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
 .composer input{margin:0;flex:1;padding:13px 18px;border-radius:26px;background:#2a1552;border-color:transparent;color:#fff}
 .composer .sendb{width:50px;height:50px}
-body.chat{background:#0E0620!important}
-body.chat .screen{min-height:100vh}
+body.chat,body.chat.nh{background:#000!important}
+body.chat .screen{min-height:100vh;background:#000}
 .sendb{flex:none;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#9F67FF);color:#fff;font-size:18px}
 .rbar{align-items:center;justify-content:space-between;gap:8px;background:var(--s2);border-left:3px solid var(--vl);padding:6px 10px;border-radius:8px;font-size:12px;color:var(--muted)}
 .sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:120;display:flex;align-items:flex-end;justify-content:center}
@@ -782,7 +812,7 @@ async function startApp(){
 /* ---------- main drawing ---------- */
 function draw(){
   stopPoll();
-  document.body.classList.toggle('nh',cur.name!=='home');document.body.classList.toggle('chat',cur.name==='community'||cur.name==='dm');
+  document.body.classList.add('nh');document.body.classList.toggle('chat',cur.name==='community'||cur.name==='dm');
   const v=VIEWS[cur.name]; if(!v){show('home');return}
   const r=v(cur.params);
   const main=MAIN.includes(cur.name);
