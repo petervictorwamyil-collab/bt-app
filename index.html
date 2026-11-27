@@ -1102,10 +1102,10 @@ function upPicker(kind){
     const grid=$('ugrid');
     const paint=()=>{
       const list=UPL.items.filter(x=>UPL.tab==='all'||(UPL.tab==='video')===x.v);
-      grid.innerHTML=`<button class="upcell add" id="uadd"><i>＋</i><span>${D?'Choose video':'From gallery'}</span></button>`+list.map(x=>{
+      grid.innerHTML=`<button class="upcell add" id="uadd"><i>＋</i><span>${D?'Choose video':UPL.tab==='image'?'Choose photos':UPL.tab==='video'?'Choose videos':'Open gallery'}</span></button>`+list.map(x=>{
         const n=UPL.sel.indexOf(x)+1;const i=UPL.items.indexOf(x);
         return `<div class="upcell ${n?'on':''}" data-i="${i}">${x.v?`<video src="${x.url}#t=0.3" muted playsinline preload="metadata"></video><b class="dur">▶</b>`:`<img src="${x.url}" alt="">`}<span class="num">${n||''}</span></div>`}).join('');
-      $('uadd').onclick=()=>$('ugal').click();
+      $('uadd').onclick=()=>openGal();
       grid.querySelectorAll('[data-i]').forEach(c=>c.onclick=()=>{
         const x=UPL.items[+c.dataset.i],k=UPL.sel.indexOf(x);
         if(k>=0)UPL.sel.splice(k,1);else{if(D)UPL.sel=[x];else if(UPL.sel.length>=10){toast('Up to 10 at a time');return}else UPL.sel.push(x)}
@@ -1113,12 +1113,13 @@ function upPicker(kind){
       $('ucount').textContent=UPL.sel.length?UPL.sel.length+' selected':(D?'Pick one video':'Pick photos or videos');
       $('unext').disabled=!UPL.sel.length;$('unext').style.opacity=UPL.sel.length?1:.45;
     };
+    const openGal=()=>{const g=$('ugal');if(!D)g.accept=UPL.tab==='image'?'image/*':UPL.tab==='video'?'video/*':'image/*,video/*';g.click()};
     const got=(files)=>{upAdd(files,kind);const n=[...UPL.items].slice(0,files.length);n.forEach(x=>{if(D)UPL.sel=[x];else if(UPL.sel.length<10&&!UPL.sel.includes(x))UPL.sel.push(x)});paint()};
     $('ugal').onchange=e=>{got(e.target.files);e.target.value=''};
     $('ucamf').onchange=e=>{got(e.target.files);e.target.value=''};
     $('ucam').onclick=()=>$('ucamf').click();
     if($('utext'))$('utext').onclick=()=>{UPL.sel=[];UPL.textMode=true;show('statusCompose')};
-    document.querySelectorAll('.uptabs [data-t]').forEach(b=>b.onclick=()=>{UPL.tab=b.dataset.t;document.querySelectorAll('.uptabs [data-t]').forEach(z=>z.classList.toggle('on',z===b));paint()});
+    document.querySelectorAll('.uptabs [data-t]').forEach(b=>b.onclick=()=>{UPL.tab=b.dataset.t;document.querySelectorAll('.uptabs [data-t]').forEach(z=>z.classList.toggle('on',z===b));paint();if(!UPL.items.some(x=>UPL.tab==='all'||(UPL.tab==='video')===x.v))openGal()});
     $('unext').onclick=()=>{if(!UPL.sel.length)return;UPL.textMode=false;show(D?'discoverCompose':'statusCompose')};
     paint();
   }};
